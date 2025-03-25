@@ -1,0 +1,137 @@
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f5efe6; /* Beige clair */
+        color: #5a3e36; /* Marron foncé */
+        margin: 0;
+        padding: 0;
+    }
+
+    h1 {
+        text-align: center;
+        color: #4a2c2a;
+        font-size: 32px;
+    }
+
+    .container {
+        width: 90%;
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 10px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .btn-warning {
+        background-color: #d4a373; /* Marron clair */
+        color: white;
+    }
+
+    .btn-warning:hover {
+        background-color: #b08968;
+    }
+
+    .btn-danger {
+        background-color: #a23e48;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #822727;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    table th, table td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    table th {
+        background-color: #8d6c5b; /* Marron doux */
+        color: white;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #f5efe6;
+    }
+
+    table tr:hover {
+        background-color: #e6d5c7;
+        transition: 0.3s;
+    }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .no-data {
+        text-align: center;
+        padding: 15px;
+        color: #b08968;
+    }
+</style>
+
+
+<body>
+    <div class="container">
+        <h1>Liste des Tuteurs</h1>
+        <a href="{{ path('app_crud_tuteur_add') }}" class="btn btn-warning">Ajouter un Tuteur</a>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>CIN</th>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Téléphone</th>
+                    <th>Adresse</th>
+                    <th>Disponibilité</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tuteur in tuteurs %}
+                    <tr>
+                        <td>{{ tuteur.cinT }}</td>
+                        <td>{{ tuteur.nomT }}</td>
+                        <td>{{ tuteur.prenomT }}</td>
+                        <td>{{ tuteur.telephoneT }}</td>
+                        <td>{{ tuteur.adresseT }}</td>
+                        <td>{{ tuteur.disponibilite }}</td>
+                        <td>{{ tuteur.email }}</td>
+                        <td class="actions">
+                            <a href="{{ path('app_crud_tuteur_edit', {'id': tuteur.idT}) }}" class="btn btn-warning">Modifier</a>
+                            <a href="{{ path('app_crud_tuteur_delete', {'id': tuteur.idT}) }}" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer ce tuteur ?');">Supprimer</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="no-data">Aucun tuteur trouvé.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+
