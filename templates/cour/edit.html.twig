@@ -1,0 +1,133 @@
+<body>
+<style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5efe6; /* Beige clair */
+            color: #5a3e36; /* Marron foncé */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 50%;
+            max-width: 500px;
+            padding: 25px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+
+        h1 {
+            color: #4a2c2a;
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            text-align: left;
+            position: relative;
+        }
+
+        label {
+            font-weight: 600;
+            color: #5a3e36;
+            margin-bottom: 5px;
+            display: block;
+            font-size: 14px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #d4a373;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: #fdf8f1;
+            transition: all 0.3s ease-in-out;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #b08968;
+            outline: none;
+            box-shadow: 0px 0px 5px rgba(176, 137, 104, 0.5);
+        }
+
+        button {
+            background-color: #b08968;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #8b5e3c;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 15px;
+            color: #5a3e36;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+            color: #b08968;
+        }
+    </style>
+
+<div class="container">
+    <h1>Modifier le Cours</h1>
+
+    <!-- Aperçu de l'image actuelle -->
+    {% if cours.imageC %}
+        <div class="mb-3">
+            <label>Image actuelle :</label>
+            <br>
+            <img src="{{ asset('assets/img/' ~ cours.imageC) }}" alt="Image actuelle" width="150">
+        </div>
+    {% endif %}
+
+    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+        <div class="form-group">
+            {{ form_label(form.titre, "Titre") }}
+            {{ form_widget(form.titre) }}
+        </div>
+        <div class="form-group">
+            {{ form_label(form.contenu, "Contenu") }}
+            {{ form_widget(form.contenu) }}
+        </div>
+        <div class="form-group">
+            {{ form_label(form.imageC, "Image") }}
+            {{ form_widget(form.imageC) }}
+        </div>
+        <div class="form-group">
+            {{ form_label(form.tuteur, "Tuteur") }}
+            {{ form_widget(form.tuteur) }}
+        </div>
+    {{ form_end(form) }}
+
+    <a href="{{ path('app_crud_cours') }}" class="back-link">← Retour à la liste</a>
+</div>
+</body>

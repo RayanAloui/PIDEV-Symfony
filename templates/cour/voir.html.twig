@@ -1,0 +1,101 @@
+<body>
+   <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5efe6; /* Beige clair */
+            color: #5a3e36; /* Marron foncé */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 800px;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+
+        h1 {
+            color: #4a2c2a;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .mb-3 {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            font-weight: 600;
+            color: #5a3e36;
+            font-size: 1rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1rem;
+            color: #4a2c2a;
+        }
+
+        .btn {
+            background-color: #b08968;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            margin-top: 15px;
+        }
+
+        .btn:hover {
+            background-color: #8b5e3c;
+        }
+
+        .img-fluid {
+            max-width: 150px;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .text-muted {
+            color: #777;
+        }
+    </style>
+<div class="container">
+    <h1>Détails du Cours : {{ cours.titre }}</h1>
+
+    <div class="mb-3">
+        <label><strong>Titre : </strong></label>
+        <p>{{ cours.titre }}</p>
+    </div>
+    <div class="mb-3">
+        <label><strong>Contenu : </strong></label>
+        <p>{{ cours.contenu }}</p>
+    </div>
+    <div class="mb-3">
+        <label><strong>Tuteur : </strong></label>
+        <p>{{ cours.tuteur.nomT }} {{ cours.tuteur.prenomT }}</p>
+    </div>
+
+    {% if cours.imageC %}
+        <div class="mb-3">
+            <label><strong>Image : </strong></label>
+            <img src="{{ asset('assets/img/' ~ cours.imageC) }}" alt="Image du cours" width="150">
+        </div>
+    {% endif %}
+
+    <a href="{{ path('app_crud_cours') }}" class="btn btn-primary">Retour à la liste</a>
+</div>
+</body>

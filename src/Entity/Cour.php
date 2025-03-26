@@ -15,7 +15,7 @@ class Cour
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(name : 'idC' , type: 'integer')]
     private ?int $idC = null;
 
     public function getIdC(): ?int
@@ -57,7 +57,7 @@ class Cour
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
+    #[ORM\Column(name: 'imageC', type: 'string', nullable: true)]
     private ?string $imageC = null;
 
     public function getImageC(): ?string
