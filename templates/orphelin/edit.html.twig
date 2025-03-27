@@ -97,36 +97,44 @@
         }
     </style>
 
+
     <div class="container">
-        <h1>Modifier l'Orphelin</h1>
+        <h1>Modifier un Orphelin</h1>
 
         {{ form_start(form) }}
             <div class="form-group">
                 {{ form_label(form.nomO, "Nom") }}
                 {{ form_widget(form.nomO) }}
+                {{ form_errors(form.nomO) }}
             </div>
             <div class="form-group">
                 {{ form_label(form.prenomO, "Prénom") }}
                 {{ form_widget(form.prenomO) }}
+                {{ form_errors(form.prenomO) }}
             </div>
             <div class="form-group">
                 {{ form_label(form.dateNaissance, "Date de Naissance") }}
                 {{ form_widget(form.dateNaissance) }}
+                {{ form_errors(form.dateNaissance) }}
             </div>
             <div class="form-group">
                 {{ form_label(form.sexe, "Sexe") }}
                 {{ form_widget(form.sexe) }}
+                {{ form_errors(form.sexe) }}
             </div>
             <div class="form-group">
                 {{ form_label(form.situationScolaire, "Situation Scolaire") }}
                 {{ form_widget(form.situationScolaire) }}
+                {{ form_errors(form.situationScolaire) }}
             </div>
             <div class="form-group">
                 {{ form_label(form.tuteur, "Tuteur") }}
                 {{ form_widget(form.tuteur) }}
+                {{ form_errors(form.tuteur) }}
             </div>
         {{ form_end(form) }}
 
         <a href="{{ path('app_crud_orphelin') }}" class="back-link">← Retour à la liste</a>
     </div>
 </body>
+

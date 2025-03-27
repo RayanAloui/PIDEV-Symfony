@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\NotBlank;
 
 class CourType extends AbstractType
 {
@@ -22,10 +23,20 @@ class CourType extends AbstractType
             ->add('titre', TextType::class, [
                 'label' => 'Titre du cours',
                 'required' => true,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Le titre du cours est obligatoire.',
+                    ])
+                ]
             ])
             ->add('contenu', TextareaType::class, [
                 'label' => 'Contenu',
                 'required' => true,
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Le contenu est obligatoire.',
+                    ])
+                ]
             ])
             ->add('imageC', FileType::class, [
                 'label' => 'Image du cours',
@@ -41,11 +52,11 @@ class CourType extends AbstractType
             ])
             ->add('tuteur', EntityType::class, [
                 'class' => Tuteur::class,
-                'choice_label' => function(Tuteur $tuteur) {
-                    return $tuteur->getNomT() . ' ' . $tuteur->getPrenomT();  
+                'choice_label' => function (Tuteur $tuteur) {
+                    return $tuteur->getNomT() . ' ' . $tuteur->getPrenomT();
                 },
                 'label' => 'Tuteur'
-            ])          
+            ])
             ->add('save', SubmitType::class, ['label' => 'Enregistrer']);
     }
 

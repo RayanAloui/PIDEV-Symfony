@@ -113,10 +113,12 @@
         <div class="form-group">
             {{ form_label(form.titre, "Titre") }}
             {{ form_widget(form.titre) }}
+            {{ form_errors(form.titre) }}
         </div>
         <div class="form-group">
             {{ form_label(form.contenu, "Contenu") }}
             {{ form_widget(form.contenu) }}
+            {{ form_errors(form.contenu) }}
         </div>
         <div class="form-group">
             {{ form_label(form.imageC, "Image") }}

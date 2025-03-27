@@ -97,40 +97,55 @@
         }
     </style>
 
-    <div class="container">
-        <h1>Ajouter un Tuteur</h1>
+    <div class="container mt-5">
+        <h1 class="mb-4">Ajouter un Tuteur</h1>
 
-        {{ form_start(form) }}
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
             <div class="form-group">
                 {{ form_label(form.cinT, "CIN") }}
-                {{ form_widget(form.cinT) }}
+                {{ form_widget(form.cinT, {'attr': {'class': 'form-control', 'required': 'required'}}) }}
+                {{ form_errors(form.cinT) }}
             </div>
+
             <div class="form-group">
                 {{ form_label(form.nomT, "Nom") }}
-                {{ form_widget(form.nomT) }}
+                {{ form_widget(form.nomT, {'attr': {'class': 'form-control', 'required': 'required', 'pattern': '[a-zA-ZÀ-ÿ\\s-]+', 'title': 'Le nom doit contenir uniquement des lettres.'}}) }}
+                {{ form_errors(form.nomT) }}
             </div>
+
             <div class="form-group">
                 {{ form_label(form.prenomT, "Prénom") }}
-                {{ form_widget(form.prenomT) }}
+                {{ form_widget(form.prenomT, {'attr': {'class': 'form-control', 'required': 'required', 'pattern': '[a-zA-ZÀ-ÿ\\s-]+', 'title': 'Le prénom doit contenir uniquement des lettres.'}}) }}
+                {{ form_errors(form.prenomT) }}
             </div>
+
             <div class="form-group">
                 {{ form_label(form.telephoneT, "Téléphone") }}
-                {{ form_widget(form.telephoneT) }}
+                {{ form_widget(form.telephoneT, {'attr': {'class': 'form-control', 'required': 'required'}}) }}
+                {{ form_errors(form.telephoneT) }}
             </div>
+
             <div class="form-group">
                 {{ form_label(form.adresseT, "Adresse") }}
-                {{ form_widget(form.adresseT) }}
+                {{ form_widget(form.adresseT, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.adresseT) }}
             </div>
+
             <div class="form-group">
                 {{ form_label(form.disponibilite, "Disponibilité") }}
-                {{ form_widget(form.disponibilite) }}
+                {{ form_widget(form.disponibilite, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.disponibilite) }}
             </div>
+
             <div class="form-group">
                 {{ form_label(form.email, "Email") }}
-                {{ form_widget(form.email) }}
+                {{ form_widget(form.email, {'attr': {'class': 'form-control', 'required': 'required'}}) }}
+                {{ form_errors(form.email) }}
             </div>
+
         {{ form_end(form) }}
 
-        <a href="{{ path('app_crud_tuteur') }}" class="back-link">← Retour à la liste</a>
+        <a href="{{ path('app_crud_tuteur') }}" class="btn btn-secondary mt-3">← Retour à la liste</a>
     </div>
 </body>
+

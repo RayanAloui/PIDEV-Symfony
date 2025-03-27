@@ -5,7 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-
+use Symfony\Component\Validator\Constraints as Assert;
 use App\Repository\TuteurRepository;
 
 #[ORM\Entity(repositoryClass: TuteurRepository::class)]
@@ -28,7 +28,12 @@ class Tuteur
         return $this;
     }
 
-    #[ORM\Column(name: "cinT", type: "string", length: 20, nullable: false)]
+    #[ORM\Column(name: "cinT", type: "string", length: 8, nullable: false)]
+    #[Assert\NotBlank(message: "Le CIN est obligatoire.")]
+    #[Assert\Regex(
+        pattern: "/^\d{8}$/",
+        message: "Le CIN doit contenir exactement 8 chiffres."
+    )]
     private ?string $cinT = null;
 
     public function getCinT(): ?string
@@ -43,6 +48,11 @@ class Tuteur
     }
 
     #[ORM\Column(name: "nomT", type: "string", length: 100, nullable: false)]
+    #[Assert\NotBlank(message: "Le nom est obligatoire.")]
+    #[Assert\Length(
+        max: 100,
+        maxMessage: "Le nom ne peut pas dépasser 100 caractères."
+    )]
     private ?string $nomT = null;
 
     public function getNomT(): ?string
@@ -57,6 +67,11 @@ class Tuteur
     }
 
     #[ORM\Column(name: "prenomT", type: "string", length: 100, nullable: false)]
+    #[Assert\NotBlank(message: "Le prénom est obligatoire.")]
+    #[Assert\Length(
+        max: 100,
+        maxMessage: "Le prénom ne peut pas dépasser 100 caractères."
+    )]
     private ?string $prenomT = null;
 
     public function getPrenomT(): ?string
@@ -70,7 +85,11 @@ class Tuteur
         return $this;
     }
 
-    #[ORM\Column(name: "telephoneT", type: "string", length: 20, nullable: true)]
+    #[ORM\Column(name: "telephoneT", type: "string", length: 8, nullable: true)]
+    #[Assert\Regex(
+        pattern: "/^\d{8}$/",
+        message: "Le numéro de téléphone doit contenir exactement 8 chiffres."
+    )]
     private ?string $telephoneT = null;
 
     public function getTelephoneT(): ?string
@@ -85,6 +104,10 @@ class Tuteur
     }
 
     #[ORM\Column(name: "adresseT", type: "string", length: 100, nullable: true)]
+    #[Assert\Length(
+        max: 100,
+        maxMessage: "L'adresse ne peut pas dépasser 100 caractères."
+    )]
     private ?string $adresseT = null;
 
     public function getAdresseT(): ?string
@@ -98,7 +121,8 @@ class Tuteur
         return $this;
     }
 
-    #[ORM\Column(name: "disponibilite", type: "string",columnDefinition: "ENUM('oui', 'non')", options: ["default" => "oui"] , nullable: false)]
+    #[ORM\Column(name: "disponibilite", type: "string", columnDefinition: "ENUM('oui', 'non')", options: ["default" => "oui"], nullable: false)]
+    #[Assert\Choice(choices: ["oui", "non"], message: "La disponibilité doit être 'oui' ou 'non'.")]
     private ?string $disponibilite = 'oui';
 
     public function getDisponibilite(): ?string
@@ -113,6 +137,12 @@ class Tuteur
     }
 
     #[ORM\Column(name: "email", type: "string", length: 255, nullable: false)]
+    #[Assert\NotBlank(message: "L'email est obligatoire.")]
+    #[Assert\Email(message: "L'email n'est pas valide.")]
+    #[Assert\Length(
+        max: 255,
+        maxMessage: "L'email ne peut pas dépasser 255 caractères."
+    )]
     private ?string $email = null;
 
     public function getEmail(): ?string
