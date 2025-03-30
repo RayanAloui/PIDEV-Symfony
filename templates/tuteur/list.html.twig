@@ -89,6 +89,55 @@
         padding: 15px;
         color: #b08968;
     }
+
+    /* Conteneur du formulaire */
+.form-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Champ de recherche */
+input[type="search"] {
+    flex-grow: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: border 0.3s ease;
+}
+
+input[type="search"]:focus {
+    border-color: #b08968;
+    outline: none;
+}
+
+/* Bouton de recherche */
+button {
+    background-color: #b08968;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background-color: #b08968;
+}
+
+.search-bar {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
 </style>
 
 
@@ -97,20 +146,57 @@
         <h1>Liste des Tuteurs</h1>
         <a href="{{ path('app_crud_tuteur_add') }}" class="btn btn-warning">Ajouter un Tuteur</a>
         
+        <a href="{{ path('tuteurs_pdf') }}" class="btn btn-danger">📄 Exporter en PDF</a>
+
+        <p></p>
+
+         {{ form_start(form) }}
+            {{ form_widget(form.query) }}
+        {{ form_end(form) }}
+
+        
         <table>
             <thead>
-                <tr>
-                    <th>CIN</th>
-                    <th>Nom</th>
-                    <th>Prénom</th>
-                    <th>Téléphone</th>
-                    <th>Adresse</th>
-                    <th>Disponibilité</th>
-                    <th>Email</th>
-                    <th>Actions</th>
-                </tr>
+            <tr>
+            <th>
+                <a href="{{ path('app_crud_tuteur', { sort: 'cinT', order: sortOrder == 'asc' ? 'desc' : 'asc' }) }}">
+                    CIN {{ sortField == 'cinT' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}
+                </a>
+            </th>
+            <th>
+                <a href="{{ path('app_crud_tuteur', { sort: 'nomT', order: sortOrder == 'asc' ? 'desc' : 'asc' }) }}">
+                    Nom {{ sortField == 'nomT' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}
+                </a>
+            </th>
+            <th>
+                <a href="{{ path('app_crud_tuteur', { sort: 'prenomT', order: sortOrder == 'asc' ? 'desc' : 'asc' }) }}">
+                    Prénom {{ sortField == 'prenomT' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}
+                </a>
+            </th>
+            <th>
+                <a href="{{ path('app_crud_tuteur', { sort: 'telephoneT', order: sortOrder == 'asc' ? 'desc' : 'asc' }) }}">
+                    Téléphone {{ sortField == 'telephoneT' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}
+                </a>
+            </th>
+            <th>
+                <a href="{{ path('app_crud_tuteur', { sort: 'adresseT', order: sortOrder == 'asc' ? 'desc' : 'asc' }) }}">
+                    Adresse {{ sortField == 'adresseT' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}
+                </a>
+            </th>
+            <th>
+                <a href="{{ path('app_crud_tuteur', { sort: 'disponibilite', order: sortOrder == 'asc' ? 'desc' : 'asc' }) }}">
+                    Disponibilité {{ sortField == 'disponibilite' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}
+                </a>
+            </th>
+            <th>
+                <a href="{{ path('app_crud_tuteur', { sort: 'email', order: sortOrder == 'asc' ? 'desc' : 'asc' }) }}">
+                    Email {{ sortField == 'email' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}
+                </a>
+            </th>
+            <th>Actions</th>
+            </tr>
             </thead>
-            <tbody>
+            <tbody id="tuteurs-list">
                 {% for tuteur in tuteurs %}
                     <tr>
                         <td>{{ tuteur.cinT }}</td>
@@ -133,5 +219,51 @@
             </tbody>
         </table>
     </div>
+
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchInput = document.querySelector(".search-input");
+            const tuteursList = document.getElementById("tuteurs-list");
+
+            searchInput.addEventListener("input", function () {
+                let query = this.value.trim();
+
+                if (query === '') {
+        fetch('/tuteur/list') 
+            .then(response => response.text())
+            .then(html => {
+                let parser = new DOMParser();
+                let doc = parser.parseFromString(html, 'text/html');
+                let tbody = doc.querySelector('#tuteursList'); 
+                document.getElementById('tuteursList').innerHTML = tbody.innerHTML;
+            });
+        return;
+    }
+
+                fetch(`/tuteurs/search?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        tuteursList.innerHTML = ""; // Effacer le tableau avant d'ajouter de nouveaux résultats
+
+                        if (data.tuteurs.length === 0) {
+                            tuteursList.innerHTML = "<tr><td colspan='5'>Aucun tuteur trouvé.</td></tr>";
+                            return;
+                        }
+
+                        data.tuteurs.forEach(tuteur => {
+                            let row = `<tr>
+                                <td>${tuteur.cinT}</td>
+                                <td>${tuteur.nomT}</td>
+                                <td>${tuteur.prenomT}</td>
+                                <td>${tuteur.telephoneT}</td>
+                                <td>${tuteur.email}</td>
+                            </tr>`;
+                            tuteursList.innerHTML += row;
+                        });
+                    });
+            });
+        });
+    </script>
+
 </body>
 
