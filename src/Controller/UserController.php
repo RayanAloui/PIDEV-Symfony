@@ -129,6 +129,29 @@ final class UserController extends AbstractController
 
         return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
     }
-   
+    #[Route('/{id}/block', name: 'app_user_block', methods: ['POST'])]
+    public function blockUser(int $id, EntityManagerInterface $entityManager): Response
+    {
+        $conn = $entityManager->getConnection();
+        $sql = "UPDATE user SET isBlocked = 1 WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['id' => $id]);
+
+        $this->addFlash('warning', 'User has been blocked.');
+        return $this->redirectToRoute('app_user_index');
+    }
+
+    #[Route('/{id}/activate', name: 'app_user_activate', methods: ['POST'])]
+    public function activateUser(int $id, EntityManagerInterface $entityManager): Response
+    {
+        $conn = $entityManager->getConnection();
+        $sql = "UPDATE user SET isBlocked = 0 WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute(['id' => $id]);
+
+        $this->addFlash('success', 'User has been activated.');
+        return $this->redirectToRoute('app_user_index');
+    }
+
     
 }

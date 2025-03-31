@@ -18,7 +18,19 @@ class UserType extends AbstractType
             ->add('telephone')
             ->add('email')
             ->add('password')
+            ->add('role', ChoiceType::class, [
+                'choices' => [
+                    'client' => 'client',
+                    'admin' => 'admin',
+                    'tuteur' => 'tuteur',
+                    'orphelin' => 'orphelin',
+                ],
+                'expanded' => false,  // This makes it a dropdown instead of radio buttons
+                'multiple' => false,  // Ensures only one choice can be selected
+            ])
             
+            ->add('image')
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
