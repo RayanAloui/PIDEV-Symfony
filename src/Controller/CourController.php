@@ -4,23 +4,45 @@ namespace App\Controller;
 
 use App\Entity\Cour;
 use App\Form\CourType;
+use App\Repository\CourRepository;
+use App\Form\CourSearchType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 #[Route('/crud/cours')]
 class CourController extends AbstractController
 {
     #[Route('/list', name: 'app_crud_cours', methods: ['GET'])]
-    public function list(EntityManagerInterface $entityManager): Response
+    public function list(Request $request, CourRepository $repository): Response
     {
-        $cours = $entityManager->getRepository(Cour::class)->findAll();
+        $form = $this->createForm(CourSearchType::class);
+        $form->handleRequest($request);
+
+        // Récupérer le champ de recherche
+        $query = $form->get('query')->getData();
+
+        // Récupérer les paramètres de tri
+        $sortField = $request->query->get('sort', 'titre'); // Champ par défaut : Nom
+        $sortOrder = $request->query->get('order', 'asc'); // Ordre par défaut : Ascendant
+
+        // Appliquer la recherche et le tri en même temps
+        if ($query) {
+            $cours = $repository->searchByTitle($query, $sortField, $sortOrder);
+        } else {
+            $cours = $repository->findBy([], [$sortField => $sortOrder]);
+        }
 
         return $this->render('cour/list.html.twig', [
+            'form' => $form->createView(),
             'cours' => $cours,
+            'sortField' => $sortField,
+            'sortOrder' => $sortOrder,
         ]);
     }
 
@@ -104,5 +126,88 @@ class CourController extends AbstractController
         return $this->render('cour/voir.html.twig', [
             'cours' => $cours,
         ]);
+    }
+
+    #[Route('/cours/search', name: 'app_cours_search', methods: ['GET'])]
+    public function search(Request $request, CourRepository $courRepository)
+    {
+        $query = $request->query->get('query', '');
+        $cours = $query ? $courRepository->searchByTitle($query) : [];
+
+        return $this->json([
+            'cours' => array_map(function ($cour) {
+                return [
+                    'titre' => $cour->getTitre(),
+                ];
+            }, $cours),
+        ]);
+    }
+
+    /*public function exportPdf(EntityManagerInterface $entityManager): Response
+    {
+        // Récupérer tous les tuteurs depuis la base de données
+        $cours = $entityManager->getRepository(Cour::class)->findAll();
+
+        // Configurer Dompdf
+        $pdfOptions = new Options();
+        $pdfOptions->set('isRemoteEnabled', true); // ✅ Autorise les images distantes
+        $pdfOptions->set('defaultFont', 'Arial');
+
+        // Initialiser Dompdf
+        $dompdf = new Dompdf($pdfOptions);
+
+        // Générer le HTML pour le PDF
+        $html = $this->renderView('cour/cours_pdf.html.twig', [
+            'cours' => $cours
+        ]);
+
+        // Charger le HTML dans Dompdf
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // Renvoyer le PDF en réponse HTTP
+        $response = new Response($dompdf->output());
+        $response->headers->set('Content-Type', 'application/pdf');
+        $response->headers->set('Content-Disposition', 'attachment; filename="Liste_Cours.pdf"');
+
+        return $response;
+    }*/
+
+    #[Route('/cours/pdf', name: 'cours_pdf')]
+    public function generatePdf(CourRepository $coursRepository): Response
+    {
+        $cours = $coursRepository->findAll();
+
+        foreach ($cours as $cour) {
+            if ($cour->getImageC()) {
+                $imagePath = $this->getParameter('kernel.project_dir') . '/public/assets/img/' . $cour->getImageC();
+                if (file_exists($imagePath)) {
+                    $imageData = base64_encode(file_get_contents($imagePath));
+                    $cour->base64Image = 'data:image/jpeg;base64,' . $imageData;
+                } else {
+                    $cour->base64Image = null;
+                }
+            } else {
+                $cour->base64Image = null;
+            }
+        }
+
+        $html = $this->renderView('cour/cours_pdf.html.twig', [
+            'cours' => $cours,
+        ]);
+
+        // Générer le PDF
+        $pdfOptions = new Options();
+        $pdfOptions->set('isRemoteEnabled', true);
+        $dompdf = new Dompdf($pdfOptions);
+        $dompdf->loadHtml($html);
+        $dompdf->render();
+
+        return new Response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="Liste_Cours.pdf"',
+        ]);
+        
     }
 }

@@ -14,6 +14,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use App\Service\MailerService;
+
 
 #[Route('/crud/tuteur')]
 class TuteurController extends AbstractController
@@ -66,7 +70,7 @@ class TuteurController extends AbstractController
     }
 
     #[Route('/edit/{id}', name: 'app_crud_tuteur_edit')]
-    public function edit(Request $request, EntityManagerInterface $entityManager, TuteurRepository $tuteurRepository, int $id): Response
+    public function edit(Request $request, EntityManagerInterface $entityManager, TuteurRepository $tuteurRepository, MailerService $mailerService, int $id): Response
     {
         $tuteur = $tuteurRepository->find($id);
 
@@ -74,10 +78,20 @@ class TuteurController extends AbstractController
             throw $this->createNotFoundException("Tuteur non trouvé !");
         }
 
+        $ancienneDisponibilite = $tuteur->getDisponibilite();
+
         $form = $this->createForm(TuteurType::class, $tuteur);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($ancienneDisponibilite !== $tuteur->getDisponibilite()) {
+                $mailerService->sendAvailabilityChangeEmail(
+                    $tuteur->getEmail(),
+                    "{$tuteur->getNomT()} {$tuteur->getPrenomT()}",
+                    $tuteur->getDisponibilite()
+                );
+            }
+
             $entityManager->flush();
             return $this->redirectToRoute('app_crud_tuteur');
         }
@@ -85,6 +99,18 @@ class TuteurController extends AbstractController
         return $this->render('tuteur/edit.html.twig', [
             'form' => $form->createView(),
         ]);
+    }
+
+    #[Route('/test-email', name: 'test_email')]
+    public function testEmail(MailerService $mailerService): Response
+    {
+        $mailerService->sendAvailabilityChangeEmail(
+            'alouiahmed525@gmail.com', 
+            'Ahmed Aloui',
+            'Disponible'
+        );
+    
+        return new Response('succès email');
     }
 
     #[Route('/delete/{id}', name: 'app_crud_tuteur_delete')]

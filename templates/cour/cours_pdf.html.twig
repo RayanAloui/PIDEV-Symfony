@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        th { background-color: #b08968; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Liste des Cours</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Titre</th>
+                <th>Contenu</th>
+                <th>Tuteur</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cour in cours %}
+                <tr>
+                    <td>
+                        {% if cour.base64Image %}
+                            <img src="{{ cour.base64Image }}" alt="Image" width="100">
+                        {% else %}
+                            <p>Aucune image</p>
+                        {% endif %}
+                    </td>
+                    <td>{{ cour.titre }}</td>
+                    <td>{{ cour.contenu }}</td>
+                    <td>
+                       {% if cour.tuteur %}
+                           {{ cour.tuteur.nomT }} {{ cour.tuteur.prenomT }}
+                       {% else %}
+                            Aucun tuteur
+                       {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
