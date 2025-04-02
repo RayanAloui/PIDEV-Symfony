@@ -1,0 +1,87 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un Incident{% endblock %}
+
+{% block body %}
+    <h1>Ajouter un Incident</h1>
+
+    <form method="post" id="incident-form">
+        <div class="form-group">
+            <label for="user">Utilisateur</label>
+            <select id="user" name="id_user" class="form-control" required>
+                <option value="">Sélectionnez un utilisateur</option>
+                {% for user in users %}
+                    <option value="{{ user.id }}" {% if selectedUser and selectedUser.id == user.id %}selected{% endif %}>
+                        {{ user.name }} {{ user.surname }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="visite">Visite</label>
+            <select id="visite" name="id_visite" class="form-control" disabled required>
+                <option value="">Sélectionnez une visite</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" class="form-control {% if errors['description'] is defined %}is-invalid{% endif %}">{{ incident.description|default('') }}</textarea>
+            {% if errors['description'] is defined %}
+                <div class="invalid-feedback">
+                    {% for error in errors['description'] %}
+                        {{ error.message }}
+                    {% endfor %}
+             </div>
+           {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="dateincident">Date de l'incident</label>
+            <input type="date" id="dateincident" name="dateincident" class="form-control" >
+        </div>
+
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+        <a href="{{ path('afficher_incident') }}" class="btn btn-secondary">Annuler</a>
+    </form>
+
+    <script>
+        document.getElementById('user').addEventListener('change', function() {
+            var userId = this.value;
+
+            // Si un utilisateur est sélectionné
+            if (userId) {
+                fetch('/incidents/visites/' + userId)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Rendre le champ des visites actif
+                        var visiteSelect = document.getElementById('visite');
+                        visiteSelect.innerHTML = '<option value="">Sélectionnez une visite</option>'; // Clear previous options
+
+                        if (data.length > 0) {
+                            data.forEach(function(visite) {
+                                var option = document.createElement('option');
+                                option.value = visite.id;
+                                option.textContent = visite.date + ' - ' + visite.motif;
+                                visiteSelect.appendChild(option);
+                            });
+                            visiteSelect.disabled = false; // Enable the visite select
+                        } else {
+                            var option = document.createElement('option');
+                            option.textContent = 'Aucune visite disponible';
+                            visiteSelect.appendChild(option);
+                            visiteSelect.disabled = true; // Disable the visite select if no visites
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching visites:', error);
+                    });
+            } else {
+                // Si aucun utilisateur n'est sélectionné, désactiver le champ des visites
+                document.getElementById('visite').disabled = true;
+            }
+        });
+    </script>
+
+{% endblock %}

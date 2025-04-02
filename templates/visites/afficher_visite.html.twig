@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des visites{% endblock %}
+
+{% block body %}
+    <h1>Liste des Visites</h1>
+
+    {% if visites is not empty %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Utilisateur</th>
+                    <th>Date</th>
+                    <th>Heure</th>
+                    <th>Motif</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for visite in visites %}
+                    <tr>
+                        <td>{{ visite.id }}</td>
+                        <td>{{ visite.id_user.name }} {{ visite.id_user.surname }}</td>
+                        <td>{{ visite.date|date('d/m/Y') }}</td>
+                        <td>{{ visite.heure }}</td>
+                        <td>{{ visite.motif }}</td>
+                        <td>{{ visite.statut }}</td>
+                        <td>
+                            <a href="{{ path('modifier_visite', {'id': visite.id}) }}" class="btn btn-warning">Modifier</a>
+                            <form method="post" action="{{ path('supprimer_visite', {'id': visite.id}) }}" style="display:inline-block;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ visite.id) }}">
+                                <button class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette visite?')">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-warning">Aucune visite enregistrée.</div>
+    {% endif %}
+
+    <a href="{{ path('ajouter_visite') }}" class="btn btn-primary">Ajouter une visite</a>
+{% endblock %}
