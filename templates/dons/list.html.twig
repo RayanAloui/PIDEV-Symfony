@@ -1,0 +1,109 @@
+<style>
+     .btn {
+        display: inline-block;
+        padding: 10px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .btn-warning {
+        background-color: #d4a373; /* Marron clair */
+        color: white;
+    }
+
+    .btn-warning:hover {
+        background-color: #b08968;
+    }
+
+    .btn-danger {
+        background-color: #a23e48;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #822727;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-family: Arial, sans-serif;
+    }
+
+    table th, table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    table th {
+        background-color: #8d6c5b;
+        color: white;
+        font-weight: bold;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #f5f5f5;
+    }
+
+    table tr:hover {
+        background-color: #f0f0f0;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 3px 7px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: bold;
+        background-color: #4a6fa5;
+        color: white;
+    }
+</style>
+<div class="container">
+    <center><h1>Liste des Orphelins</h1></center>
+    <a href="{{ path('app_crud_dons_add') }}" class="btn btn-warning">Ajouter un Orphelin</a>
+
+    <p></p>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Montant</th>
+            <th>Type</th>
+            <th>Date</th>
+            <th>Événement</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for don in dons %}
+            <tr>
+                <td><span class="badge">#{{ don.idDon }}</span></td>
+                <td>{{ don.montant }} TND</td>
+                <td>{{ don.typeDon }}</td>
+                <td>{{ don.dateDon|date('d/m/Y') }}</td>
+                <td>
+                    {% if don.idEvent %}
+                        {{ don.idEvent.nom }}
+                    {% else %}
+                        <span style="color: #999;">Aucun événement</span>
+                    {% endif %}
+                </td>
+                <td>{{ don.description|slice(0, 30) }}{% if don.description|length > 30 %}...{% endif %}</td>
+                <td class="actions">
+                    <a href="{{ path('app_crud_dons_edit', {'id': don.idDon}) }}" class="btn btn-warning">Modifier</a>
+                    <a href="{{ path('app_crud_dons_delete', {'id': don.idDon}) }}" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer cet orphelin ?');">Supprimer</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 15px; color: #777;">Aucun don trouvé</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
