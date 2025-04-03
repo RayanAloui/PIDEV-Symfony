@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails du Cours{% endblock %}
+
+{% block body %}
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f5efe6;
+        margin: 0;
+        padding: 20px;
+    }
+
+    .container {
+        max-width: 700px;
+        margin: auto;
+        padding: 30px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.15);
+        text-align: center;
+    }
+
+    h1 {
+        color: #4a2c2a;
+        font-size: 2rem;
+        margin-bottom: 20px;
+    }
+
+    .course-image {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+
+    .course-content {
+        font-size: 1.1rem;
+        color: #5a3e36;
+        text-align: left;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 20px;
+        text-decoration: none;
+        color: #5a3e36;
+        font-weight: bold;
+    }
+</style>
+
+<div class="container">
+    <h1>{{ cours.titre }}</h1>
+    <img src="{{ asset('assets/img/' ~ cours.imageC) }}" alt="Image" width="100">
+    <p class="course-content">{{ cours.contenu }}</p>
+
+   {# Formulaire de notation #}
+        <h3>Attribuer une note</h3>
+        {{ form_start(form) }}
+            {{ form_widget(form) }}
+        {{ form_end(form) }}
+
+        {# Affichage des évaluations des orphelins #}
+        <h3>Évaluations des orphelins</h3>
+        <ul>
+            {% for rating in ratings %}
+                <li>
+                    <strong>{{ rating.orphelin.nomO }} {{ rating.orphelin.prenomO }} :</strong>
+                    <span>{{ rating.note }} étoiles</span>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <a href="{{ path('orphelin_dashboard') }}" class="back-link">← Retour aux cours</a>
+</div>
+{% endblock %}

@@ -40,5 +40,7 @@ class MailerService
         } catch (\Exception $e) {
             $this->logger->error("❌ Erreur lors de l'envoi de l'e-mail : " . $e->getMessage());
         }
+
+       
     }
 }

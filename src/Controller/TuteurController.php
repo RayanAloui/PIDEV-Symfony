@@ -3,7 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Tuteur;
+use App\Entity\Cour;
 use App\Repository\TuteurRepository;
+use App\Repository\CourRepository;
+use App\Repository\RatingRepository;
+use App\Repository\OrphelinRepository;
 use App\Form\TuteurSearchType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +21,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use App\Service\MailerService;
-
+use App\Service\SmsService;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 #[Route('/crud/tuteur')]
 class TuteurController extends AbstractController
@@ -70,7 +75,7 @@ class TuteurController extends AbstractController
     }
 
     #[Route('/edit/{id}', name: 'app_crud_tuteur_edit')]
-    public function edit(Request $request, EntityManagerInterface $entityManager, TuteurRepository $tuteurRepository, MailerService $mailerService, int $id): Response
+    public function edit(Request $request, EntityManagerInterface $entityManager, TuteurRepository $tuteurRepository, MailerService $mailerService, SmsService $smsService, int $id): Response
     {
         $tuteur = $tuteurRepository->find($id);
 
@@ -85,10 +90,17 @@ class TuteurController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($ancienneDisponibilite !== $tuteur->getDisponibilite()) {
+                //Envoi de l'email
                 $mailerService->sendAvailabilityChangeEmail(
                     $tuteur->getEmail(),
                     "{$tuteur->getNomT()} {$tuteur->getPrenomT()}",
                     $tuteur->getDisponibilite()
+                );
+
+                //Envoi du SMS
+                $smsService->sendSms(
+                    '+216' . $tuteur->getTelephoneT(),
+                    "Bonjour {$tuteur->getNomT()} {$tuteur->getPrenomT()}, votre disponibilité a été mise à jour : {$tuteur->getDisponibilite()}."
                 );
             }
 
@@ -102,16 +114,25 @@ class TuteurController extends AbstractController
     }
 
     #[Route('/test-email', name: 'test_email')]
-    public function testEmail(MailerService $mailerService): Response
+    public function testNotification(MailerService $mailerService): Response
     {
         $mailerService->sendAvailabilityChangeEmail(
-            'alouiahmed525@gmail.com', 
+            'alouiahmed525@gmail.com',
             'Ahmed Aloui',
             'Disponible'
         );
-    
-        return new Response('succès email');
+
+        return new Response('✅ Notification e-mail + SMS envoyée.');
     }
+
+    #[Route('/test-sms', name: 'test_sms')]
+    public function testSms(SmsService $smsService): Response
+    {
+        $smsService->sendSms('+21699058580', 'Test Twilio Symfony 🚀');
+
+        return new Response('✅ Test SMS envoyé.');
+    }
+
 
     #[Route('/delete/{id}', name: 'app_crud_tuteur_delete')]
     public function delete(EntityManagerInterface $entityManager, TuteurRepository $tuteurRepository, int $id): Response
@@ -178,4 +199,115 @@ class TuteurController extends AbstractController
 
         return $response;
     }
+
+    #[Route('/login', name: 'tuteur_login')]
+    public function login(Request $request, EntityManagerInterface $entityManager, SessionInterface $session): Response
+    {
+        if ($request->isMethod('POST')) {
+            $email = $request->request->get('email');
+            $cinT = $request->request->get('cinT');
+
+            // Rechercher le tuteur dans la BD
+            $tuteur = $entityManager->getRepository(Tuteur::class)->findOneBy([
+                'email' => $email,
+                'cinT' => $cinT
+            ]);
+
+            if ($tuteur) {
+                // Stocker les infos du tuteur en session
+                $session->set('idT', $tuteur->getIdT());
+                $session->set('nomT', $tuteur->getNomT());
+                $session->set('prenomT', $tuteur->getPrenomT());
+
+                return $this->redirectToRoute('tuteur_dashboard');
+            } else {
+                $this->addFlash('error', 'Identifiants incorrects !');
+            }
+        }
+
+        return $this->render('tuteur/login.html.twig');
+    }
+
+    #[Route('/dashboard', name: 'tuteur_dashboard')]
+    public function dashboard(SessionInterface $session, CourRepository $courRepository): Response
+    {
+        // Vérifier si le tuteur est connecté
+        if (!$session->has('idT')) {
+            return $this->redirectToRoute('tuteur_login');
+        }
+
+        // Récupérer l'ID du tuteur depuis la session
+        $tuteurId = $session->get('idT');
+
+        // Récupérer les cours spécifiques à ce tuteur
+        $cours = $courRepository->findBy(['tuteur' => $tuteurId]);
+
+        return $this->render('tuteur/dashboard.html.twig', [
+            'nomT' => $session->get('nomT'),
+            'prenomT' => $session->get('prenomT'),
+            'cours' => $cours
+        ]);
+    }
+
+
+    #[Route('/logout', name: 'tuteur_logout')]
+    public function logout(SessionInterface $session): Response
+    {
+        $session->clear();
+        return $this->redirectToRoute('tuteur_login');
+    }
+
+    #[Route('/orphelins', name: 'tuteur_orphelins')]
+    public function afficherOrphelins(SessionInterface $session, OrphelinRepository $orphelinRepository): Response
+    {
+        // Vérifier si le tuteur est connecté
+        if (!$session->has('idT')) {
+            return $this->redirectToRoute('tuteur_login');
+        }
+
+        $idTuteur = $session->get('idT');
+
+        // Récupérer la liste des orphelins du tuteur connecté
+        $orphelins = $orphelinRepository->findBy(['tuteur' => $idTuteur]);
+
+        return $this->render('tuteur/orphelins_list.html.twig', [
+            'orphelins' => $orphelins,
+        ]);
+    }
+
+    #[Route('/cours/{id}', name: 'tuteur_cours_details')]
+    public function voirCours(Cour $cours, SessionInterface $session , int $id,EntityManagerInterface $em, RatingRepository $ratingRepository): Response
+    {
+        // Vérifier si le tuteur est connecté
+        if (!$session->has('idT')) {
+            return $this->redirectToRoute('tuteur_login');
+        }
+
+        // Récupérer le cours par son ID
+        $cours = $em->getRepository(Cour::class)->find($id);
+
+        // Vérifier si le cours existe et si c'est bien un cours du tuteur connecté
+        if (!$cours || $cours->getTuteur()->getIdT() !== $session->get('idT')) {
+            throw $this->createNotFoundException("Cours introuvable ou non autorisé.");
+        }
+
+        // Récupérer les évaluations des orphelins pour ce cours
+        $ratings = $ratingRepository->findBy(['cours' => $cours]);
+
+        // Calcul de la note moyenne
+        $totalRating = 0;
+        $totalOrphelins = count($ratings);
+        foreach ($ratings as $rating) {
+            $totalRating += $rating->getNote();
+        }
+        $averageRating = $totalOrphelins > 0 ? $totalRating / $totalOrphelins : 0;
+
+        // Renvoyer la vue avec les données
+        return $this->render('tuteur/cours_details.html.twig', [
+            'cours' => $cours,
+            'ratings' => $ratings,
+            'averageRating' => $averageRating,
+        ]);
+    }
 }
+

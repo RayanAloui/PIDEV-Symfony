@@ -3,6 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\Cour;
+use App\Entity\Orphelin;
+use App\Entity\Rating;
+use App\Form\RatingType;
 use App\Form\CourType;
 use App\Repository\CourRepository;
 use App\Form\CourSearchType;
@@ -14,6 +17,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use App\Entity\Tuteur;
 
 #[Route('/crud/cours')]
 class CourController extends AbstractController
@@ -208,6 +213,92 @@ class CourController extends AbstractController
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="Liste_Cours.pdf"',
         ]);
-        
     }
+
+
+    #[Route('/dashboard/cours/ajouter', name: 'tuteur_cours_ajouter')]
+    public function ajouterCours(Request $request, SessionInterface $session, EntityManagerInterface $entityManager): Response
+    {
+        if (!$session->has('idT')) {
+            return $this->redirectToRoute('tuteur_login');
+        }
+
+        $tuteurId = $session->get('idT');
+        $tuteur = $entityManager->getRepository(Tuteur::class)->find($tuteurId);
+
+        $cour = new Cour();
+        $cour->setTuteur($tuteur);
+
+        $form = $this->createForm(CourType::class, $cour);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($cour);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('tuteur_dashboard');
+        }
+
+        return $this->render('tuteur/cours_add.html.twig', [
+            'form' => $form->createView(),
+            'action' => 'Ajouter'
+        ]);
+    }
+
+
+    #[Route('/dashboard/cours/modifier/{id}', name: 'tuteur_cours_modifier')]
+    public function modifierCours(Cour $cours, Request $request, SessionInterface $session, EntityManagerInterface $entityManager): Response
+    {
+        if (!$session->has('idT') || $cours->getTuteur()->getIdT() !== $session->get('idT')) {
+            return $this->redirectToRoute('tuteur_dashboard');
+        }
+
+        $form = $this->createForm(CourType::class, $cours);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $imageFile = $form->get('imageC')->getData();
+
+            if ($imageFile) {
+                // Supprimer l'ancienne image (optionnel, si tu veux éviter trop de fichiers inutiles)
+                if ($cours->getImageC()) {
+                    $oldImagePath = $this->getParameter('cours_images_directory') . '/' . $cours->getImageC();
+                    if (file_exists($oldImagePath)) {
+                        unlink($oldImagePath);
+                    }
+                }
+
+                // Sauvegarder la nouvelle image
+                $newFilename = uniqid() . '.' . $imageFile->guessExtension();
+                $imageFile->move($this->getParameter('cours_images_directory'), $newFilename);
+                $cours->setImageC($newFilename);
+            }
+
+            $entityManager->flush();
+            return $this->redirectToRoute('tuteur_dashboard');
+        }
+
+        return $this->render('tuteur/cours_edit.html.twig', [
+            'form' => $form->createView(),
+            'cours' => $cours,
+            'action' => 'Modifier'
+
+        ]);
+    }
+
+
+    #[Route('/dashboard/cours/supprimer/{id}', name: 'tuteur_cours_supprimer')]
+    public function supprimerCours(Cour $cour, SessionInterface $session, EntityManagerInterface $entityManager): Response
+    {
+        if (!$session->has('idT') || $cour->getTuteur()->getIdT() !== $session->get('idT')) {
+            return $this->redirectToRoute('tuteur_dashboard');
+        }
+
+        $entityManager->remove($cour);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('tuteur_dashboard');
+    }
+
+
 }

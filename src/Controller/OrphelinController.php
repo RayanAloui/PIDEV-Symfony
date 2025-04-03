@@ -3,6 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Orphelin;
+use App\Entity\Rating;
+use App\Form\RatingType;
+use App\Repository\CourRepository;
+use App\Repository\RatingRepository;
+use App\Entity\Cour;
 use App\Form\OrphelinType;
 use App\Form\OrphelinSearchType;
 use App\Repository\OrphelinRepository;
@@ -14,6 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 #[Route('/crud/orphelin')]
 class OrphelinController extends AbstractController
@@ -176,5 +182,198 @@ class OrphelinController extends AbstractController
         ];
 
         return $this->json($data);
+    }
+
+    #[Route('/login', name: 'orphelin_login')]
+    public function login(Request $request, SessionInterface $session, EntityManagerInterface $em): Response
+    {
+        if ($session->has('idO')) {
+            return $this->redirectToRoute('orphelin_dashboard');
+        }
+
+        $error = null;
+
+        if ($request->isMethod('POST')) {
+            $nomO = $request->request->get('nomO');
+            $prenomO = $request->request->get('prenomO');
+            $idO = $request->request->get('idO');
+
+            // Vérifier si l'orphelin existe
+            $orphelin = $em->getRepository(Orphelin::class)->findOneBy([
+                'idO' => $idO,
+                'nomO' => $nomO,
+                'prenomO' => $prenomO
+            ]);
+
+            if ($orphelin) {
+                $session->set('idO', $orphelin->getIdO());
+                $session->set('nomO', $orphelin->getNomO());
+                $session->set('prenomO', $orphelin->getPrenomO());
+                $session->set('idTuteur', $orphelin->getTuteur()->getIdT());
+
+                return $this->redirectToRoute('orphelin_dashboard');
+            } else {
+                $error = "Identifiants incorrects.";
+            }
+        }
+
+        return $this->render('orphelin/login.html.twig', [
+            'error' => $error
+        ]);
+    }
+
+
+    #[Route('/dashboard', name: 'orphelin_dashboard')]
+    public function dashboard(SessionInterface $session, EntityManagerInterface $em): Response
+    {
+        // Vérifier si l'orphelin est connecté
+        if (!$session->has('idO')) {
+            return $this->redirectToRoute('orphelin_login');
+        }
+
+        $idTuteur = $session->get('idTuteur');
+
+        // Récupérer les cours du tuteur de cet orphelin
+        $cours = $em->getRepository(Cour::class)->findBy(['tuteur' => $idTuteur]);
+
+        return $this->render('orphelin/dashboard.html.twig', [
+            'cours' => $cours,
+            'nomO' => $session->get('nomO'),
+            'prenomO' => $session->get('prenomO'),
+        ]);
+    }
+
+    /*#[Route('/cours/{id}', name: 'orphelin_cours_details')]
+    public function coursDetails(int $id, SessionInterface $session, EntityManagerInterface $em): Response
+    {
+        if (!$session->has('idO')) {
+            return $this->redirectToRoute('orphelin_login');
+        }
+
+        $cours = $em->getRepository(Cour::class)->find($id);
+
+        if (!$cours || $cours->getTuteur()->getIdT() !== $session->get('idTuteur')) {
+            throw $this->createNotFoundException("Cours introuvable ou non autorisé.");
+        }
+
+        return $this->render('orphelin/cours_details.html.twig', [
+            'cours' => $cours
+        ]);
+    }*/
+
+    #[Route('/cours/{id}', name: 'orphelin_cours_details')]
+    public function coursDetails(int $id, SessionInterface $session, Request $request, EntityManagerInterface $em, RatingRepository $ratingRepository, CourRepository $courRepository): Response
+    {
+        if (!$session->has('idO')) {
+            return $this->redirectToRoute('orphelin_login');
+        }
+
+        // Récupérer le cours
+        $cours = $em->getRepository(Cour::class)->find($id);
+
+        if (!$cours || $cours->getTuteur()->getIdT() !== $session->get('idTuteur')) {
+            throw $this->createNotFoundException("Cours introuvable ou non autorisé.");
+        }
+
+        // Récupérer la note existante de l'orphelin pour ce cours
+        $orphelin = $em->getRepository(Orphelin::class)->find($session->get('idO'));
+        $existingRating = $ratingRepository->findOneBy(['orphelin' => $orphelin, 'cours' => $cours]);
+
+        if ($existingRating) {
+            // Si une note existe déjà, nous l'affichons dans le formulaire
+            $form = $this->createForm(RatingType::class, $existingRating);
+        } else {
+            // Sinon, nous créons un nouveau formulaire
+            $form = $this->createForm(RatingType::class);
+        }
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $rating = $form->getData();
+            $rating->setOrphelin($orphelin);
+            $rating->setCours($cours);
+
+            if (!$existingRating) {
+                // Si c'est une nouvelle note, nous persistons l'entité Rating
+                $em->persist($rating);
+            }
+            $em->flush();
+
+            // Recalcul de la note moyenne
+            $ratings = $ratingRepository->findBy(['cours' => $cours]);
+            $totalRating = 0;
+            $totalOrphelins = count($ratings);
+            foreach ($ratings as $rating) {
+                $totalRating += $rating->getNote();
+            }
+            $averageRating = $totalOrphelins > 0 ? $totalRating / $totalOrphelins : 0;
+
+            // Mise à jour de la note moyenne dans l'entité Cour
+            $cours->setNote_Moyenne($averageRating);
+            $em->flush();
+
+            // Redirection après l'évaluation
+            return $this->redirectToRoute('orphelin_cours_details', ['id' => $id]);
+        }
+
+        // Affichage des évaluations existantes
+        $ratings = $ratingRepository->findBy(['cours' => $cours]);
+
+        return $this->render('orphelin/cours_details.html.twig', [
+            'cours' => $cours,
+            'ratings' => $ratings,
+            'form' => $form->createView(),
+        ]);
+    }
+    /*public function coursDetails(int $id, SessionInterface $session, EntityManagerInterface $em, Request $request, RatingRepository $ratingRepository): Response
+    {
+        // Vérification si l'orphelin est connecté
+        if (!$session->has('idO')) {
+            return $this->redirectToRoute('orphelin_login');
+        }
+
+        // Récupérer le cours par son ID
+        $cours = $em->getRepository(Cour::class)->find($id);
+
+        // Vérifier si le cours existe et s'il appartient bien au tuteur de l'orphelin connecté
+        if (!$cours || $cours->getTuteur()->getIdT() !== $session->get('idTuteur')) {
+            throw $this->createNotFoundException("Cours introuvable ou non autorisé.");
+        }
+
+        // Récupérer les évaluations du cours
+        $ratings = $ratingRepository->findBy(['cours' => $cours]);
+
+        // Créer un nouvel objet Rating pour le formulaire de notation
+        $rating = new Rating();
+        $rating->setCours($cours);
+        $rating->setOrphelin($em->getRepository(Orphelin::class)->find($session->get('idO')));  // Assurer que l'orphelin est l'utilisateur connecté
+
+        // Créer le formulaire de notation
+        $form = $this->createForm(RatingType::class, $rating);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Enregistrer la note dans la base de données
+            $em->persist($rating);
+            $em->flush();
+
+            // Rediriger vers la même page pour afficher la note mise à jour
+            return $this->redirectToRoute('orphelin_cours_details', ['id' => $id]);
+        }
+
+        // Renvoyer la vue avec les détails du cours, le formulaire et les évaluations
+        return $this->render('orphelin/cours_details.html.twig', [
+            'cours' => $cours,
+            'form' => $form->createView(),
+            'ratings' => $ratings
+        ]);
+    }*/
+
+    #[Route('/logout', name: 'orphelin_logout')]
+    public function logout(SessionInterface $session): Response
+    {
+        $session->clear();
+        return $this->redirectToRoute('orphelin_login');
     }
 }

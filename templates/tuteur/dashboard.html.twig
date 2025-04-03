@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de bord - Tuteur{% endblock %}
+
+{% block body %}
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f5efe6; /* Beige clair */
+        color: #5a3e36; /* Marron foncé */
+        margin: 0;
+        padding: 0;
+    }
+
+    .dashboard-container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.15);
+        text-align: center;
+    }
+
+    .dashboard-container h1 {
+        color: #4a2c2a;
+        font-size: 24px;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
+
+    .dashboard-container p {
+        font-size: 18px;
+        color: #555;
+    }
+
+    .logout-btn {
+        display: inline-block;
+        background-color: #b08968;
+        padding: 12px 20px;
+        border: none;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 16px;
+        margin-top: 20px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .logout-btn:hover {
+        background-color: #8b5e3c;
+    }
+</style>
+
+<div class="dashboard-container">
+    <h1>Bienvenue, {{ prenomT }} {{ nomT }}</h1>
+    <p>Vous êtes connecté à votre espace tuteur.</p>
+    <a href="{{ path('tuteur_logout') }}" class="logout-btn">Se déconnecter</a>
+    <a href="{{ path('tuteur_cours_ajouter') }}" class="logout-btn">Ajouter un cours</a>
+    <a href="{{ path('tuteur_orphelins') }}" class="logout-btn">Voir mes orphelins</a>
+</div>
+
+<div class="dashboard-container">
+    <h1>Mes Cours</h1>
+
+    <div class="courses-container">
+        {% for cour in cours %}
+            <div class="course-card">
+                {% if cour.imageC %}
+                    <img src="{{ asset('assets/img/' ~ cour.imageC) }}" alt="Image" width="50">                
+                {% else %}
+                    <img src="{{ asset('assets/img/default.jpg') }}" alt="Image par défaut" width="50">
+                {% endif %}
+                <div class="course-info">
+                    <h2>{{ cour.titre }}</h2>
+                    <p>{{ cour.contenu|slice(0, 100) }}...</p>
+                </div>
+                <a href="{{ path('tuteur_cours_modifier', {'id': cour.idC}) }}" class="btn btn-warning">Modifier</a>
+                <a href="{{ path('tuteur_cours_supprimer', {'id': cour.idC}) }}" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer ce cours ?');">Supprimer</a>
+                <a href="{{ path('tuteur_cours_details', { 'id': cour.idC }) }}" class="btn btn-info">👀 Consulter</a>
+            </div>
+        {% else %}
+            <p>Aucun cours disponible.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+
+

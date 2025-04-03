@@ -10,7 +10,7 @@ use App\Repository\TuteurRepository;
 
 #[ORM\Entity(repositoryClass: TuteurRepository::class)]
 #[ORM\Table(name: 'tuteurs')]
-class Tuteur
+class Tuteur 
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
