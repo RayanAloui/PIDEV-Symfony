@@ -1,0 +1,336 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}User Index{% endblock %}
+
+{% block body %}
+    <style>
+        /* General page styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f2e3; /* Light beige background */
+            margin: 0;
+            padding: 0;
+            color: #3e2a47; /* Dark brown text */
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Page title styling */
+        .page-title {
+            font-size: 2.5rem;
+            color: #6f4f28; /* Warm brown */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Table Styling */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #d7c6b7; /* Light brown border */
+        }
+
+        .table th {
+            background-color: #c29c6e; /* Warm gold */
+            color: white;
+        }
+
+        .table tr:hover {
+            background-color: #f2e3d5; /* Light tan */
+        }
+
+        /* Action Button Styling */
+        .btn-action {
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            text-decoration: none;
+            margin: 2px;
+        }
+
+        .btn-show {
+            background-color: #9e7b5e; /* Darker brown */
+            color: white;
+        }
+
+        .btn-show:hover {
+            background-color: #7c5c42;
+        }
+
+        .btn-edit {
+            background-color: #a88f5b; /* Warm light brown */
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background-color: #8f6c47;
+        }
+
+        .btn-danger {
+            background-color: #b7472a; /* Red-brown */
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #9a3d22;
+        }
+
+        .btn-success {
+            background-color: #7b9f6f; /* Olive green-brown */
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #6c8d5f;
+        }
+
+        .btn-warning {
+            background-color: #d4b25e; /* Light yellow-brown */
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #c0a254;
+        }
+
+        /* Create New Button */
+        .btn-create {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #6f4f28; /* Deep brown */
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn-create:hover {
+            background-color: #4a3423; /* Darker brown */
+        }
+
+        /* Empty state */
+        .no-records {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2rem;
+            color: #a88f5b; /* Light brown */
+        }
+
+        /* Sort and Search Section */
+        .sort-search-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .sort-by {
+            font-size: 1rem;
+        }
+
+        .sort-by select {
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+        }
+
+        .search-bar input {
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+        }
+
+        /* Chart Container */
+        .chart-box {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 40px;
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            color: #6f4f28; /* Warm brown */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 400px;
+        }
+    </style>
+
+    <div class="container">
+        <h1 class="page-title">User Index</h1>
+
+        <!-- Sort and Search Section -->
+        <div class="sort-search-container">
+            <!-- Sort By Dropdown -->
+            <div class="sort-by">
+                <label for="sort">Sort by:</label>
+                <form method="get" action="{{ path('app_user_index') }}">
+                    <select id="sort" name="sort" onchange="this.form.submit()">
+                        <option value="" {% if sort is empty %}selected{% endif %}></option>
+                        <option value="email" {% if sort == 'email' %}selected{% endif %}>Email</option>
+                        <option value="role" {% if sort == 'role' %}selected{% endif %}>Role</option>
+                    </select>
+                </form>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <form method="get" action="{{ path('app_user_index') }}">
+                    <input type="text" name="search" placeholder="Search..." value="{{ search }}">
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Surname</th>
+                        <th>Telephone</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>IsBlocked</th>
+                        <th>IsConfirmed</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.surname }}</td>
+                            <td>{{ user.telephone }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.role }}</td>
+                            <td>{{ user.isBlocked == 1 ? 'Blocked' : 'Active' }}</td>
+                            <td>{{ user.isConfirmed == 1 ? 'Confirmed' : 'Not Confirmed' }}</td>
+                            <td class="actions">
+                                <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn-action btn-edit">Edit</a>
+
+                                <!-- Delete Button -->
+                                <form action="{{ path('app_user_delete', {'id': user.id}) }}" method="post" style="display:inline;">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                    <button type="submit" onclick="return confirm('Are you sure you want to delete this user?')" class="btn-action btn-danger">Delete</button>
+                                </form>
+
+                                <!-- Block/Activate Button -->
+                                <form action="{{ path(user.isBlocked ? 'app_user_activate' : 'app_user_block', {'id': user.id}) }}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn-action {{ user.isBlocked ? 'btn-success' : 'btn-warning' }}">
+                                        {{ user.isBlocked ? 'Activate' : 'Block' }}
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="no-records">No records found</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+         <a href="{{ path('app_user_new') }}" class="btn-create">Create New</a>
+
+        <!-- Bar Chart for Active vs Blocked Users -->
+        <div class="chart-box">
+            <h2 class="chart-title">User Status (Active vs Blocked)</h2>
+            <div class="chart-container">
+                <canvas id="userBarChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Pie Chart for Confirmed vs Unconfirmed Users -->
+        <div class="chart-box">
+            <h2 class="chart-title">User Confirmation Status</h2>
+            <div class="chart-container">
+                <canvas id="userPieChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart.js Script -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            // Bar Chart: Active vs Blocked
+            var ctxBar = document.getElementById('userBarChart').getContext('2d');
+            var userBarChart = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: ['Active', 'Blocked'],
+                    datasets: [{
+                        label: 'User Status',
+                        data: [{{ activeCount|json_encode() }}, {{ blockedCount|json_encode() }}],
+                        backgroundColor: ['#7b9f6f', '#b7472a'], // Green for active, red for blocked
+                        borderColor: ['#6c8d5f', '#9a3d22'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Pie Chart: Confirmed vs Unconfirmed
+            var ctxPie = document.getElementById('userPieChart').getContext('2d');
+            var userPieChart = new Chart(ctxPie, {
+                type: 'pie',
+                data: {
+                    labels: ['Confirmed', 'Unconfirmed'],
+                    datasets: [{
+                        label: 'User Confirmation Status',
+                        data: [{{ confirmedCount|json_encode() }}, {{ unconfirmedCount|json_encode() }}],
+                        backgroundColor: ['#6f4f28', '#f4c542'], // Brown for confirmed, yellow for unconfirmed
+                        borderColor: ['#5a4020', '#e3b033'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        </script>
+    </div>
+{% endblock %}
