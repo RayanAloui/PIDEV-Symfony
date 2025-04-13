@@ -1,3 +1,7 @@
+{% extends 'back.html.twig' %}
+
+{% block body %}
+
 <style>
     body {
         font-family: 'Arial', sans-serif;
@@ -142,9 +146,13 @@ button:hover {
 <body>
 <div class="container">
     <h1>Liste des Cours</h1>
-    <a href="{{ path('app_crud_cours_add') }}" class="btn btn-primary mb-3">Ajouter un Cours</a>
+    <a href="{{ path('app_crud_cours_add') }}" class="btn btn-warning">Ajouter un Cours</a>
 
     <a href="{{ path('cours_pdf') }}" class="btn btn-danger">📄 Exporter en PDF</a>
+
+    <a href="{{ path('app_crud_tuteur') }}" class="btn btn-danger">Liste des tuteurs</a>
+
+    <a href="{{ path('app_crud_orphelin') }}" class="btn btn-danger">Liste des orphelins</a>
 
     <p></p>
 
@@ -169,6 +177,11 @@ button:hover {
                     </a>
                 </th>
                 <th>
+                    <a href="{{ path('app_crud_cours', { sort: 'resume', order: sortOrder == 'asc' ? 'desc' : 'asc' }) }}">
+                         Résumé {{ sortField == 'resume' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}
+                    </a>
+                </th>
+                <th>
                     <a href="{{ path('app_crud_cours', { sort: 'tuteur', order: sortOrder == 'asc' ? 'desc' : 'asc' }) }}">
                          Tuteur {{ sortField == 'tuteur' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}
                     </a>
@@ -188,6 +201,7 @@ button:hover {
                     </td>
                     <td>{{ cour.titre }}</td>
                     <td>{{ cour.contenu|slice(0, 50) }}...</td>
+                    <td>{{ cour.resume|slice(0,50) }}...</td>
                     <td>
                        {% if cour.tuteur %}
                            {{ cour.tuteur.nomT }} {{ cour.tuteur.prenomT }}
@@ -254,3 +268,4 @@ button:hover {
 
 </body>
 
+{% endblock %}

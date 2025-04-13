@@ -25,7 +25,12 @@ class RatingType extends AbstractType
             'label' => 'Note (1 à 5)',
             'attr' => ['min' => 1, 'max' => 5],
         ])*/
-        ->add('save', SubmitType::class, ['label' => 'Noter']);
+        ->add('save', SubmitType::class,[
+            'label' => 'Noter',
+            'attr' => [
+                'class' => 'btn btn-primary btn-lg mt-3 px-3 rounded-pill shadow',
+            ]
+        ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

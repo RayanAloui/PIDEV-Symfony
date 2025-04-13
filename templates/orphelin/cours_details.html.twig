@@ -53,9 +53,74 @@
 <div class="container">
     <h1>{{ cours.titre }}</h1>
     <img src="{{ asset('assets/img/' ~ cours.imageC) }}" alt="Image" width="100">
+    <p></p>
+    <h1>Contenu</h1>
     <p class="course-content">{{ cours.contenu }}</p>
 
+    <form method="get" action="{{ path('orphelin_cours_details', {id: cours.idC}) }}">
+    <input type="hidden" name="tts" value="1">
+    <button type="submit" class="btn btn-success mt-3">Lire à haute voix</button>
+</form>
+
+{% if audioUrl %}
+    <div class="mt-3">
+        <h5>Lecture audio :</h5>
+        <audio controls>
+            <source src="{{ audioUrl }}" type="audio/mpeg">
+            Votre navigateur ne prend pas en charge l'audio.
+        </audio>
+    </div>
+{% endif %}
+
+    <h1>Résumé</h1>
+    <p class="course-content">{{ cours.resume }}</p>
+
+    <form method="get">
+    <button type="submit" name="extract_keywords" value="1" class="btn btn-primary">
+        Mots-clés
+    </button>
+    </form>
+
+    <p></p>
+
+{% if keywords is defined and keywords is not empty %}
+    <h3>Mots-clés extraits :</h3>
+    <ul>
+        {% for keyword in keywords %}
+            <li>{{ keyword }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+    <button id="translateBtn" class="btn btn-primary mt-3">Traduire en anglais</button>
+
+<div id="translatedText" class="mt-3" style="display: none;">
+    <h3>Traduction :</h3>
+    <p id="translatedContent" style="color: #333;"></p>
+</div>
+
+<script>
+    document.getElementById('translateBtn').addEventListener('click', function () {
+        fetch('', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.translated) {
+                document.getElementById('translatedText').style.display = 'block';
+                document.getElementById('translatedContent').textContent = data.translated;
+            }
+        });
+    });
+</script>
+
+
+
    {# Formulaire de notation #}
+   <p></p>
         <h3>Attribuer une note</h3>
         {{ form_start(form) }}
             {{ form_widget(form) }}

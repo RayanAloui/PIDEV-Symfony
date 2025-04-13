@@ -24,9 +24,15 @@ use App\Service\MailerService;
 use App\Service\SmsService;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
+
 #[Route('/crud/tuteur')]
 class TuteurController extends AbstractController
 {
+    #[Route('/test', name: 'app_front')]
+    public function frontPage(SessionInterface $session): Response
+    {
+        return $this->render('base.html.twig');
+    }
     #[Route('/list', name: 'app_crud_tuteur', methods: ['GET'])]
     public function list(Request $request, TuteurRepository $repository): Response
     {
@@ -276,7 +282,7 @@ class TuteurController extends AbstractController
     }
 
     #[Route('/cours/{id}', name: 'tuteur_cours_details')]
-    public function voirCours(Cour $cours, SessionInterface $session , int $id,EntityManagerInterface $em, RatingRepository $ratingRepository): Response
+    public function voirCours(Cour $cours, SessionInterface $session, int $id, EntityManagerInterface $em, RatingRepository $ratingRepository): Response
     {
         // Vérifier si le tuteur est connecté
         if (!$session->has('idT')) {
@@ -310,4 +316,3 @@ class TuteurController extends AbstractController
         ]);
     }
 }
-

@@ -19,6 +19,7 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Entity\Tuteur;
+use App\Service\EdenAiService;
 
 #[Route('/crud/cours')]
 class CourController extends AbstractController
@@ -52,7 +53,7 @@ class CourController extends AbstractController
     }
 
     #[Route('/add', name: 'app_crud_cours_add', methods: ['GET', 'POST'])]
-    public function add(Request $request, EntityManagerInterface $entityManager): Response
+    public function add(Request $request, EntityManagerInterface $entityManager,EdenAiService $edenAiService): Response
     {
         $cour = new Cour();
         $form = $this->createForm(CourType::class, $cour);
@@ -69,6 +70,11 @@ class CourController extends AbstractController
                     $this->addFlash('danger', 'Erreur lors de l\'upload de l\'image.');
                 }
             }
+
+            // Génération automatique du résumé
+            $contenu = $cour->getContenu();
+            $resume = $edenAiService->summarizeText($contenu);
+            $cour->setResume($resume);
 
             $entityManager->persist($cour);
             $entityManager->flush();

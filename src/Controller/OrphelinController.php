@@ -20,10 +20,16 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use App\Service\EdenAiService;
 
 #[Route('/crud/orphelin')]
 class OrphelinController extends AbstractController
 {
+    #[Route('/test', name: 'app_front')]
+    public function frontPage(SessionInterface $session): Response
+    {
+        return $this->render('base.html.twig');
+    }
     #[Route('/list', name: 'app_crud_orphelin', methods: ['GET'])]
     /*public function index(OrphelinRepository $orphelinRepository): Response
     {
@@ -262,28 +268,38 @@ class OrphelinController extends AbstractController
     }*/
 
     #[Route('/cours/{id}', name: 'orphelin_cours_details')]
-    public function coursDetails(int $id, SessionInterface $session, Request $request, EntityManagerInterface $em, RatingRepository $ratingRepository, CourRepository $courRepository): Response
-    {
+    public function coursDetails(
+        int $id,
+        SessionInterface $session,
+        Request $request,
+        EntityManagerInterface $em,
+        RatingRepository $ratingRepository,
+        CourRepository $courRepository,
+        EdenAiService $edenAiService
+    ): Response {
         if (!$session->has('idO')) {
             return $this->redirectToRoute('orphelin_login');
         }
 
-        // Récupérer le cours
         $cours = $em->getRepository(Cour::class)->find($id);
 
         if (!$cours || $cours->getTuteur()->getIdT() !== $session->get('idTuteur')) {
             throw $this->createNotFoundException("Cours introuvable ou non autorisé.");
         }
 
-        // Récupérer la note existante de l'orphelin pour ce cours
+        // Si la requête est une requête AJAX pour la traduction
+        if ($request->isXmlHttpRequest() && $request->isMethod('POST')) {
+            $translated = $edenAiService->translateToEnglish($cours->getContenu());
+            return new JsonResponse(['translated' => $translated]);
+        }
+
+        // Gestion de la note
         $orphelin = $em->getRepository(Orphelin::class)->find($session->get('idO'));
         $existingRating = $ratingRepository->findOneBy(['orphelin' => $orphelin, 'cours' => $cours]);
 
         if ($existingRating) {
-            // Si une note existe déjà, nous l'affichons dans le formulaire
             $form = $this->createForm(RatingType::class, $existingRating);
         } else {
-            // Sinon, nous créons un nouveau formulaire
             $form = $this->createForm(RatingType::class);
         }
 
@@ -295,37 +311,44 @@ class OrphelinController extends AbstractController
             $rating->setCours($cours);
 
             if (!$existingRating) {
-                // Si c'est une nouvelle note, nous persistons l'entité Rating
                 $em->persist($rating);
             }
             $em->flush();
 
-            // Recalcul de la note moyenne
+            // Recalcul de la moyenne
             $ratings = $ratingRepository->findBy(['cours' => $cours]);
-            $totalRating = 0;
-            $totalOrphelins = count($ratings);
-            foreach ($ratings as $rating) {
-                $totalRating += $rating->getNote();
-            }
-            $averageRating = $totalOrphelins > 0 ? $totalRating / $totalOrphelins : 0;
+            $totalRating = array_reduce($ratings, fn($sum, $r) => $sum + $r->getNote(), 0);
+            $averageRating = count($ratings) > 0 ? $totalRating / count($ratings) : 0;
 
-            // Mise à jour de la note moyenne dans l'entité Cour
             $cours->setNote_Moyenne($averageRating);
             $em->flush();
 
-            // Redirection après l'évaluation
             return $this->redirectToRoute('orphelin_cours_details', ['id' => $id]);
         }
 
-        // Affichage des évaluations existantes
         $ratings = $ratingRepository->findBy(['cours' => $cours]);
+
+        $keywords = [];
+        if ($request->query->get('extract_keywords')) {
+            $keywords = $edenAiService->extractKeywords($cours->getContenu());
+        }
+
+        // Synthèse vocale
+        $audioUrl = null;
+        if ($request->query->get('tts') === '1') {
+            dump('Synthèse vocale déclenchée');
+            $audioUrl = $edenAiService->synthesize($cours->getContenu());
+        }
 
         return $this->render('orphelin/cours_details.html.twig', [
             'cours' => $cours,
             'ratings' => $ratings,
             'form' => $form->createView(),
+            'keywords' => $keywords,
+            'audioUrl' => $audioUrl,
         ]);
     }
+
     /*public function coursDetails(int $id, SessionInterface $session, EntityManagerInterface $em, Request $request, RatingRepository $ratingRepository): Response
     {
         // Vérification si l'orphelin est connecté

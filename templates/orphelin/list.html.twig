@@ -1,3 +1,6 @@
+{% extends 'back.html.twig' %}
+
+{% block body %}
 <style>
     body {
         font-family: 'Arial', sans-serif;
@@ -186,6 +189,10 @@ h3 {
         <a href="{{ path('app_crud_orphelin_add') }}" class="btn btn-warning">Ajouter un Orphelin</a>
 
         <a href="{{ path('orphelins_pdf') }}" class="btn btn-danger">📄 Exporter en PDF</a>
+
+        <a href="{{ path('app_crud_tuteur') }}" class="btn btn-danger">Liste des tuteurs</a>
+
+        <a href="{{ path('app_crud_cours') }}" class="btn btn-danger">Liste des cours</a>
 
         <p></p>
 
@@ -457,3 +464,5 @@ h3 {
         });
     </script>
 </body>
+
+{% endblock %}

@@ -1,3 +1,6 @@
+{% extends 'back.html.twig' %}
+
+{% block body %}
 <style>
     body {
         font-family: 'Arial', sans-serif;
@@ -148,6 +151,10 @@ button:hover {
         
         <a href="{{ path('tuteurs_pdf') }}" class="btn btn-danger">📄 Exporter en PDF</a>
 
+        <a href="{{ path('app_crud_orphelin') }}" class="btn btn-danger">Liste des orphelins</a>
+
+        <a href="{{ path('app_crud_cours') }}" class="btn btn-danger">Liste des cours</a>
+
         <p></p>
 
          {{ form_start(form) }}
@@ -267,3 +274,4 @@ button:hover {
 
 </body>
 
+{% endblock %}
