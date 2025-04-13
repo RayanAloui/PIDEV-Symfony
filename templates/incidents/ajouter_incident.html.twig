@@ -40,6 +40,13 @@
         <div class="form-group">
             <label for="dateincident">Date de l'incident</label>
             <input type="date" id="dateincident" name="dateincident" class="form-control" >
+                {% if errors['dateincident'] is defined %}
+                    <ul class="text-danger">
+                        {% for error in errors['dateincident'] %}
+                            <li>{{ error.message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
         </div>
 
         <button type="submit" class="btn btn-primary">Enregistrer</button>

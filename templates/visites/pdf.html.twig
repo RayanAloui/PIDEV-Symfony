@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Fiche de visite #{{ visite.id }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; }
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .qr-container { float: right; text-align: center; margin: 10px; }
+        .qr-code { width: 150px; height: 150px; }
+        .info { margin-bottom: 10px; }
+        .label { font-weight: bold; display: inline-block; width: 100px; }
+        .footer { margin-top: 30px; padding-top: 10px; border-top: 1px solid #ddd; font-size: 0.8em; text-align: center; }
+        .clear { clear: both; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Fiche de visite</h2>
+    </div>
+
+    <div class="qr-container">
+        <img src="{{ qrCode }}" alt="QR Code de confirmation" width="150">
+        <p>Scannez ce QR code pour confirmer votre visite</p>
+    </div>
+
+    <div class="info">
+        <span class="label">ID Visite:</span> {{ visite.id }}
+    </div>
+    
+    <div class="info">
+        <span class="label">Visiteur:</span> {{ visite.id_user.name }} {{ visite.id_user.surname }}
+    </div>
+    
+    <div class="info">
+        <span class="label">Date:</span> {{ visite.date|date('d/m/Y') }}
+    </div>
+    
+    <div class="info">
+        <span class="label">Heure:</span> {{ visite.heure }}
+    </div>
+    
+    <div class="info">
+        <span class="label">Motif:</span> {{ visite.motif }}
+    </div>
+    
+    <div class="info">
+        <span class="label">Statut:</span> {{ visite.statut }}
+    </div>
+
+    <div class="clear"></div>
+
+    <div class="footer">
+        Document généré le {{ "now"|date("d/m/Y à H:i") }} | Système de gestion des visites
+    </div>
+</body>
+</html>

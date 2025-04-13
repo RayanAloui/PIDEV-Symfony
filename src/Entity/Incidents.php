@@ -5,7 +5,7 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Entity\Visites;
-
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 #[ORM\Entity]
 class Incidents
 {
@@ -83,4 +83,20 @@ class Incidents
     {
         $this->dateincident = $value;
     }
+
+    #[Assert\Callback]
+    public function validateDateIncident(ExecutionContextInterface $context, $payload): void
+    {
+        if ($this->id_visite && $this->dateincident) {
+            $dateVisite = $this->id_visite->getDate();
+            $dateIncident = $this->dateincident;
+
+            if ($dateIncident->format('Y-m-d') !== $dateVisite->format('Y-m-d')) {
+                $context->buildViolation('La date de l\'incident doit être le même jour que la visite.')
+                    ->atPath('dateincident')
+                    ->addViolation();
+            }
+        }
+    }
+
 }

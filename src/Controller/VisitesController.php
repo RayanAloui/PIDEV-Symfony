@@ -10,8 +10,140 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\RoundBlockSizeMode;
+use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Color\Color;
+use Endroid\QrCode\QrCode;
+
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+
+use Dompdf\Dompdf;
+use Dompdf\Options;
+
+
+
 class VisitesController extends AbstractController
 {
+    #[Route('/visite/scan', name: 'visite_scan', methods: ['GET', 'POST'])]
+    public function scan(Request $request, EntityManagerInterface $em): Response
+    {
+        if ($request->isMethod('GET')) {
+            return $this->render('visites/scan.html.twig');
+        }
+    
+        try {
+            $data = json_decode($request->getContent(), true);
+    
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \InvalidArgumentException('Invalid JSON data');
+            }
+    
+            $visiteId = $data['visite_id'] ?? null;
+    
+            if (!$visiteId) {
+                return new JsonResponse(
+                    ['status' => 'error', 'message' => 'ID de visite manquant'],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+    
+            $visite = $em->getRepository(Visites::class)->find($visiteId);
+    
+            if (!$visite) {
+                return new JsonResponse(
+                    ['status' => 'error', 'message' => 'Visite non trouvée'],
+                    Response::HTTP_NOT_FOUND
+                );
+            }
+    
+            $statut = $visite->getStatut();
+    
+            if ($statut === 'En attente') {
+                $visite->setStatut('Confirmée');
+                $em->flush();
+    
+                return new JsonResponse([
+                    'status' => 'success',
+                    'message' => 'Bienvenue ! Votre visite est confirmée.',
+                ]);
+            }
+    
+            if ($statut === 'Confirmée') {
+                $visite->setStatut('Terminée');
+                $em->flush();
+    
+                return new JsonResponse([
+                    'status' => 'success',
+                    'message' => 'Merci pour votre visite, à la prochaine 😊 !',
+                ]);
+            }
+    
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => 'Cette visite est déjà terminée.',
+            ], Response::HTTP_CONFLICT);
+    
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'status' => 'error',
+                'message' => 'Erreur serveur: ' . $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+
+    #[Route('/visite/pdf/{id}', name: 'visite_pdf', methods: ['GET'])]
+    public function generatePdf(EntityManagerInterface $em, int $id): Response
+    {
+        $visite = $em->getRepository(Visites::class)->find($id);
+        
+        if (!$visite) {
+            $this->addFlash('error', 'Visite non trouvée');
+            return $this->redirectToRoute('afficher_visite');
+        }
+    
+        // 1. Génération du mot de passe
+
+    
+        // 2. Création simple du QR Code
+        $qrCode = new QrCode((string)$visite->getId());
+       
+        
+        // 3. Écriture en PNG
+        $writer = new PngWriter();
+        $result = $writer->write($qrCode);
+        
+        // 4. Conversion pour HTML
+        $qrCodeData = 'data:'.$result->getMimeType().';base64,'.base64_encode($result->getString());
+    
+        // 5. Génération du PDF (reste identique)
+        $pdfOptions = new Options();
+        $pdfOptions->set('defaultFont', 'Arial');
+        $dompdf = new Dompdf($pdfOptions);
+        $html = $this->renderView('visites/pdf.html.twig', [
+            'visite' => $visite,
+            'qrCode' => $qrCodeData
+        ]);
+        
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+    
+        return new Response(
+            $dompdf->output(),
+            200,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="visite_'.$visite->getId().'.pdf"'
+            ]
+        );
+    }
+
     #[Route('/visite/ajouter', name: 'ajouter_visite', methods: ['GET', 'POST'])]
     public function ajouterVisite(Request $request, EntityManagerInterface $em): Response
     {
