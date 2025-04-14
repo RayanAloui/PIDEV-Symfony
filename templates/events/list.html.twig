@@ -1,0 +1,107 @@
+{% extends 'back.html.twig' %}
+
+{% block body %}
+
+<style>
+     .btn {
+        display: inline-block;
+        padding: 10px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .btn-warning {
+        background-color: #d4a373; /* Marron clair */
+        color: white;
+    }
+
+    .btn-warning:hover {
+        background-color: #b08968;
+    }
+
+    .btn-danger {
+        background-color: #a23e48;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #822727;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-family: Arial, sans-serif;
+    }
+
+    table th, table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    table th {
+        background-color: #8d6c5b;
+        color: white;
+        font-weight: bold;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #f5f5f5;
+    }
+
+    table tr:hover {
+        background-color: #f0f0f0;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 3px 7px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: bold;
+        background-color: #4a6fa5;
+        color: white;
+    }
+</style>
+<div class="container">
+    <center><h1>Liste des Événements</h1></center>
+    <a href="{{ path('app_crud_events_add') }}" class="btn btn-warning">Ajouter un Événement</a>
+
+    <p></p>
+
+<table>
+    <thead>
+        <tr>
+            
+            <th>Nom</th>
+            <th>Date</th>
+            <th>Lieu</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for event in events %}
+            <tr>
+                
+                <td>{{ event.nom }}</td>
+                <td>{{ event.dateEvent|date('d/m/Y') }}</td>
+                <td>{{ event.lieu }}</td>
+                <td>{{ event.description|slice(0, 30) }}{% if event.description|length > 30 %}...{% endif %}</td>
+                <td class="actions">
+                    <a href="{{ path('app_crud_events_edit', {'id': event.idEvent}) }}" class="btn btn-warning">Modifier</a>
+                    <a href="{{ path('app_crud_events_delete', {'id': event.idEvent}) }}" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer cet événement ?');">Supprimer</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 15px; color: #777;">Aucun événement trouvé</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}
