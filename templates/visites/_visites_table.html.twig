@@ -1,0 +1,37 @@
+{% if visites is not empty %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th class="sortable" data-sort-field="user">Utilisateur</th>
+                <th class="sortable" data-sort-field="date">Date</th>
+                <th class="sortable" data-sort-field="heure">Heure</th>
+                <th>Motif</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for visite in visites %}
+                <tr>
+                    <td>{{ visite.id }}</td>
+                    <td>{{ visite.id_user.name }} {{ visite.id_user.surname }}</td>
+                    <td>{{ visite.date|date('d/m/Y') }}</td>
+                    <td>{{ visite.heure }}</td>
+                    <td>{{ visite.motif }}</td>
+                    <td>{{ visite.statut }}</td>
+                    <td>
+                        <a href="{{ path('modifier_visite', {'id': visite.id}) }}" class="btn btn-warning">Modifier</a>
+                        <a href="{{ path('visite_pdf', {'id': visite.id}) }}" class="btn btn-info">PDF</a>
+                        <form method="post" action="{{ path('supprimer_visite', {'id': visite.id}) }}" style="display:inline-block;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ visite.id) }}">
+                            <button class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette visite?')">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class="alert alert-warning">Aucune visite enregistrée.</div>
+{% endif %}
