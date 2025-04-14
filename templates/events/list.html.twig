@@ -1,3 +1,7 @@
+{% extends 'back.html.twig' %}
+
+{% block body %}
+
 <style>
      .btn {
         display: inline-block;
@@ -71,7 +75,7 @@
 <table>
     <thead>
         <tr>
-            <th>ID</th>
+            
             <th>Nom</th>
             <th>Date</th>
             <th>Lieu</th>
@@ -82,7 +86,7 @@
     <tbody>
         {% for event in events %}
             <tr>
-                <td><span class="badge">#{{ event.idEvent }}</span></td>
+                
                 <td>{{ event.nom }}</td>
                 <td>{{ event.dateEvent|date('d/m/Y') }}</td>
                 <td>{{ event.lieu }}</td>
@@ -100,3 +104,4 @@
     </tbody>
 </table>
 </div>
+{% endblock %}

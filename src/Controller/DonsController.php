@@ -30,10 +30,12 @@ class DonsController extends AbstractController
     public function add(Request $request, EntityManagerInterface $entityManager): Response
     {
         $don = new Dons();
+        
         $form = $this->createForm(DonsType::class, $don);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            
             $entityManager->persist($don);
             $entityManager->flush();
             $this->addFlash('success', 'Don ajouté avec succès.');

@@ -76,4 +76,12 @@ class EventsController extends AbstractController
 
         return $this->redirectToRoute('app_crud_events');
     }
+    #[Route('/events', name: 'app_events')]
+    public function index(EventsRepository $eventRepository): Response
+    {
+        $events = $eventRepository->findAll();
+        return $this->render('events/listFront.html.twig', [
+        'events' => $events
+        ]);
+    }
 }

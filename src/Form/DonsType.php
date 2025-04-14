@@ -13,6 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class DonsType extends AbstractType
 {
@@ -22,11 +23,17 @@ class DonsType extends AbstractType
             ->add('montant', MoneyType::class, [
                 'label' => 'Montant du Don',
                 'currency' => 'TND',
-                'attr' => ['placeholder' => 'Entrez le montant du don']
+                'empty_data' => '0',
+                'attr' => ['placeholder' => 'Entrez le montant du don'],
+                'constraints' => [
+                new Assert\NotBlank(['message' => 'Le montant du don est obligatoire.']),
+                new Assert\Positive(['message' => 'Le montant doit être un nombre positif.']),
+    ],
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
                 'required' => false,
+                'empty_data' => '',
                 'attr' => ['placeholder' => 'Ajoutez une description (facultatif)']
             ])
             ->add('typeDon', ChoiceType::class, [  // Utilisez le nom exact de la propriété
@@ -36,13 +43,21 @@ class DonsType extends AbstractType
                     'Vêtements' => 'Vêtements',
                     'Nourriture' => 'Nourriture',
                     'Autre' => 'Autre',
+                    
                 ],
-                'placeholder' => 'Sélectionnez un type de don'
+                //'placeholder' => 'Sélectionnez un type de don',
+                'constraints' => [new Assert\NotBlank(message: "Le type du don est obligatoire.")],
+                
             ])
             ->add('dateDon', DateType::class, [  // Utilisez le nom exact de la propriété
                 'label' => 'Date du Don',
                 'widget' => 'single_text',
-                'attr' => ['type' => 'date']
+                'attr' => ['type' => 'date'],
+                'required' => true,
+                'constraints' => [
+                    new Assert\NotBlank(message: "La date du don est obligatoire."),
+                    new Assert\LessThanOrEqual("today", message: "La date du don ne peut pas être dans le futur.")
+    ]
             ])
             ->add('idEvent', EntityType::class, [  // Utilisez le nom exact de la propriété
                 'class' => Events::class,
@@ -50,10 +65,6 @@ class DonsType extends AbstractType
                 'label' => 'Événement Associé',
                 'placeholder' => 'Sélectionnez un événement',
                 'required' => false
-            ])
-            ->add('save', SubmitType::class, [
-                'label' => 'Enregistrer',
-                'attr' => ['class' => 'btn btn-primary']
             ]);
     }
 

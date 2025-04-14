@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 class Events
 {
     #[ORM\Id]
+    #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
     private int $id_event;
 
@@ -31,6 +32,7 @@ class Events
     public function __construct()
     {
         $this->dons = new ArrayCollection();
+        $this->date_event = new \DateTime();
     }
 
     public function getIdEvent(): int
@@ -117,4 +119,7 @@ class Events
 
         return $this;
     }
+    
+
+    
 }

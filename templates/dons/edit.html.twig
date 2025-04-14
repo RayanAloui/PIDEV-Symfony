@@ -95,37 +95,82 @@
             text-decoration: underline;
             color: #b08968;
         }
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+
+        .invalid-feedback {
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+        }
     </style>
 
-    <div class="container">
+    <div class="container"> 
         <h1>Modifier un Don</h1>
 
-        {{ form_start(form) }}
+        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
             <div class="form-group">
                 {{ form_label(form.montant, "Montant du Don") }}
-                {{ form_widget(form.montant) }}
-                {{ form_errors(form.montant) }}
+                {{ form_widget(form.montant, {
+                    'attr': {
+                        'class': 'form-control ' ~ (form.montant.vars.valid ? '' : 'is-invalid')
+                    }
+                }) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.montant) }}
+                </div>
             </div>
+            
             <div class="form-group">
                 {{ form_label(form.description, "Description") }}
-                {{ form_widget(form.description) }}
-                {{ form_errors(form.description) }}
+                {{ form_widget(form.description, {
+                    'attr': {
+                        'class': 'form-control ' ~ (form.description.vars.valid ? '' : 'is-invalid')
+                    }
+                }) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.description) }}
+                </div>
             </div>
+            
             <div class="form-group">
                 {{ form_label(form.typeDon, "Type de Don") }}
-                {{ form_widget(form.typeDon) }}
-                {{ form_errors(form.typeDon) }}
+                {{ form_widget(form.typeDon, {
+                    'attr': {
+                        'class': 'form-control ' ~ (form.typeDon.vars.valid ? '' : 'is-invalid')
+                    }
+                }) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.typeDon) }}
+                </div>
             </div>
+            
             <div class="form-group">
                 {{ form_label(form.dateDon, "Date du Don") }}
-                {{ form_widget(form.dateDon) }}
-                {{ form_errors(form.dateDon) }}
+                {{ form_widget(form.dateDon, {
+                    'attr': {
+                        'class': 'form-control ' ~ (form.dateDon.vars.valid ? '' : 'is-invalid')
+                    }
+                }) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.dateDon) }}
+                </div>
             </div>
+            
             <div class="form-group">
                 {{ form_label(form.idEvent, "Événement Associé") }}
-                {{ form_widget(form.idEvent) }}
-                {{ form_errors(form.idEvent) }}
+                {{ form_widget(form.idEvent, {
+                    'attr': {
+                        'class': 'form-control ' ~ (form.idEvent.vars.valid ? '' : 'is-invalid')
+                    }
+                }) }}
+                <div class="invalid-feedback">
+                    {{ form_errors(form.idEvent) }}
+                </div>
             </div>
+
+            <button type="submit" class="btn btn-custom">Enregistrer</button>
         {{ form_end(form) }}
 
         <a href="{{ path('app_crud_dons') }}" class="back-link">← Retour à la liste</a>
