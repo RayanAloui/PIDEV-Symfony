@@ -6,7 +6,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-
+use Symfony\Component\Validator\Constraints as Assert;
 use App\Repository\OrphelinRepository;
 
 #[ORM\Entity(repositoryClass: OrphelinRepository::class)]
@@ -15,7 +15,7 @@ class Orphelin
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(name: "idO",type: 'integer')]
     private ?int $idO = null;
 
     public function getIdO(): ?int
@@ -29,7 +29,9 @@ class Orphelin
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
+    #[ORM\Column(name: "nomO", type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "Le nom est obligatoire.")]
+    #[Assert\Regex(pattern: "/^[a-zA-ZÀ-ÿ\s-]+$/", message: "Le nom ne doit contenir que des lettres.")]
     private ?string $nomO = null;
 
     public function getNomO(): ?string
@@ -43,7 +45,9 @@ class Orphelin
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
+    #[ORM\Column(name: "prenomO", type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "Le prénom est obligatoire.")]
+    #[Assert\Regex(pattern: "/^[a-zA-ZÀ-ÿ\s-]+$/", message: "Le prénom ne doit contenir que des lettres.")]
     private ?string $prenomO = null;
 
     public function getPrenomO(): ?string
@@ -57,7 +61,9 @@ class Orphelin
         return $this;
     }
 
-    #[ORM\Column(type: 'date', nullable: false)]
+    #[ORM\Column(name: "dateNaissance", type: 'date', nullable: false)]
+    #[Assert\NotBlank(message: "La date de naissance est obligatoire.")]
+    #[Assert\LessThanOrEqual("today", message: "La date de naissance ne peut pas être dans le futur.")]
     private ?\DateTimeInterface $dateNaissance = null;
 
     public function getDateNaissance(): ?\DateTimeInterface
@@ -71,8 +77,10 @@ class Orphelin
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $sexe = null;
+    #[ORM\Column(name: "sexe", type: 'string', columnDefinition: "ENUM('M', 'F')", options: ["default" => "M"], nullable: false)]
+    #[Assert\NotBlank(message: "Le sexe est obligatoire.")]
+    #[Assert\Choice(choices: ["M", "F"], message: "Le sexe doit être 'M' ou 'F'.")]
+    private ?string $sexe = 'M';
 
     public function getSexe(): ?string
     {
@@ -85,7 +93,7 @@ class Orphelin
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
+    #[ORM\Column(name: "situationScolaire",type: 'string', nullable: true)]
     private ?string $situationScolaire = null;
 
     public function getSituationScolaire(): ?string
@@ -100,7 +108,8 @@ class Orphelin
     }
 
     #[ORM\ManyToOne(targetEntity: Tuteur::class, inversedBy: 'orphelins')]
-    #[ORM\JoinColumn(name: 'idTuteur', referencedColumnName: 'idT')]
+    #[ORM\JoinColumn(name: 'idTuteur', referencedColumnName: 'idT', nullable: false)]
+    #[Assert\NotBlank(message: "Un tuteur doit être associé à l'orphelin.")]
     private ?Tuteur $tuteur = null;
 
     public function getTuteur(): ?Tuteur

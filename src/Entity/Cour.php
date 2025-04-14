@@ -6,7 +6,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-
+use Symfony\Component\Validator\Constraints as Assert;
 use App\Repository\CourRepository;
 
 #[ORM\Entity(repositoryClass: CourRepository::class)]
@@ -15,7 +15,7 @@ class Cour
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(name : 'idC' , type: 'integer')]
     private ?int $idC = null;
 
     public function getIdC(): ?int
@@ -30,6 +30,7 @@ class Cour
     }
 
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "Le titre est obligatoire.")]
     private ?string $titre = null;
 
     public function getTitre(): ?string
@@ -44,6 +45,7 @@ class Cour
     }
 
     #[ORM\Column(type: 'text', nullable: false)]
+    #[Assert\NotBlank(message: "Le contenu est obligatoire.")]
     private ?string $contenu = null;
 
     public function getContenu(): ?string
@@ -57,7 +59,7 @@ class Cour
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: true)]
+    #[ORM\Column(name: 'imageC', type: 'string', nullable: true)]
     private ?string $imageC = null;
 
     public function getImageC(): ?string

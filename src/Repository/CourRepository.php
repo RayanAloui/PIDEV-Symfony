@@ -16,6 +16,17 @@ class CourRepository extends ServiceEntityRepository
         parent::__construct($registry, Cour::class);
     }
 
+    public function searchByTitle(string $query, string $sortField = 'titre', string $sortOrder = 'asc')
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.titre LIKE :query')
+            ->setParameter('query', "%$query%")
+            ->orderBy("c.$sortField", $sortOrder)
+            ->getQuery()
+            ->getResult();
+    }
+
+
     //    /**
     //     * @return Cour[] Returns an array of Cour objects
     //     */

@@ -102,21 +102,19 @@
     </style>
 </head>
 <body>
-   <div class="topbar">
-    <h1>Admin Dashboard</h1>
-
-    <!-- Logout button as a form to trigger the logout -->
+    <div class="topbar">
+        <h1>Admin Dashboard</h1>
+       <!-- Logout button as a form to trigger the logout -->
     <form action="{{ path('app_logout') }}" method="post" style="display: inline;">
         <button type="submit" class="logout-btn">Log Out</button>
     </form>
-</div>
-
+    </div>
     <div class="sidebar">
         <h2>Admin Panel</h2>
         <ul>
-            <li><a href="{{ path('app_notification_index') }}"><i>🏠</i>Dashboard</a></li>
-             <li><a href="{{ path('app_user_index') }}"><i>👥</i>Users</a></li>
-            <li><a href="{{ path('app_crud_tuteur') }}"><i>🎓</i>Tuteurs</a></li>
+            <li><a href="#"><i>🏠</i>Dashboard</a></li>
+            <li><a href="{{ path('app_user_index') }}"><i>👥</i>Users</a></li>
+            <li class="active"><a href="#"><i>🎓</i>Tuteurs</a></li>
             <li><a href="#"><i>📩</i>Réclamations</a></li>
             <li><a href="#"><i>💰</i>Dons</a></li>
             <li><a href="#"><i>🏃</i>Activities</a></li>

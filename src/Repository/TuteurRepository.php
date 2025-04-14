@@ -16,6 +16,17 @@ class TuteurRepository extends ServiceEntityRepository
         parent::__construct($registry, Tuteur::class);
     }
 
+    public function searchTuteurs(string $query, string $sortField = 'nomT', string $sortOrder = 'asc')
+    {
+        return $this->createQueryBuilder('t')
+            ->where('t.nomT LIKE :query OR t.prenomT LIKE :query OR t.cinT LIKE :query OR t.telephoneT LIKE :query OR t.email LIKE :query')
+            ->setParameter('query', "%$query%")
+            ->orderBy("t.$sortField", $sortOrder)
+            ->getQuery()
+            ->getResult();
+    }
+
+
     //    /**
     //     * @return Tuteur[] Returns an array of Tuteur objects
     //     */
