@@ -41,9 +41,13 @@
         margin-bottom: 20px;
     }
 
+    /* Reset default form controls styles */
     .form-container input,
     .form-container select,
     .form-container textarea {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
         width: 100%;
         padding: 12px;
         border: 1px solid #ddd;
@@ -56,7 +60,7 @@
     .form-container input:focus,
     .form-container select:focus,
     .form-container textarea:focus {
-        border-color:rgb(215, 141, 13);
+        border-color: rgb(215, 141, 13);
         outline: none;
     }
 
@@ -79,7 +83,7 @@
     }
 
     .form-container .btn:hover {
-        background-color:rgb(215, 141, 13);
+        background-color: rgb(215, 141, 13);
     }
 
     /* Responsive Styles */
@@ -89,14 +93,72 @@
             margin: 20px;
         }
     }
+
+    .form-errors {
+        color: red;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+    
 </style>
 
 <div class="form-container">
     <h1>User Form</h1>
-    {{ form_start(form) }}
-        {{ form_widget(form) }}
-        <br>
-        <button class="btn">{{ button_label|default('Save') }}</button>
+    <!-- Add novalidate attribute to prevent browser validation -->
+    {{ form_start(form, { 'attr': {'novalidate': 'novalidate'} }) }}
+    
+    <div>
+        {{ form_label(form.name) }}
+        {{ form_widget(form.name) }}
+        <div class="form-errors">
+            {{ form_errors(form.name) }}
+        </div>
+    </div>
+
+    <div>
+        {{ form_label(form.surname) }}
+        {{ form_widget(form.surname) }}
+        <div class="form-errors">
+            {{ form_errors(form.surname) }}
+        </div>
+    </div>
+
+    <div>
+        {{ form_label(form.telephone) }}
+        {{ form_widget(form.telephone) }}
+        <div class="form-errors">
+            {{ form_errors(form.telephone) }}
+        </div>
+    </div>
+
+    <div>
+        {{ form_label(form.email) }}
+        {{ form_widget(form.email) }}
+        <div class="form-errors">
+            {{ form_errors(form.email) }}
+        </div>
+    </div>
+
+    <div>
+        {{ form_label(form.password) }}
+        {{ form_widget(form.password) }}
+        <div class="form-errors">
+            {{ form_errors(form.password) }}
+        </div>
+    </div>
+
+    <div>
+        {{ form_label(form.role) }}
+        {{ form_widget(form.role) }}
+        <div class="form-errors">
+            {{ form_errors(form.role) }}
+        </div>
+    </div>
+
+    <div>
+        {{ form_widget(form.save) }}
+    </div>
+    
     {{ form_end(form) }}
 </div>
 

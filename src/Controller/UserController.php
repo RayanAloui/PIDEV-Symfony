@@ -10,14 +10,31 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+
+use App\Form\RegistrationType;
+use App\Form\AddUserType;
+
+use App\Service\Cryptage;
+
+
+
+
 
 
 #[Route('/user')]
 final class UserController extends AbstractController
 {
     #[Route(name: 'app_user_index', methods: ['GET'])]
-    public function index(UserRepository $userRepository, Request $request): Response
+    public function index(UserRepository $userRepository, Request $request , SessionInterface $session): Response
     {
+
+         // Check if the user is logged in by checking session
+    if (!$session->get('user_email')) {
+        return $this->redirectToRoute('app_login'); // Redirect to login page if not logged in
+    }
+        
+        
         // Get the "sort" or "search" parameter from the query string
         $sortParam = $request->query->get('sort', null); // Default to null if no param is passed
         $searchQuery = $request->query->get('search', null); // Get search query if it exists
@@ -51,6 +68,11 @@ final class UserController extends AbstractController
         $confirmedCount = count(array_filter($users, fn($user) => $user->getIsConfirmed() === 1));
         $unconfirmedCount = count(array_filter($users, fn($user) => $user->getIsConfirmed() === 0)); 
 
+        $admins=count(array_filter($users, fn($user) => $user->getRole() === 'admin'));
+        $clients=count(array_filter($users, fn($user) => $user->getRole() === 'client'));
+        $orphelins=count(array_filter($users, fn($user) => $user->getRole() === 'orphelin'));
+        $tuteurs=count(array_filter($users, fn($user) => $user->getRole() === 'tuteur'));
+
     
         // Render the view and pass the users, query parameters, and chart data
         return $this->render('user/index.html.twig', [
@@ -61,29 +83,51 @@ final class UserController extends AbstractController
             'blockedCount' => $blockedCount, // Count of blocked users for the chart
             'confirmedCount' => $confirmedCount, // Count of confirmed users
             'unconfirmedCount' => $unconfirmedCount, // Count of unconfirmed users
+            'admins' => $admins,
+            'clients' => $clients,
+            'orphelins' => $orphelins,
+            'tuteurs' => $tuteurs,
         ]);
     }
     
     
 
     #[Route('/new', name: 'app_user_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager , SessionInterface $session): Response
     {
+
+             // Check if the user is logged in by checking session
+    if (!$session->get('user_email')) {
+        return $this->redirectToRoute('app_login'); // Redirect to login page if not logged in
+    }
+
+
         $user = new User();
-        $form = $this->createForm(UserType::class, $user);
+        $form = $this->createForm(AddUserType::class, $user);
         $form->handleRequest($request);
     
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Set default values
-            $user->setIsBlocked(0);
-            $user->setIsConfirmed(0);
-            $user->setNumberVerification(random_int(100000, 999999)); // Generate a random 6-digit number
-            $user->setToken(0);
+        if ($form->isSubmitted()) {
+            // Check if form is valid and perform validation
+            if ($form->isValid()) {
+                // Set default values
+                $user->setIsBlocked(0);
+                $user->setIsConfirmed(0);
+                $user->setNumberVerification(random_int(100000, 999999)); // Generate a random 6-digit number
+                $user->setToken(0);
+                $user->setImage(NULL);
+
+                $originalPassword = $user->getPassword();
+                $cryptedPassword = Cryptage::crypte($originalPassword);
+                $user->setPassword($cryptedPassword);
     
-            $entityManager->persist($user);
-            $entityManager->flush();
+                $entityManager->persist($user);
+                $entityManager->flush();
     
-            return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
+                return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
+            } else {
+                // If the form is not valid, you might want to handle specific actions here
+                // Such as logging, debugging, or just ensuring the errors show up in the template
+            }
         }
     
         return $this->render('user/new.html.twig', [
@@ -96,28 +140,57 @@ final class UserController extends AbstractController
     #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
     public function show(User $user): Response
     {
+        // Déchiffrer le mot de passe
+        $decryptedPassword = Cryptage::decrypte($user->getPassword());
+    
         return $this->render('user/show.html.twig', [
             'user' => $user,
+            'decryptedPassword' => $decryptedPassword,
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_user_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, User $user, EntityManagerInterface $entityManager): Response
-    {
-        $form = $this->createForm(UserType::class, $user);
-        $form->handleRequest($request);
+    
+ 
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
+#[Route('/{id}/edit', name: 'app_user_edit', methods: ['GET', 'POST'])]
+public function edit(Request $request, User $user, EntityManagerInterface $entityManager, SessionInterface $session): Response
+{
+    // Vérifier si l'utilisateur est connecté
+    if (!$session->get('user_email')) {
+        return $this->redirectToRoute('app_login');
+    }
 
-            return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
+    
+
+    
+    $form = $this->createForm(UserType::class, $user);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+       
+        $submittedPassword = $form->get('password')->getData(); 
+
+        // Si le mot de passe a été modifié
+        if (!empty($submittedPassword)) {
+            $user->setPassword(Cryptage::crypte($submittedPassword)); 
+        }else{
+            $user->setPassword($user->getPassword());
         }
 
-        return $this->render('user/edit.html.twig', [
-            'user' => $user,
-            'form' => $form,
-        ]);
+        // Persist les modifications
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
     }
+
+    return $this->render('user/edit.html.twig', [
+        'user' => $user,
+        'form' => $form->createView(),
+    ]);
+}
+
+    
+
 
     #[Route('/{id}', name: 'app_user_delete', methods: ['POST'])]
     public function delete(Request $request, User $user, EntityManagerInterface $entityManager): Response
@@ -129,29 +202,29 @@ final class UserController extends AbstractController
 
         return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
     }
-    #[Route('/{id}/block', name: 'app_user_block', methods: ['POST'])]
-    public function blockUser(int $id, EntityManagerInterface $entityManager): Response
+        #[Route('/{id}/block', name: 'app_user_block', methods: ['POST'])]
+    public function blockUser(User $user, EntityManagerInterface $entityManager): Response
     {
-        $conn = $entityManager->getConnection();
-        $sql = "UPDATE user SET isBlocked = 1 WHERE id = :id";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(['id' => $id]);
+        $user->setIsBlocked(1);
+        $entityManager->flush();
 
         $this->addFlash('warning', 'User has been blocked.');
         return $this->redirectToRoute('app_user_index');
     }
 
-    #[Route('/{id}/activate', name: 'app_user_activate', methods: ['POST'])]
-    public function activateUser(int $id, EntityManagerInterface $entityManager): Response
+
+        #[Route('/{id}/activate', name: 'app_user_activate', methods: ['POST'])]
+    public function activateUser(User $user, EntityManagerInterface $entityManager): Response
     {
-        $conn = $entityManager->getConnection();
-        $sql = "UPDATE user SET isBlocked = 0 WHERE id = :id";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(['id' => $id]);
+        $user->setIsBlocked(0); 
+        $entityManager->flush();
 
         $this->addFlash('success', 'User has been activated.');
         return $this->redirectToRoute('app_user_index');
     }
 
-    
+
+
+ 
+
 }

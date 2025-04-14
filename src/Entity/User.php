@@ -5,6 +5,8 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 use App\Repository\UserRepository;
 
@@ -28,7 +30,16 @@ class User
         return $this;
     }
 
+
+
+
+
+
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 2, max: 50)]
+    #[Assert\Regex(pattern: "/^[a-zA-ZÀ-ÿ'-]+$/", message: "Name must contain only valid characters.")]
+
     private ?string $name = null;
 
     public function getName(): ?string
@@ -42,7 +53,18 @@ class User
         return $this;
     }
 
+
+
+
+
+
+
+
+
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 2, max: 50)]
+    #[Assert\Regex(pattern: "/^[a-zA-ZÀ-ÿ'-]+$/", message: "Name must contain only valid characters.")]
     private ?string $surname = null;
 
     public function getSurname(): ?string
@@ -56,7 +78,17 @@ class User
         return $this;
     }
 
+
+
+
+
+
+
+
+
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank]
+    #[Assert\Regex(pattern: "/^\d{8}$/", message: "Telephone must contain exactly 8 digits.")]
     private ?string $telephone = null;
 
     public function getTelephone(): ?string
@@ -70,7 +102,17 @@ class User
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
+
+
+
+
+
+
+
+
+    #[ORM\Column(type: 'string', nullable: true)]
+    #[Assert\NotBlank]
+    #[Assert\Email(message: "Please enter a valid email address.")]
     private ?string $email = null;
 
     public function getEmail(): ?string
@@ -84,8 +126,18 @@ class User
         return $this;
     }
 
+
+
+
+
+
+
+
     #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\Length(min: 6, minMessage: "Password must be at least 6 characters.")]
+    #[Assert\Regex(pattern: "/^(?=.*[A-Za-z])(?=.*\d).{6,}$/", message: "Password must contain letters and numbers.")]
     private ?string $password = null;
+    
 
     public function getPassword(): ?string
     {
@@ -97,6 +149,14 @@ class User
         $this->password = $password;
         return $this;
     }
+
+
+
+
+
+
+
+
 
     #[ORM\Column(type: 'string', nullable: false)]
     private ?string $role = null;
@@ -112,6 +172,14 @@ class User
         return $this;
     }
 
+
+
+
+
+
+
+
+
     #[ORM\Column(type: 'integer', nullable: false)]
     private ?int $isblocked = null;
 
@@ -125,6 +193,15 @@ class User
         $this->isblocked = $isBlocked;
         return $this;
     }
+
+
+
+
+
+
+
+
+
 
     #[ORM\Column(type: 'integer', nullable: false)]
     private ?int $isconfirmed = null;
@@ -140,6 +217,13 @@ class User
         return $this;
     }
 
+
+
+
+
+
+
+
     #[ORM\Column(type: 'integer', nullable: false)]
     private ?int $numberverification = null;
 
@@ -154,6 +238,15 @@ class User
         return $this;
     }
 
+
+
+
+
+
+
+
+
+
     #[ORM\Column(type: 'integer', nullable: false)]
     private ?int $token = null;
 
@@ -167,6 +260,14 @@ class User
         $this->token = $token;
         return $this;
     }
+
+
+
+
+
+
+
+
 
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $image = null;

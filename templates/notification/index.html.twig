@@ -1,0 +1,191 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fc;
+            color: #333;
+        }
+
+        /* Heading Styles */
+        h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #3e4a61;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .text-muted {
+            color: #6c757d;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        /* Notification Cards */
+        .notification-card {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .notification-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .notification-content {
+            max-width: 80%;
+        }
+
+        .notification-card h6 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2d3a4b;
+        }
+
+        .notification-card p {
+            font-size: 1rem;
+            color: #68717d;
+            margin-bottom: 8px;
+        }
+
+        .notification-card small {
+            font-size: 0.875rem;
+            color: #adb5bd;
+        }
+
+        .notification-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .notification-info span {
+            font-size: 0.9rem;
+            color: #5a6f7b;
+            margin-bottom: 8px;
+        }
+
+        .list-group {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .list-group-item {
+            border: none;
+            padding: 0;
+        }
+
+        /* Pagination Container */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        /* Button Styling for Previous and Next */
+        .pagination-button {
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 30px;
+            background-color: #5cb85c;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin: 0 15px;
+        }
+
+        /* Hover Effect */
+        .pagination-button:hover {
+            background-color: #4cae4c;
+            transform: scale(1.05);
+        }
+
+        /* Disabled Button */
+        .pagination-button.disabled {
+            background-color: #d6d6d6;
+            color: #b5b5b5;
+            cursor: not-allowed;
+        }
+
+        /* Icon Styling */
+        .pagination-button i {
+            font-size: 1.5rem;
+            margin-right: 8px;
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            .pagination-button {
+                font-size: 1rem;
+                padding: 10px 20px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="content">
+    <h2><i class="fas fa-bell"></i> Mes Notifications</h2>
+    <p class="text-muted">Total: {{ totalNotifications }} notifications</p>
+
+    {% if notifications|length > 0 %}
+        <div class="list-group">
+            {% for notification in notifications %}
+                <div class="list-group-item notification-card">
+                    <div class="notification-content">
+                        <h6><strong>Activity                 :</strong>{{ notification.activite }}</h6>
+                        <p><strong>Utilisateur:</strong> {{ notification.username }}</p>
+                        <div class="notification-info">
+                            <span><i class="far fa-clock"></i> <strong>Date:</strong> {{ notification.date|date('d/m/Y') }} à {{ notification.heure }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination with Previous and Next Buttons -->
+        <div class="pagination-container">
+            <!-- Previous Button -->
+            {% if currentPage > 1 %}
+                <button class="pagination-button" onclick="window.location='{{ path('app_notification_index', { page: currentPage - 1 }) }}'">
+                    <i class="fas fa-chevron-left"></i> Précédent
+                </button>
+            {% else %}
+                <button class="pagination-button disabled">
+                    <i class="fas fa-chevron-left"></i> Précédent
+                </button>
+            {% endif %}
+
+            <!-- Next Button -->
+            {% if currentPage < totalPages %}
+                <button class="pagination-button" onclick="window.location='{{ path('app_notification_index', { page: currentPage + 1 }) }}'">
+                    Suivant <i class="fas fa-chevron-right"></i>
+                </button>
+            {% else %}
+                <button class="pagination-button disabled">
+                    Suivant <i class="fas fa-chevron-right"></i>
+                </button>
+            {% endif %}
+        </div>
+    {% else %}
+        <p class="text-muted">Aucune notification pour le moment.</p>
+    {% endif %}
+</div>
+{% endblock %}

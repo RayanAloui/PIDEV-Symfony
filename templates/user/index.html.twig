@@ -1,5 +1,36 @@
 {% extends 'base.html.twig' %}
 
+{% block content %}
+    {% if not app.session.get('user_email') %}
+        <script>
+            window.location.href = "{{ path('app_login') }}";
+        </script>
+    {% endif %}
+    
+    <!-- Your other content goes here -->
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 {% block title %}User Index{% endblock %}
 
 {% block body %}
@@ -235,10 +266,14 @@
                             <td>{{ user.telephone }}</td>
                             <td>{{ user.email }}</td>
                             <td>{{ user.role }}</td>
-                            <td>{{ user.isBlocked == 1 ? 'Blocked' : 'Active' }}</td>
-                            <td>{{ user.isConfirmed == 1 ? 'Confirmed' : 'Not Confirmed' }}</td>
+                            <td>{{ user.isBlocked == 1 ? '🔴 BLOCKED' : '🟢 ACTIVE' }}</td>
+                            <td>{{ user.isConfirmed == 1 ? '✅CONFIRMED' : '❌ PENDING' }}</td>
                             <td class="actions">
+                            
+                                <!-- Edit Button -->
                                 <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn-action btn-edit">Edit</a>
+                                <a href="{{ path('app_user_show', {'id': user.id}) }}" class="btn-action btn-edit">show</a>
+
 
                                 <!-- Delete Button -->
                                 <form action="{{ path('app_user_delete', {'id': user.id}) }}" method="post" style="display:inline;">
@@ -273,13 +308,21 @@
             </div>
         </div>
 
-        <!-- Pie Chart for Confirmed vs Unconfirmed Users -->
-        <div class="chart-box">
-            <h2 class="chart-title">User Confirmation Status</h2>
-            <div class="chart-container">
-                <canvas id="userPieChart"></canvas>
-            </div>
+      <!-- Combined Pie Chart Box -->
+<div class="chart-box">
+    <h2 class="chart-title">User Status & Role Distribution</h2>
+    <div class="chart-container" style="display: flex; justify-content: space-around;">
+        <!-- Pie Chart for Confirmation Status -->
+        <div style="width: 45%;">
+            <canvas id="userPieChart"></canvas>
         </div>
+        <!-- Pie Chart for Role Distribution -->
+        <div style="width: 45%;">
+            <canvas id="userRolePieChart"></canvas>
+        </div>
+    </div>
+</div>
+
 
         <!-- Chart.js Script -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -328,6 +371,25 @@
                         legend: {
                             position: 'top'
                         }
+                    }
+                }
+            });
+             var ctxRolePie = document.getElementById('userRolePieChart').getContext('2d');
+            var userRolePieChart = new Chart(ctxRolePie, {
+                type: 'pie',
+                data: {
+                    labels: ['Admins', 'Clients', 'Orphans', 'Tutors'],
+                    datasets: [{
+                        data: [{{ admins|json_encode() }}, {{ clients|json_encode() }}, {{ orphelins|json_encode() }}, {{ tuteurs|json_encode() }}],
+                        backgroundColor: ['#c29c6e', '#7b9f6f', '#b7472a', '#d4b25e'],
+                        borderColor: ['#a88f5b', '#6c8d5f', '#9a3d22', '#c0a254'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' }
                     }
                 }
             });

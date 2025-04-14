@@ -76,6 +76,35 @@
     .form-container .btn:hover {
         background-color: #0056b3;
     }
+    .form-container .form-error {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+/* Error Message Styles */
+.form-container .form-error {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+/* Style the Save Button in Brown */
+.save-btn {
+    background-color: #6f4f28 !important;
+    color: white !important;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 14px;
+    width: 100%;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.save-btn:hover {
+    background-color: #5a3d21 !important;
+}
+
 </style>
 
     <div class="container">
@@ -87,7 +116,66 @@
         </a>
 
         <!-- Include Form -->
-        {{ include('user/_form.html.twig') }}
+      
+
+                {{ form_start(form, {'attr': {'class': 'form-container', 'novalidate': 'novalidate'}}) }}
+
+    <div>
+        {{ form_label(form.name) }}
+        {{ form_widget(form.name) }}
+        {% for error in form.name.vars.errors %}
+            <div class="form-error">{{ error.message }}</div>
+        {% endfor %}
+    </div>
+
+    <div>
+        {{ form_label(form.surname) }}
+        {{ form_widget(form.surname) }}
+        {% for error in form.surname.vars.errors %}
+            <div class="form-error">{{ error.message }}</div>
+        {% endfor %}
+    </div>
+
+    <div>
+        {{ form_label(form.telephone) }}
+        {{ form_widget(form.telephone) }}
+        {% for error in form.telephone.vars.errors %}
+            <div class="form-error">{{ error.message }}</div>
+        {% endfor %}
+    </div>
+
+    <div>
+        {{ form_label(form.email) }}
+        {{ form_widget(form.email) }}
+        {% for error in form.email.vars.errors %}
+            <div class="form-error">{{ error.message }}</div>
+        {% endfor %}
+    </div>
+
+    <div>
+        {{ form_label(form.password) }}
+        {{ form_widget(form.password) }}
+        {% for error in form.password.vars.errors %}
+            <div class="form-error">{{ error.message }}</div>
+        {% endfor %}
+    </div>
+
+    <div>
+        {{ form_label(form.role) }}
+        {{ form_widget(form.role) }}
+        {% for error in form.role.vars.errors %}
+            <div class="form-error">{{ error.message }}</div>
+        {% endfor %}
+    </div>
+
+    {{ form_row(form.save, {'attr': {'class': 'btn save-btn'}}) }}
+
+{{ form_end(form) }}
+
+
+
+
+
     </div>
 {% endblock %}
 
