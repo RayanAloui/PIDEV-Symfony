@@ -145,14 +145,14 @@ class VisitesController extends AbstractController
     }
 
     #[Route('/visite/ajouter', name: 'ajouter_visite', methods: ['GET', 'POST'])]
-    public function ajouterVisite(Request $request, EntityManagerInterface $em): Response
+    public function ajouterVisite(Request $request, EntityManagerInterface $em, \Symfony\Contracts\HttpClient\HttpClientInterface $httpClient): Response
     {
         $visite = new Visites();
         $visite->setStatut('En attente');
     
         if ($request->isMethod('POST')) {
             $user = $em->getRepository(User::class)->find($request->request->get('id_user'));
-            
+    
             if (!$user) {
                 $this->addFlash('error', 'Utilisateur non trouvé');
                 return $this->redirectToRoute('ajouter_visite');
@@ -166,13 +166,35 @@ class VisitesController extends AbstractController
             $em->persist($visite);
             $em->flush();
     
-            $this->addFlash('success', 'Visite ajoutée avec succès (ID: '.$visite->getId().')');
+            // 📲 Envoi WhatsApp via CallMeBot
+            $nom = $user->getName() . ' ' . $user->getSurname();
+            $numero = +21694653884; // format +216XXXXXXXX
+            $date = $visite->getDate()->format('d/m/Y');
+            $heure = $visite->getHeure();
+            $message = "Bonjour $nom, votre rendez-vous est confirmé pour le $date à $heure. Merci !";
+    
+            $apikey = '8351129'; // 👉 remplace par ta vraie clé CallMeBot
+            $url = "https://api.callmebot.com/whatsapp.php?phone=" . urlencode($numero)
+                . "&text=" . urlencode($message)
+                . "&apikey=" . urlencode($apikey);
+    
+            try {
+                $response = $httpClient->request('GET', $url);
+    
+                if ($response->getStatusCode() === 200) {
+                    $this->addFlash('success', 'Visite ajoutée et message WhatsApp envoyé ✅');
+                } else {
+                    $this->addFlash('warning', 'Visite ajoutée, mais envoi WhatsApp échoué ❌');
+                }
+            } catch (\Exception $e) {
+                $this->addFlash('warning', 'Visite ajoutée, mais erreur lors de l’envoi WhatsApp ❌');
+            }
+    
             return $this->redirectToRoute('afficher_visite');
         }
     
-        // Récupérer tous les utilisateurs pour le formulaire
         $users = $em->getRepository(User::class)->findAll();
-        
+    
         return $this->render('visites/ajouter_visite.html.twig', [
             'users' => $users
         ]);

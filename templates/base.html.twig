@@ -112,14 +112,11 @@
     <div class="sidebar">
         <h2>Admin Panel</h2>
         <ul>
-            <li><a href=""><i>🏠</i>Dashboard</a></li>
-             <li><a href=""><i>👥</i>Users</a></li>
-            <li><a href="#"><i>🎓</i>Tuteurs</a></li>
-            <li><a href="#"><i>📩</i>Réclamations</a></li>
-            <li><a href="#"><i>💰</i>Dons</a></li>
-            <li><a href="#"><i>🏃</i>Activities</a></li>
-            <li><a href="#"><i>🏥</i>Visites</a></li>
-            <li><a href="#"><i>⚙️</i>Settings</a></li>
+
+            <li><a href="{{ path('app_crud_dons') }}"><i>💰</i>Dons</a></li>
+            <li><a href="{{ path('app_crud_events') }}"><i>🎉</i>Events</a></li>
+            <li><a href="{{ path('afficher_incident') }}"><i>🏥</i>incidents</a></li>
+            <li><a href="{{ path('afficher_visite') }}"><i>🏥</i>VERS FRONT END</a></li>
         </ul>
     </div>
   <div class="content">
