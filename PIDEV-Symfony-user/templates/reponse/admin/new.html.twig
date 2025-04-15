@@ -1,0 +1,100 @@
+{% extends 'front.html.twig' %}
+
+{% block title %}New Response{% endblock %}
+
+{% block body %}
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Submit a New Response</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+
+                        {# Description Field #}
+                        <div class="form-group mb-4">
+                            {{ form_label(form.description) }}
+                            {{ form_widget(form.description, {
+                                'attr': {
+                                    'class': 'form-control' ~ (form_errors(form.description) ? ' is-invalid' : ''),
+                                    'rows': 5,
+                                    'placeholder': 'Enter response description'
+                                }
+                            }) }}
+                            {% if form_errors(form.description) %}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.description) }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {# Date Field #}
+                        <div class="form-group mb-4">
+                            {{ form_label(form.date) }}
+                            {{ form_widget(form.date, {
+                                'attr': {
+                                    'class': 'form-control' ~ (form_errors(form.date) ? ' is-invalid' : '')
+                                }
+                            }) }}
+                            {% if form_errors(form.date) %}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.date) }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {# Status Field #}
+                        <div class="form-group mb-4">
+                            {{ form_label(form.statut) }}
+                            {{ form_widget(form.statut, {
+                                'attr': {
+                                    'class': 'form-control' ~ (form_errors(form.statut) ? ' is-invalid' : '')
+                                }
+                            }) }}
+                            {% if form_errors(form.statut) %}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.statut) }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {# Indice Field #}
+                        <div class="form-group mb-4">
+                            {{ form_label(form.indice) }}
+                            {{ form_widget(form.indice, {
+                                'attr': {
+                                    'class': 'form-control' ~ (form_errors(form.indice) ? ' is-invalid' : ''),
+                                    'placeholder': 'Optional index/number'
+                                }
+                            }) }}
+                            {% if form_errors(form.indice) %}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.indice) }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fa fa-paper-plane mr-1"></i> Submit Response
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="{{ path('app_reponse_index') }}" class="btn btn-light w-100">
+                                    Cancel
+                                </a>
+                            </div>
+                        </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
