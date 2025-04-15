@@ -11,7 +11,7 @@ class SmsService
     private string $from;
     private LoggerInterface $logger;
 
-    /*public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger)
     {
         // ⚠️ Mets ici tes propres credentials Twilio
         $sid = 'AC5e18bbd7fb8f38dc387e6cda806f64a7';
@@ -20,7 +20,7 @@ class SmsService
 
         $this->twilio = new Client($sid, $authToken);
         $this->logger = $logger;
-    }*/
+    }
 
     public function sendSms(string $to, string $message)
     {

@@ -28,7 +28,7 @@ class OrphelinController extends AbstractController
     #[Route('/test', name: 'app_front')]
     public function frontPage(SessionInterface $session): Response
     {
-        return $this->render('base.html.twig');
+        return $this->render('front.html.twig');
     }
     #[Route('/list', name: 'app_crud_orphelin', methods: ['GET'])]
     /*public function index(OrphelinRepository $orphelinRepository): Response
