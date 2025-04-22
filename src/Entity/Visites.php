@@ -11,14 +11,14 @@ use App\Entity\Incidents;
 #[ORM\Entity]
 class Visites
 {
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
     private int $id;
 
-        #[ORM\ManyToOne(targetEntity: User::class, inversedBy: "visitess")]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: "visitess")]
     #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[Assert\NotBlank(message: "L'utilisateur est requis.")]
     private User $id_user;
 
     #[ORM\Column(type: "date")]
@@ -40,6 +40,10 @@ class Visites
     #[Assert\Choice(choices: ["En attente", "Confirmée", "Annulée", "Terminée"], message: "Statut invalide.")]
     private string $statut;
 
+    #[ORM\OneToMany(mappedBy: "id_visite", targetEntity: Incidents::class)]
+    private Collection $incidentss;
+
+    // Getters et Setters
     public function getId()
     {
         return $this->id;
@@ -99,7 +103,4 @@ class Visites
     {
         $this->statut = $value;
     }
-
-    #[ORM\OneToMany(mappedBy: "id_visite", targetEntity: Incidents::class)]
-    private Collection $incidentss;
 }

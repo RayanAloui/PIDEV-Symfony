@@ -1,27 +1,27 @@
-{% extends 'base.html.twig' %}
+{% extends 'front.html.twig' %}
 
 {% block title %}Liste des visites{% endblock %}
 
 {% block body %}
     <h1>Liste des Visites</h1>
 
+    <input type="text" id="search-input" class="form-control mb-3" placeholder="Rechercher un utilisateur...">
+
     {% if visites is not empty %}
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Utilisateur</th>
-                    <th>Date</th>
-                    <th>Heure</th>
+                    <th id="th-date" style="cursor: pointer;">Date</th>
+                    <th id="th-heure" style="cursor: pointer;">Heure</th>
                     <th>Motif</th>
                     <th>Statut</th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="visite-table-body">
                 {% for visite in visites %}
                     <tr>
-                        <td>{{ visite.id }}</td>
                         <td>{{ visite.id_user.name }} {{ visite.id_user.surname }}</td>
                         <td>{{ visite.date|date('d/m/Y') }}</td>
                         <td>{{ visite.heure }}</td>
@@ -44,4 +44,61 @@
     {% endif %}
 
     <a href="{{ path('ajouter_visite') }}" class="btn btn-primary">Ajouter une visite</a>
+
+    <script>
+        const originalRows = [...document.querySelectorAll('#visite-table-body tr')];
+        let sortStates = {
+            date: 'none',
+            heure: 'none'
+        };
+
+        document.getElementById('search-input').addEventListener('input', function () {
+            const searchValue = this.value.toLowerCase();
+            const filtered = originalRows.filter(row => {
+                const userCell = row.cells[0].textContent.toLowerCase();
+                return userCell.includes(searchValue);
+            });
+            updateTable(filtered);
+        });
+
+        function updateTable(rows) {
+            const tbody = document.getElementById('visite-table-body');
+            tbody.innerHTML = '';
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        function sortTableBy(index, type, currentState) {
+            let sortedRows = [...document.querySelectorAll('#visite-table-body tr')];
+
+            if (currentState === 'none') {
+                sortedRows.sort((a, b) => {
+                    const valA = a.cells[index].textContent.trim();
+                    const valB = b.cells[index].textContent.trim();
+                    return type === 'date'
+                        ? new Date(valA.split('/').reverse().join('/')) - new Date(valB.split('/').reverse().join('/'))
+                        : valA.localeCompare(valB);
+                });
+                return { rows: sortedRows, state: 'asc' };
+            } else if (currentState === 'asc') {
+                sortedRows.reverse();
+                return { rows: sortedRows, state: 'desc' };
+            } else {
+                return { rows: originalRows, state: 'none' };
+            }
+        }
+
+        document.getElementById('th-date').addEventListener('click', function () {
+            const { rows, state } = sortTableBy(1, 'date', sortStates.date);
+            sortStates.date = state;
+            sortStates.heure = 'none'; // reset autre tri
+            updateTable(rows);
+        });
+
+        document.getElementById('th-heure').addEventListener('click', function () {
+            const { rows, state } = sortTableBy(2, 'heure', sortStates.heure);
+            sortStates.heure = state;
+            sortStates.date = 'none'; // reset autre tri
+            updateTable(rows);
+        });
+    </script>
 {% endblock %}
