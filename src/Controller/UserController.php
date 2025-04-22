@@ -10,85 +10,100 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 use App\Form\RegistrationType;
 use App\Form\AddUserType;
 
 use App\Service\Cryptage;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use App\Services\MailerService;
+use App\Services\SmsService;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 
+use Knp\Snappy\Pdf;
 
+use Twig\Environment;
 
 
 
 #[Route('/user')]
 final class UserController extends AbstractController
 {
-    #[Route(name: 'app_user_index', methods: ['GET'])]
-    public function index(UserRepository $userRepository, Request $request , SessionInterface $session): Response
-    {
-
-         // Check if the user is logged in by checking session
-    if (!$session->get('user_email')) {
-        return $this->redirectToRoute('app_login'); // Redirect to login page if not logged in
-    }
-        
-        
-        // Get the "sort" or "search" parameter from the query string
-        $sortParam = $request->query->get('sort', null); // Default to null if no param is passed
-        $searchQuery = $request->query->get('search', null); // Get search query if it exists
     
-        // Build the query for filtering/searching
+    
+    #[Route(name: 'app_user_index', methods: ['GET'])]
+    public function index(UserRepository $userRepository, Request $request, SessionInterface $session): Response
+    {
+        // Vérifier si l'utilisateur est connecté
+        if (!$session->get('user_email') || $session->get('user_role') !== 'admin') {
+            return $this->redirectToRoute('app_login');
+        }
+    
+        // Paramètre de tri uniquement
+        $sortParam = $request->query->get('sort');
+        $searchTerm = $request->query->get('search');
+    
+        // Construction de la requête
         $queryBuilder = $userRepository->createQueryBuilder('u');
     
-        // Apply search filter if there's a search query
-        if ($searchQuery) {
+        if ($sortParam === 'email') {
+            $queryBuilder->orderBy('u.email', 'ASC');
+        } elseif ($sortParam === 'role') {
+            $queryBuilder->orderBy('u.role', 'ASC');
+        }
+        if (!empty($searchTerm)) {
             $queryBuilder
-                ->where('u.name LIKE :query OR u.surname LIKE :query OR u.email LIKE :query OR u.telephone LIKE :query')
-                ->setParameter('query', '%'.$searchQuery.'%');
+                ->where('u.name LIKE :search')
+                ->orWhere('u.surname LIKE :search')
+                ->orWhere('u.email LIKE :search')
+                ->orWhere('u.role LIKE :search')
+                ->setParameter('search', '%' . $searchTerm . '%');
         }
     
-        // Apply sorting if "sort" parameter is provided
-        if ($sortParam) {
-            if ($sortParam === 'email') {
-                $queryBuilder->orderBy('u.email', 'ASC');
-            } elseif ($sortParam === 'role') {
-                $queryBuilder->orderBy('u.role', 'ASC');
-            }
-        }
-    
-        // Execute the query and get the results
         $users = $queryBuilder->getQuery()->getResult();
     
-        // Count the active and blocked users
-        $activeCount = count(array_filter($users, fn($user) => $user->getIsBlocked() === 0));
-        $blockedCount = count(array_filter($users, fn($user) => $user->getIsBlocked() === 1));
-
-        $confirmedCount = count(array_filter($users, fn($user) => $user->getIsConfirmed() === 1));
-        $unconfirmedCount = count(array_filter($users, fn($user) => $user->getIsConfirmed() === 0)); 
-
-        $admins=count(array_filter($users, fn($user) => $user->getRole() === 'admin'));
-        $clients=count(array_filter($users, fn($user) => $user->getRole() === 'client'));
-        $orphelins=count(array_filter($users, fn($user) => $user->getRole() === 'orphelin'));
-        $tuteurs=count(array_filter($users, fn($user) => $user->getRole() === 'tuteur'));
-
+        // Données pour les graphiques
+        $activeCount = count(array_filter($users, fn($u) => !$u->getIsBlocked()));
+        $blockedCount = count(array_filter($users, fn($u) => $u->getIsBlocked()));
+        $confirmedCount = count(array_filter($users, fn($u) => $u->getIsConfirmed()));
+        $unconfirmedCount = count(array_filter($users, fn($u) => !$u->getIsConfirmed()));
     
-        // Render the view and pass the users, query parameters, and chart data
+        $admins = count(array_filter($users, fn($u) => $u->getRole() === 'admin'));
+        $clients = count(array_filter($users, fn($u) => $u->getRole() === 'client'));
+        $orphelins = count(array_filter($users, fn($u) => $u->getRole() === 'orphelin'));
+        $tuteurs = count(array_filter($users, fn($u) => $u->getRole() === 'tuteur'));
+    
+        // Requête AJAX
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('user/_user_list.html.twig', [
+                'users' => $users,
+            ]);
+        }
+    
+        // Vue complète
         return $this->render('user/index.html.twig', [
             'users' => $users,
-            'search' => $searchQuery, // Pass the current search term to the view
-            'sort' => $sortParam,     // Pass the current sort option to the view
-            'activeCount' => $activeCount, // Count of active users for the chart
-            'blockedCount' => $blockedCount, // Count of blocked users for the chart
-            'confirmedCount' => $confirmedCount, // Count of confirmed users
-            'unconfirmedCount' => $unconfirmedCount, // Count of unconfirmed users
+            'sort' => $sortParam,
+            'search' => $searchTerm, // <-- ajoute ceci
+            'activeCount' => $activeCount,
+            'blockedCount' => $blockedCount,
+            'confirmedCount' => $confirmedCount,
+            'unconfirmedCount' => $unconfirmedCount,
             'admins' => $admins,
             'clients' => $clients,
             'orphelins' => $orphelins,
             'tuteurs' => $tuteurs,
         ]);
+        
     }
+    
     
     
 
@@ -99,6 +114,9 @@ final class UserController extends AbstractController
              // Check if the user is logged in by checking session
     if (!$session->get('user_email')) {
         return $this->redirectToRoute('app_login'); // Redirect to login page if not logged in
+    } if($session->get('user_role')!="admin"){
+        return $this->redirectToRoute('app_login');
+
     }
 
 
@@ -159,7 +177,10 @@ public function edit(Request $request, User $user, EntityManagerInterface $entit
     if (!$session->get('user_email')) {
         return $this->redirectToRoute('app_login');
     }
+    if($session->get('user_role')!="admin"){
+        return $this->redirectToRoute('app_login');
 
+    }
     
 
     
@@ -201,6 +222,18 @@ public function edit(Request $request, User $user, EntityManagerInterface $entit
         }
 
         return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
+
+
+
+
+
+
+
+
+
+
+
+
     }
         #[Route('/{id}/block', name: 'app_user_block', methods: ['POST'])]
     public function blockUser(User $user, EntityManagerInterface $entityManager): Response
@@ -222,6 +255,38 @@ public function edit(Request $request, User $user, EntityManagerInterface $entit
         $this->addFlash('success', 'User has been activated.');
         return $this->redirectToRoute('app_user_index');
     }
+
+
+    
+
+    #[Route('/users/pdf', name: 'users_pdf')]
+    public function exportUsersPdf(EntityManagerInterface $entityManager): Response
+    {
+        // Récupérer les utilisateurs
+        $users = $entityManager->getRepository(User::class)->findAll();
+    
+        // Configuration de Dompdf
+        $pdfOptions = new Options();
+        $pdfOptions->set('defaultFont', 'Arial');
+        $pdfOptions->set('isRemoteEnabled', true); // Important pour que les images locales fonctionnent
+        $dompdf = new Dompdf($pdfOptions);
+    
+        // HTML à rendre
+        $html = $this->renderView('user/users_pdf.html.twig', [
+            'users' => $users,
+            'currentDate' => (new \DateTime())->format('d/m/Y H:i')
+        ]);
+    
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+    
+        return new Response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="Liste_Utilisateurs.pdf"',
+        ]);
+    }
+
 
 
 

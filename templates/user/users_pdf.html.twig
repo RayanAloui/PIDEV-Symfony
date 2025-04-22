@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        th { background-color: #6c757d; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Liste des Utilisateurs</h1>
+<p>Date de génération : {{ currentDate }}</p>
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Téléphone</th>
+                <th>Email</th>
+                <th>Rôle</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.surname }}</td>
+                    <td>{{ user.telephone }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.role }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5">Aucun utilisateur trouvé</td>
+                </tr>
+            {% endfor %}
+            <br> 
+             </br> 
+           <div style="position: fixed; bottom: 30px; width: 100%; text-align: center;">
+    <img src="{{ absolute_url(asset('signature.png')) }}" alt="Signature" style="height: 80px;">
+</div>
+
+        </tbody>
+    </table>
+</body>
+
+
+
+</html>

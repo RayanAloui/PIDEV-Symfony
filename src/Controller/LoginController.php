@@ -25,7 +25,7 @@ final class LoginController extends AbstractController
 {
     // Get stored cookies for email and password (if any)
     $cookieEmail = $request->cookies->get('user_email');
-    $cookiePassword = $request->cookies->get('user_password');
+    $cookiePassword =Cryptage::decrypte($request->cookies->get('user_password'));
 
     // If the user is already logged in, redirect to the front page
     if ($session->get('user_email')) {
