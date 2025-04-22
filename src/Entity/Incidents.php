@@ -23,7 +23,7 @@ class Incidents
     #[ORM\ManyToOne(targetEntity: Visites::class, inversedBy: "incidentss")]
     #[ORM\JoinColumn(name: 'id_visite', referencedColumnName: 'id', onDelete: 'CASCADE')]
     #[Assert\NotNull(message: "La visite est obligatoire")]
-    private Visites $id_visite;
+    private ?Visites $id_visite = null;
 
     #[ORM\Column(type: "text")]
     #[Assert\NotBlank(message: "La description est obligatoire")]
@@ -54,14 +54,15 @@ class Incidents
         $this->id_user = $value;
     }
 
-    public function getId_visite()
+    public function getId_visite(): ?Visites
     {
         return $this->id_visite;
     }
 
-    public function setId_visite($value)
+    public function setId_visite(?Visites $id_visite): self
     {
-        $this->id_visite = $value;
+        $this->id_visite = $id_visite;
+        return $this;
     }
 
     public function getDescription()

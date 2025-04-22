@@ -1,46 +1,120 @@
 {% extends 'front.html.twig' %}
 
-{% block title %}Ajouter une visite{% endblock %}
+{% block title %}Liste des visites{% endblock %}
 
 {% block body %}
-    <h1>Ajouter une visite</h1>
-    
-    <form method="post" novalidate>
-        <div class="form-group">
-            <label for="user">Utilisateur</label>
-            <select id="user" name="id_user" class="form-control" required>
-                {% for user in users %}
-                    <option value="{{ user.id }}">{{ user.name }} {{ user.surname }}</option> <!-- Affiche le nom complet -->
+    <h1>Liste des Visites</h1>
+
+    <!-- Formulaire de recherche dynamique pour les utilisateurs -->
+    <div class="mb-3">
+        <input type="text" id="searchUser" class="form-control" placeholder="Rechercher par utilisateur" />
+    </div>
+
+    {% if visites is not empty %}
+        <table class="table table-striped" id="visitesTable">
+            <thead>
+                <tr>
+                    <th>Utilisateur</th>
+                    <th id="sortByDate" style="cursor: pointer;">Date</th>
+                    <th id="sortByHeure" style="cursor: pointer;">Heure</th>
+                    <th>Motif</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for visite in visites %}
+                    <tr>
+                        <td>{{ visite.id_user.name }} {{ visite.id_user.surname }}</td>
+                        <td>{{ visite.date|date('d/m/Y') }}</td>
+                        <td>{{ visite.heure }}</td>
+                        <td>{{ visite.motif }}</td>
+                        <td>{{ visite.statut }}</td>
+                        <td>
+                            <a href="{{ path('modifier_visite', {'id': visite.id}) }}" class="btn btn-warning">Modifier</a>
+                            <a href="{{ path('visite_pdf', {'id': visite.id}) }}" class="btn btn-info">PDF</a>
+                            <form method="post" action="{{ path('supprimer_visite', {'id': visite.id}) }}" style="display:inline-block;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ visite.id) }}">
+                                <button class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette visite?')">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
                 {% endfor %}
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label for="date">Date</label>
-            <input type="date" id="date" name="date" class="form-control" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="heure">Heure</label>
-            <input type="time" id="heure" name="heure" class="form-control" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="motif">Motif</label>
-            <input type="text" id="motif" name="motif" class="form-control" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="statut">Statut</label>
-            <select id="statut" name="statut" class="form-control" required>
-                <option value="En attente">En attente</option>
-                <option value="Confirmée">Confirmée</option>
-                <option value="Annulée">Annulée</option>
-                <option value="Terminée">Terminée</option>
-            </select>
-        </div>
-        
-        <button type="submit" class="btn btn-primary">Enregistrer</button>
-        <a href="{{ path('afficher_visite') }}" class="btn btn-secondary">Annuler</a>
-    </form>
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-warning">Aucune visite enregistrée.</div>
+    {% endif %}
+
+    <a href="{{ path('ajouter_visite') }}" class="btn btn-primary">Ajouter une visite</a>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        // Fonction pour rafraîchir le tableau avec les résultats filtrés
+        function refreshTable(searchUser, sortOption) {
+            fetch(`{{ path('afficher_visite') }}?searchUser=${searchUser}&sortOption=${sortOption}`)
+                .then(response => response.json())
+                .then(data => {
+                    let tbody = document.querySelector('#visitesTable tbody');
+                    tbody.innerHTML = ''; // Effacer les lignes existantes
+                    data.visites.forEach(visite => {
+                        let row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${visite.id_user.name} ${visite.id_user.surname}</td>
+                            <td>${visite.date}</td>
+                            <td>${visite.heure}</td>
+                            <td>${visite.motif}</td>
+                            <td>${visite.statut}</td>
+                            <td>
+                                <a href="/visite/modifier/${visite.id}" class="btn btn-warning">Modifier</a>
+                                <a href="/visite/pdf/${visite.id}" class="btn btn-info">PDF</a>
+                                <form method="post" action="/visite/supprimer/${visite.id}" style="display:inline-block;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ visite.id) }}">
+                                    <button class="btn btn-danger">Supprimer</button>
+                                </form>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                });
+        }
+
+        // Event listener pour la recherche dynamique des utilisateurs
+        document.getElementById('searchUser').addEventListener('input', function() {
+            let searchUser = this.value;
+            let sortOption = document.getElementById('sortOption') ? document.getElementById('sortOption').value : '';
+            refreshTable(searchUser, sortOption);
+        });
+
+        // Initialisation des états pour le tri
+        let dateSortState = 0; // 0: original, 1: croissant, 2: décroissant
+        document.getElementById('sortByDate').addEventListener('click', function() {
+            dateSortState = (dateSortState + 1) % 3; // Cycle entre les 3 états
+            let sortOption = '';
+            if (dateSortState === 1) {
+                sortOption = 'date_asc'; // Croissant
+            } else if (dateSortState === 2) {
+                sortOption = 'date_desc'; // Décroissant
+            }
+            let searchUser = document.getElementById('searchUser').value;
+            refreshTable(searchUser, sortOption);
+        });
+
+        let heureSortState = 0; // 0: original, 1: croissant, 2: décroissant
+        document.getElementById('sortByHeure').addEventListener('click', function() {
+            heureSortState = (heureSortState + 1) % 3; // Cycle entre les 3 états
+            let sortOption = '';
+            if (heureSortState === 1) {
+                sortOption = 'heure_asc'; // Croissant
+            } else if (heureSortState === 2) {
+                sortOption = 'heure_desc'; // Décroissant
+            }
+            let searchUser = document.getElementById('searchUser').value;
+            refreshTable(searchUser, sortOption);
+        });
+    </script>
 {% endblock %}
