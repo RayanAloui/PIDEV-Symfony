@@ -44,6 +44,10 @@ class Dons
     
     private string $description;
 
+    
+
+    
+
     public function getIdDon(): int
     {
         return $this->id_don;
@@ -111,6 +115,10 @@ class Dons
     }
     public function __construct()
     {
-        $this->date_don = new \DateTime(); // Valeur par défaut pour éviter le null
+        $this->date_don = new \DateTime();
+         // Valeur par défaut pour éviter le null
     }
+
+    
+    
 }

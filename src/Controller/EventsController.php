@@ -10,16 +10,32 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[Route('/crud/events')]
 class EventsController extends AbstractController
 {
     #[Route('/list', name: 'app_crud_events', methods: ['GET'])]
-    public function list(EventsRepository $repository): Response
+    public function list(Request $request,EventsRepository $repository): Response
     {
-        $events = $repository->findAll();
+        $query = $request->query->get('query');
+        
+        // Champs de tri
+        $sortField = $request->query->get('sort', 'nom'); // champ par défaut
+        $sortOrder = $request->query->get('order', 'asc'); // ordre par défaut
+        
+        // Requête : recherche avec tri ou simple tri
+        if ($query) {
+            $events = $repository->searchEvents($query, $sortField, $sortOrder);
+        } else {
+            $events = $repository->findBy([], [$sortField => $sortOrder]);
+        }
+        
         return $this->render('events/list.html.twig', [
             'events' => $events,
+            'sortField' => $sortField,
+            'sortOrder' => $sortOrder,
+            'query' => $query,
         ]);
     }
 
@@ -84,4 +100,36 @@ class EventsController extends AbstractController
         'events' => $events
         ]);
     }
+
+    #[Route('/search', name: 'app_crud_events_search', methods: ['GET'])]
+    public function search(Request $request, EventsRepository $repository): JsonResponse
+    {
+        try {
+            $query = $request->query->get('query', '');
+            $sortField = $request->query->get('sort', 'nom');
+            $sortOrder = $request->query->get('order', 'asc');
+        
+            $events = $repository->searchEvents($query, $sortField, $sortOrder);
+        
+            $results = [];
+            foreach ($events as $event) {
+                $results[] = [
+                    'id' => $event->getIdEvent(),
+                    'nom' => $event->getNom(),
+                    'dateEvent' => $event->getDateEvent()->format('d/m/Y'),
+                    'lieu' => $event->getLieu(),
+                    'description' => (strlen($event->getDescription()) > 30) ? 
+                        substr($event->getDescription(), 0, 30) . '...' : $event->getDescription(),
+                    'editUrl' => $this->generateUrl('app_crud_events_edit', ['id' => $event->getIdEvent()]),
+                    'deleteUrl' => $this->generateUrl('app_crud_events_delete', ['id' => $event->getIdEvent()])
+                ];
+            }
+        
+            return new JsonResponse($results);
+        } catch (\Exception $e) {
+            // Log l'erreur et retourner une réponse d'erreur
+            return new JsonResponse(['error' => 'Une erreur est survenue lors de la recherche: ' . $e->getMessage()], 500);
+        }
+    }
+
 }

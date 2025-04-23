@@ -66,18 +66,57 @@
             background-color: #4a6fa5;
             color: white;
         }
+        .search-container {
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 300px;
+            font-size: 14px;
+        }
+        
+        .search-clear {
+            margin-left: 10px;
+            color: #777;
+            cursor: pointer;
+        }
+        
+        /* Style pour l'indicateur de chargement */
+        .loading {
+            display: inline-block;
+            margin-left: 10px;
+            font-style: italic;
+            color: #777;
+            display: none;
+        }
     </style>
     <div class="container">
         <center><h1>Liste des Dons</h1></center>
         <a href="{{ path('app_crud_dons_add') }}" class="btn btn-warning">Ajouter un Don</a>
-
+        <a href="{{ path('app_statistiques') }}" class="btn btn-warning" style="background-color: #8d6c5b;">
+            Statistiques
+        </a>
+            
+        <p></p>
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Rechercher un don..." value="{{ query }}">
+            <span id="clearSearch" class="search-clear" title="Effacer la recherche">❌</span>
+            <span id="loadingIndicator" class="loading">Recherche en cours...</span>
+        </div>
         <p></p>
 
-    <table>
+    <table id="donsTable">
         <thead>
             <tr>
                 
-                <th>Montant</th>
+                <th><a href="{{ path('app_crud_dons', { sort: 'montant', order: sortOrder == 'asc' ? 'desc' : 'asc', query: query }) }}">
+                Montant {{ sortField == 'montant' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}
+            </a></th>
                 <th>Type</th>
                 <th>Date</th>
                 <th>Événement</th>
@@ -113,4 +152,97 @@
         </tbody>
     </table>
 </div>
+
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const clearSearch = document.getElementById('clearSearch');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const tbody = document.querySelector('#donsTable tbody');
+            let currentSortField = '{{ sortField }}';
+            let currentSortOrder = '{{ sortOrder }}';
+            let searchTimeout;
+            
+            // Fonction pour effectuer la recherche
+            function performSearch() {
+                const query = searchInput.value.trim();
+                clearTimeout(searchTimeout);
+                
+                loadingIndicator.style.display = 'inline-block';
+                
+                searchTimeout = setTimeout(() => {
+                    fetch(`{{ path('app_crud_dons_search') }}?query=${encodeURIComponent(query)}&sort=${currentSortField}&order=${currentSortOrder}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            updateTable(data);
+                            loadingIndicator.style.display = 'none';
+                        })
+                        .catch(error => {
+                            console.error('Erreur lors de la recherche:', error);
+                            loadingIndicator.style.display = 'none';
+                        });
+                }, 300); // Délai pour éviter les requêtes multiples
+            }
+            
+            // Fonction pour mettre à jour le tableau avec les résultats
+            function updateTable(results) {
+                tbody.innerHTML = '';
+                
+                if (results.length === 0) {
+                    const noResultsRow = document.createElement('tr');
+                    noResultsRow.id = 'no-results';
+                    noResultsRow.innerHTML = `<td colspan="6" style="text-align: center; padding: 15px; color: #777;">Aucun don trouvé</td>`;
+                    tbody.appendChild(noResultsRow);
+                } else {
+                    results.forEach(don => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${don.montant} TND</td>
+                            <td>${don.typeDon}</td>
+                            <td>${don.dateDon}</td>
+                            <td>${don.evenement}</td>
+                            <td>${don.description}</td>
+                            <td class="actions">
+                                <a href="${don.editUrl}" class="btn btn-warning">Modifier</a>
+                                <a href="${don.deleteUrl}" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer ce don ?');">Supprimer</a>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+            }
+            
+            // Gestion du tri
+            document.querySelectorAll('.sort-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    const field = this.dataset.field;
+                    const newOrder = (field === currentSortField && currentSortOrder === 'asc') ? 'desc' : 'asc';
+                    
+                    currentSortField = field;
+                    currentSortOrder = newOrder;
+                    
+                    // Mise à jour des indicateurs de tri
+                    document.querySelectorAll('.sort-indicator').forEach(indicator => {
+                        indicator.textContent = '';
+                    });
+                    this.querySelector('.sort-indicator').textContent = (newOrder === 'asc') ? '🔼' : '🔽';
+                    
+                    performSearch();
+                });
+            });
+            
+            // Évènement de recherche
+            searchInput.addEventListener('input', performSearch);
+            
+            // Évènement pour effacer la recherche
+            clearSearch.addEventListener('click', function() {
+                searchInput.value = '';
+                performSearch();
+            });
+        });
+    </script>
+
 {% endblock %}
+
+
+

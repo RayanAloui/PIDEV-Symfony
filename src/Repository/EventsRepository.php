@@ -13,13 +13,15 @@ class EventsRepository extends ServiceEntityRepository
         parent::__construct($registry, Events::class);
     }
 
-    public function searchEvents(string $query)
+    public function searchEvents(string $query, string $sortField = 'nom', string $sortOrder = 'asc')
     {
-        return $this->createQueryBuilder('e')
-            ->where('e.nom LIKE :query')
-            ->orWhere('e.lieu LIKE :query')
-            ->setParameter('query', "%$query%")
-            ->getQuery()
-            ->getResult();
+        $qb = $this->createQueryBuilder('e')
+        ->where('e.nom LIKE :query')
+        ->orWhere('e.lieu LIKE :query')
+        ->orWhere('e.description LIKE :query')
+        ->setParameter('query', "%$query%")
+        ->orderBy("e.$sortField", $sortOrder);
+        
+    return $qb->getQuery()->getResult();
     }
 }
