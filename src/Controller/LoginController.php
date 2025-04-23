@@ -16,7 +16,9 @@ use Symfony\Component\HttpFoundation\Cookie;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface; 
 use App\Service\Cryptage;
-
+use Symfony\Component\Form\FormError;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use ReCaptcha\ReCaptcha;
 
 final class LoginController extends AbstractController
 {
@@ -98,44 +100,62 @@ final class LoginController extends AbstractController
         return $this->redirectToRoute('app_login');
     }
 
-
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
-    {
+    public function register(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        UserPasswordHasherInterface $passwordHasher,
+        ReCaptcha $reCaptcha
+    ): Response {
         $user = new User();
         $form = $this->createForm(RegistrationType::class, $user);
         $form->handleRequest($request);
     
-        if ($form->isSubmitted() && $form->isValid()) {
-           
-            $user->setIsBlocked(0);
-            $user->setIsConfirmed(0);
-            $user->setRole('client'); 
-            $user->setNumberVerification(random_int(100000, 999999)); 
-            $user->setToken(0); 
-            $user->setImage(null);
-
-            $originalPassword = $user->getPassword();
-            $cryptedPassword = Cryptage::crypte($originalPassword);
-            $user->setPassword($cryptedPassword);
-    
-          
-          
-         
-    
-           
-            $entityManager->persist($user);
-            $entityManager->flush();
-    
+        if ($form->isSubmitted()) {
+            // Get the reCAPTCHA token from the hidden input field
+            $recaptchaToken = $request->request->get('recaptcha_token');
             
-            return $this->redirectToRoute('app_login');
+            // Verify the reCAPTCHA token
+            $response = $reCaptcha->verify($recaptchaToken);
+            
+           
+    
+            if ($form->isValid()) {
+                // Proceed with user registration logic
+                $user->setIsBlocked(0);
+                $user->setIsConfirmed(0);
+                $user->setRole('client');
+                $user->setNumberVerification(random_int(100000, 999999));
+                $user->setToken(0);
+                $user->setImage(null);
+    
+                // Hash the password
+                $originalPassword = $user->getPassword();
+                $cryptedPassword = Cryptage::crypte($originalPassword);
+                $user->setPassword($cryptedPassword);
+    
+                // Persist the user entity
+                $entityManager->persist($user);
+                $entityManager->flush();
+    
+                // Redirect to login
+                return $this->redirectToRoute('app_login');
+            }
         }
     
         return $this->render('registration/register.html.twig', [
             'form' => $form->createView(),
-            
         ]);
     }
+    
+    
+    
+
+
+    
+
+    
+    
     
   
 }

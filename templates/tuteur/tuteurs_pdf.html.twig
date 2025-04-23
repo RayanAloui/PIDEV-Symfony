@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        th { background-color: #b08968; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Liste des Tuteurs</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>CIN</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Téléphone</th>
+                <th>Adresse</th>
+                <th>Disponibilité</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tuteur in tuteurs %}
+                <tr>
+                    <td>{{ tuteur.cinT }}</td>
+                    <td>{{ tuteur.nomT }}</td>
+                    <td>{{ tuteur.prenomT }}</td>
+                    <td>{{ tuteur.telephoneT }}</td>
+                    <td>{{ tuteur.adresseT }}</td>
+                    <td>{{ tuteur.disponibilite }}</td>
+                    <td>{{ tuteur.email }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -11,8 +11,11 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class RegistrationType extends AbstractType
 {
@@ -53,6 +56,7 @@ class RegistrationType extends AbstractType
                 ],
                 'label' => 'Password',
             ])
+            
             ->add('submit', SubmitType::class, [
                 'label' => 'Register',
                 'attr' => ['class' => 'btn btn-primary'],
@@ -65,4 +69,5 @@ class RegistrationType extends AbstractType
             'data_class' => User::class,
         ]);
     }
+
 }

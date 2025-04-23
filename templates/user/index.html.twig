@@ -221,31 +221,37 @@
     <div class="container">
         <h1 class="page-title">User Index</h1>
 
-        <!-- Sort and Search Section -->
-        <div class="sort-search-container">
-            <!-- Sort By Dropdown -->
-            <div class="sort-by">
-                <label for="sort">Sort by:</label>
-                <form method="get" action="{{ path('app_user_index') }}">
-                    <select id="sort" name="sort" onchange="this.form.submit()">
-                        <option value="" {% if sort is empty %}selected{% endif %}></option>
-                        <option value="email" {% if sort == 'email' %}selected{% endif %}>Email</option>
-                        <option value="role" {% if sort == 'role' %}selected{% endif %}>Role</option>
-                    </select>
-                </form>
-            </div>
+       <!-- Sort and Search Section -->
+<div class="sort-search-container" style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
 
-            <!-- Search Bar -->
-           <div class="search-bar">
-           <input type="text" id="searchInput" placeholder="Search users..." value="{{ search ?? '' }}">
+    <!-- Sort By Dropdown -->
+    <div class="sort-by" style="display: flex; align-items: center; gap: 8px;">
+        <label for="sort"></label>
+        <img src="{{ asset('img/trier.png') }}" alt="Sort icon" style="height: 50px;">
+        <form method="get" action="{{ path('app_user_index') }}">
+            <select id="sort" name="sort" onchange="this.form.submit()">
+                <option value="" {% if sort is empty %}selected{% endif %}></option>
+                <option value="email" {% if sort == 'email' %}selected{% endif %}>Email</option>
+                <option value="role" {% if sort == 'role' %}selected{% endif %}>Role</option>
+            </select>
+        </form>
+    </div>
 
-                </div>
+    <!-- Search Bar -->
+    <div class="search-bar" style="display: flex; align-items: center; gap: 8px;">
+        <input type="text" id="searchInput" placeholder="Search users..." value="{{ search ?? '' }}">
+        <img src="{{ asset('img/search-engine-optimization.png') }}" alt="Search icon" style="height: 50px;">
+    </div>
 
-            <div>
-                <a href="{{ path('users_pdf') }}" class="btn btn-primary" target="_blank">📄 Exporter en PDF</a>
-                <img src="{{ asset('/img/signature.png') }}" alt="Admin signature" style="height: 80px;">
-            </div>
-        </div>
+    <!-- PDF Export -->
+    <div>
+        <a href="{{ path('users_pdf') }}" class="btn" target="_blank" style="background-color: white; border: 1px solid #ccc;">
+            <img src="{{ asset('img/papier.png') }}" alt="Exporter en PDF" style="height: 70px;">
+        </a>
+    </div>
+
+</div>
+
 
         <div class="table-container">
             <table class="table">

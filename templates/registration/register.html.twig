@@ -238,22 +238,18 @@
         }
     </style>
 {% endblock %}
-
 {% block body %}
     <div class="register-container">
         <div class="scanlines"></div>
         <h1 class="register-title">CREATE ACCOUNT</h1>
 
         {{ form_start(form, {'attr': {'class': 'form-container', 'novalidate': 'novalidate'}}) }}
-            
+
+            <!-- Form Fields (Name, Surname, etc.) -->
+
             <div>
                 {{ form_label(form.name) }}
-                {{ form_widget(form.name, {
-                    'attr': {
-                        'placeholder': 'Enter your name',
-                        'class': 'form-control'
-                    }
-                }) }}
+                {{ form_widget(form.name, {'attr': {'placeholder': 'Enter your name', 'class': 'form-control'}}) }}
                 {% for error in form.name.vars.errors %}
                     <div class="form-error">{{ error.message }}</div>
                 {% endfor %}
@@ -261,12 +257,7 @@
 
             <div>
                 {{ form_label(form.surname) }}
-                {{ form_widget(form.surname, {
-                    'attr': {
-                        'placeholder': 'Enter your surname',
-                        'class': 'form-control'
-                    }
-                }) }}
+                {{ form_widget(form.surname, {'attr': {'placeholder': 'Enter your surname', 'class': 'form-control'}}) }}
                 {% for error in form.surname.vars.errors %}
                     <div class="form-error">{{ error.message }}</div>
                 {% endfor %}
@@ -274,12 +265,7 @@
 
             <div>
                 {{ form_label(form.telephone) }}
-                {{ form_widget(form.telephone, {
-                    'attr': {
-                        'placeholder': 'Enter your phone number',
-                        'class': 'form-control'
-                    }
-                }) }}
+                {{ form_widget(form.telephone, {'attr': {'placeholder': 'Enter your phone number', 'class': 'form-control'}}) }}
                 {% for error in form.telephone.vars.errors %}
                     <div class="form-error">{{ error.message }}</div>
                 {% endfor %}
@@ -287,12 +273,7 @@
 
             <div>
                 {{ form_label(form.email) }}
-                {{ form_widget(form.email, {
-                    'attr': {
-                        'placeholder': 'Enter your email',
-                        'class': 'form-control'
-                    }
-                }) }}
+                {{ form_widget(form.email, {'attr': {'placeholder': 'Enter your email', 'class': 'form-control'}}) }}
                 {% for error in form.email.vars.errors %}
                     <div class="form-error">{{ error.message }}</div>
                 {% endfor %}
@@ -300,24 +281,20 @@
 
             <div>
                 {{ form_label(form.password) }}
-                {{ form_widget(form.password, {
-                    'attr': {
-                        'placeholder': 'Create a password',
-                        'class': 'form-control'
-                    }
-                }) }}
+                {{ form_widget(form.password, {'attr': {'placeholder': 'Create a password', 'class': 'form-control'}}) }}
                 {% for error in form.password.vars.errors %}
                     <div class="form-error">{{ error.message }}</div>
                 {% endfor %}
             </div>
 
+            <!-- reCAPTCHA Widget (directly rendered here) -->
+            <div class="form-group">
+                <div class="g-recaptcha" data-sitekey="6LfF2SErAAAAAGGFuT6Ns3a1zhG3dJyH2pHs68Mo" data-callback="onRecaptchaSuccess"></div>
+                <input type="hidden" name="recaptcha_token" id="recaptcha_token" />
+            </div>
+
             <div>
-                {{ form_widget(form.submit, {
-                    'attr': {
-                        'class': 'register-btn'
-                    },
-                    'label': 'REGISTER'
-                }) }}
+                {{ form_widget(form.submit, {'attr': {'class': 'register-btn', 'disabled': 'disabled'}}) }}
             </div>
 
             <div class="form-footer">
@@ -326,4 +303,15 @@
 
         {{ form_end(form) }}
     </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script>
+    function onRecaptchaSuccess(token) {
+        document.getElementById('recaptcha_token').value = token; // Set token to hidden field
+        document.querySelector('.register-btn').removeAttribute('disabled'); // Enable submit button
+    }
+</script>
 {% endblock %}
