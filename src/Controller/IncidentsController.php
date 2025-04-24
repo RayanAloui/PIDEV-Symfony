@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Controller;
-
+use App\Repository\IncidentsRepository;
 use App\Entity\Incidents;
 use App\Entity\User;
 use App\Entity\Visites;
@@ -115,6 +115,26 @@ public function getVisitesForUser(int $userId, EntityManagerInterface $em): Json
     }
 
     return new JsonResponse($visitesData);
+}
+
+
+
+#[Route('/incidents/filtered', name: 'incidents_filtered', methods: ['GET'])]
+public function getFilteredIncidents(Request $request, IncidentsRepository $incidentsRepository): JsonResponse
+{
+    $search = $request->query->get('search', '');
+    $sortBy = $request->query->get('sortBy');
+    $sortOrder = $request->query->get('sortOrder', 'asc');
+
+    // Recherche et tri des incidents
+    $incidents = $incidentsRepository->findByFilters($search, $sortBy, $sortOrder);
+
+    // Retourner le contenu HTML pour les incidents
+    $html = $this->renderView('incidents/_incidents_table.html.twig', [
+        'incidents' => $incidents
+    ]);
+
+    return new JsonResponse(['success' => true, 'html' => $html]);
 }
 
 

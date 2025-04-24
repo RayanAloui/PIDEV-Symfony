@@ -8,6 +8,7 @@
     <!-- Barre de recherche -->
     <input type="text" id="search-input" class="form-control" placeholder="Rechercher par utilisateur, description, ou date..." style="margin-bottom: 20px;">
 
+    <!-- Tableau des incidents -->
     {% if incidents is not empty %}
         <table class="table table-striped">
             <thead>
@@ -15,16 +16,13 @@
                     <th>Visite</th>
                     <th>Utilisateur</th>
                     <th>Description</th>
-                    <th id="date-incident" style="cursor: pointer;">
-                        Date de l'incident
-                        <i class="bi bi-sort" id="sort-icon"></i>
-                    </th>
+                    <th>Date de l'incident</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="incidents-table-body">
                 {% for incident in incidents %}
-                    <tr data-date="{{ incident.dateincident|date('Y-m-d') }}" data-user="{{ incident.id_user.name }} {{ incident.id_user.surname }}" data-description="{{ incident.description }}">
+                    <tr>
                         <td>{{ incident.id_visite.id }}</td>
                         <td>{{ incident.id_user.name }} {{ incident.id_user.surname }}</td>
                         <td>{{ incident.description }}</td>
@@ -44,56 +42,40 @@
         <div class="alert alert-warning">Aucun incident enregistré.</div>
     {% endif %}
 
-    <a href="{{ path('ajouter_incident') }}" class="btn btn-primary">Ajouter un incident</a>
-
     <script>
-        // Recherche dynamique sur le tableau
+        // Fonction de recherche AJAX
         document.getElementById('search-input').addEventListener('input', function() {
-            let searchValue = this.value.toLowerCase();  // Récupère la valeur de la barre de recherche
-            let tableBody = document.getElementById('incidents-table-body');
-            let rows = Array.from(tableBody.getElementsByTagName('tr'));
+            let searchValue = this.value;
+            loadIncidents(searchValue, null, 'asc');  // Charger les incidents selon la recherche
+        });
 
-            // Filtrer les lignes en fonction du texte de recherche
-            rows.forEach(function(row) {
-                let user = row.getAttribute('data-user').toLowerCase();
-                let description = row.getAttribute('data-description').toLowerCase();
-                let date = row.getAttribute('data-date');
-                
-                if (user.includes(searchValue) || description.includes(searchValue) || date.includes(searchValue)) {
-                    row.style.display = '';  // Afficher la ligne
-                } else {
-                    row.style.display = 'none';  // Masquer la ligne
+        // Fonction AJAX pour charger les incidents filtrés et triés
+        function loadIncidents(search = '', sortBy = null, sortOrder = 'asc') {
+            $.ajax({
+                url: '{{ path('incidents_filtered') }}',
+                type: 'GET',
+                data: {
+                    search: search,
+                    sortBy: sortBy,
+                    sortOrder: sortOrder
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#incidents-table-body').html(response.html);  // Mettre à jour le tableau
+                    } else {
+                        console.error(response.message);
+                        $('#incidents-table-body').html(
+                            '<div class="alert alert-danger">Erreur lors du chargement des données</div>'
+                        );
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Erreur AJAX:', xhr.responseText);
+                    $('#incidents-table-body').html(
+                        '<div class="alert alert-danger">Erreur de communication avec le serveur</div>'
+                    );
                 }
             });
-        });
-
-        // Tri dynamique de la date
-        let sortOrder = 'asc';  // L'ordre initial est croissant
-        
-        document.getElementById('date-incident').addEventListener('click', function() {
-            // Changer l'ordre du tri
-            sortOrder = (sortOrder === 'asc') ? 'desc' : 'asc';
-            
-            // Modifier l'icône du tri
-            let icon = document.getElementById('sort-icon');
-            icon.classList.toggle('bi-sort-up', sortOrder === 'asc');
-            icon.classList.toggle('bi-sort-down', sortOrder === 'desc');
-
-            // Trier les lignes du tableau par date
-            let tableBody = document.getElementById('incidents-table-body');
-            let rows = Array.from(tableBody.getElementsByTagName('tr'));
-
-            // Trier les lignes selon la date
-            rows.sort(function(rowA, rowB) {
-                let dateA = rowA.getAttribute('data-date');
-                let dateB = rowB.getAttribute('data-date');
-                return (sortOrder === 'asc') ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
-            });
-
-            // Réinsérer les lignes triées dans le tableau
-            rows.forEach(function(row) {
-                tableBody.appendChild(row);
-            });
-        });
+        }
     </script>
 {% endblock %}

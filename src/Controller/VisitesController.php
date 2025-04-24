@@ -9,6 +9,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Repository\VisitesRepository;
+
 
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -212,6 +214,24 @@ class VisitesController extends AbstractController
     return $this->render('visites/ajouter_visite.html.twig', [
         'users' => $users
     ]);
+}
+
+#[Route('/visites/filtered', name: 'visites_filtered', methods: ['GET'])]
+public function getFilteredVisites(
+    Request $request,
+    VisitesRepository $visitesRepository
+): JsonResponse {
+    $search = $request->query->get('search', '');
+    $sortBy = $request->query->get('sortBy');
+    $sortOrder = $request->query->get('sortOrder', 'asc');
+
+    $visites = $visitesRepository->findByFilters($search, $sortBy, $sortOrder);
+
+    $html = $this->renderView('visites/_visites_table.html.twig', [
+        'visites' => $visites
+    ]);
+
+    return new JsonResponse(['success' => true, 'html' => $html]);
 }
 
 
