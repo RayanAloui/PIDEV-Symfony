@@ -1,82 +1,110 @@
-{% extends 'Base.html.twig' %}
+{% extends 'front.html.twig' %}
 
 {% block title %}New Reclamation{% endblock %}
 
 {% block body %}
-    <section class="py-5">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="card">
-                        <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-                            <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
-                                <h6 class="text-white text-capitalize ps-3">Submit a New Reclamation</h6>
+<style>
+    body {
+        background-color: #f5f5dc; /* light beige */
+    }
+    .card {
+        background-color: #fffaf0; /* floral white for soft beige card */
+        border: 1px solid #e6d8b9;
+    }
+    .card-header {
+        background-color: #d2b48c; /* tan */
+        color: #ffffff;
+    }
+    .btn-primary {
+        background-color: #c3a675;
+        border-color: #c3a675;
+    }
+    .btn-primary:hover {
+        background-color: #a68b5b;
+        border-color: #a68b5b;
+    }
+    .btn-light {
+        background-color: #f5f5dc;
+        border: 1px solid #dcd2b2;
+    }
+    .form-control {
+        background-color: #fffaf0;
+        border: 1px solid #d3c2a3;
+    }
+</style>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">Submit a New Reclamation</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                            <div class="form-group mb-4">
+                                {{ form_label(form.mail, 'Mail') }}
+                                {{ form_widget(form.mail, {'attr': {'class': 'form-control' ~ (form_errors(form.mail) ? ' is-invalid' : '')}}) }}
+                                {% if form_errors(form.mail) %}
+                                    <div class="invalid-feedback">
+                                        {{ form_errors(form.mail) }}
+                                    </div>
+                                {% endif %}
                             </div>
-                        </div>
-                        <div class="card-body p-4">
-                            {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
-                                <div class="input-group input-group-static mb-4">
-                                    {{ form_label(form.mail, 'Mail') }}
-                                    {{ form_widget(form.mail, {'attr': {'class': 'form-control' ~ (form_errors(form.mail) ? ' is-invalid' : '')}}) }}
-                                    {% if form_errors(form.mail) %}
-                                        <div class="invalid-feedback">
-                                            {{ form_errors(form.mail) }}
-                                        </div>
-                                    {% endif %}
-                                </div>
 
-                                <div class="input-group input-group-static mb-4">
-                                    {{ form_label(form.description, 'Description') }}
-                                    {{ form_widget(form.description, {
-                                        'attr': {
-                                            'class': 'form-control' ~ (form_errors(form.description) ? ' is-invalid' : ''),
-                                            'rows': '6'
-                                        }
-                                    }) }}
-                                    {% if form_errors(form.description) %}
-                                        <div class="invalid-feedback">
-                                            {{ form_errors(form.description) }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="input-group input-group-static mb-4">
-                                    {{ form_label(form.typereclamation, 'Type of Reclamation') }}
-                                    {{ form_widget(form.typereclamation, {'attr': {'class': 'form-control' ~ (form_errors(form.typereclamation) ? ' is-invalid' : '')}}) }}
-                                    {% if form_errors(form.typereclamation) %}
-                                        <div class="invalid-feedback">
-                                            {{ form_errors(form.typereclamation) }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="input-group input-group-static mb-4">
-                                    {{ form_label(form.date, 'Date') }}
-                                    {{ form_widget(form.date, {'attr': {'class': 'form-control' ~ (form_errors(form.date) ? ' is-invalid' : '')}}) }}
-                                    {% if form_errors(form.date) %}
-                                        <div class="invalid-feedback">
-                                            {{ form_errors(form.date) }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="row mt-4">
-                                    <div class="col-md-6">
-                                        <button type="submit" class="btn bg-gradient-primary w-100">
-                                            <i class="material-icons">send</i> Submit Reclamation
-                                        </button>
+                            <div class="form-group mb-4">
+                                {{ form_label(form.description, 'Description') }}
+                                {{ form_widget(form.description, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.description) ? ' is-invalid' : ''),
+                                        'rows': '6'
+                                    }
+                                }) }}
+                                {% if form_errors(form.description) %}
+                                    <div class="invalid-feedback">
+                                        {{ form_errors(form.description) }}
                                     </div>
-                                    <div class="col-md-6">
-                                        <a href="{{ path('app_reclamation_index') }}" class="btn bg-gradient-light w-100">
-                                            Cancel
-                                        </a>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group mb-4">
+                                {{ form_label(form.typereclamation, 'Type of Reclamation') }}
+                                {{ form_widget(form.typereclamation, {'attr': {'class': 'form-control' ~ (form_errors(form.typereclamation) ? ' is-invalid' : '')}}) }}
+                                {% if form_errors(form.typereclamation) %}
+                                    <div class="invalid-feedback">
+                                        {{ form_errors(form.typereclamation) }}
                                     </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group mb-4">
+                                {{ form_label(form.date, 'Date') }}
+                                {{ form_widget(form.date, {'attr': {'class': 'form-control' ~ (form_errors(form.date) ? ' is-invalid' : '')}}) }}
+                                {% if form_errors(form.date) %}
+                                    <div class="invalid-feedback">
+                                        {{ form_errors(form.date) }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fa fa-paper-plane mr-1"></i> Submit Reclamation
+                                    </button>
                                 </div>
-                            {{ form_end(form) }}
-                        </div>
+                                <div class="col-md-6">
+                                    <a href="{{ path('app_reclamation_index') }}" class="btn btn-light w-100">
+                                        Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        {{ form_end(form) }}
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 {% endblock %}

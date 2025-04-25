@@ -2,15 +2,24 @@
 {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': true}}) }}
     <div class="mb-3">
         {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-        {{ form_widget(form.description, {'attr': {'class': 'form-control rounded-3'}}) }}
+        {{ form_widget(form.description, {
+            'attr': {
+                'class': 'form-control rounded-3' ~ (form.description.vars.errors|length ? ' is-invalid' : ''),
+            }
+        }) }}
         <div class="invalid-feedback">
             {{ form_errors(form.description) }}
         </div>
+        <small class="form-text text-muted">{{ form.description.vars.help }}</small>
     </div>
 
     <div class="mb-3">
         {{ form_label(form.date, 'Date', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-        {{ form_widget(form.date, {'attr': {'class': 'form-control rounded-3', 'type': 'date'}}) }}
+        {{ form_widget(form.date, {
+            'attr': {
+                'class': 'form-control rounded-3' ~ (form.date.vars.errors|length ? ' is-invalid' : ''),
+            }
+        }) }}
         <div class="invalid-feedback">
             {{ form_errors(form.date) }}
         </div>
@@ -18,7 +27,11 @@
 
     <div class="mb-3">
         {{ form_label(form.statut, 'Status', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-        {{ form_widget(form.statut, {'attr': {'class': 'form-control rounded-3'}}) }}
+        {{ form_widget(form.statut, {
+            'attr': {
+                'class': 'form-select rounded-3' ~ (form.statut.vars.errors|length ? ' is-invalid' : ''),
+            }
+        }) }}
         <div class="invalid-feedback">
             {{ form_errors(form.statut) }}
         </div>
@@ -26,7 +39,11 @@
 
     <div class="mb-3">
         {{ form_label(form.indice, 'Indice', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-        {{ form_widget(form.indice, {'attr': {'class': 'form-control rounded-3'}}) }}
+        {{ form_widget(form.indice, {
+            'attr': {
+                'class': 'form-control rounded-3' ~ (form.indice.vars.errors|length ? ' is-invalid' : ''),
+            }
+        }) }}
         <div class="invalid-feedback">
             {{ form_errors(form.indice) }}
         </div>
@@ -38,3 +55,34 @@
         </button>
     </div>
 {{ form_end(form) }}
+
+{% block javascripts %}
+<script>
+// Enhanced client-side validation
+document.addEventListener('DOMContentLoaded', function() {
+    // Validate on submit
+    const forms = document.querySelectorAll('.needs-validation');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+
+    // Validate on blur (when leaving a field)
+    document.querySelectorAll('.form-control, .form-select').forEach(field => {
+        field.addEventListener('blur', function() {
+            this.classList.add('touched');
+            if (!this.checkValidity()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Services\EmailService;
+use App\Entity\Reclamation;
 use App\Entity\Reponse;
 use App\Form\ReponseType;
 use App\Repository\ReponseRepository;
@@ -14,7 +16,13 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/reponse')]
 final class ReponseController extends AbstractController
 {
-    // ✅ User routes first to avoid conflict with {id}
+    private EmailService $emailService;
+
+    public function __construct(EmailService $emailService)
+    {
+        $this->emailService = $emailService;
+    }
+
     #[Route('', name: 'app_reponse_index', methods: ['GET'])]
     public function index(ReponseRepository $reponseRepository): Response
     {
@@ -31,34 +39,56 @@ final class ReponseController extends AbstractController
         ]);
     }
 
-   
     #[Route('/admin', name: 'app_reponse_admin_index', methods: ['GET'])]
-    public function adminIndex(ReponseRepository $reponseRepository): Response
+    public function adminIndex(Request $request, ReponseRepository $reponseRepository): Response
     {
+        $query = $request->query->get('query', '');
+        $sortField = $request->query->get('sortField', 'date');
+        $sortOrder = $request->query->get('sortOrder', 'DESC');
+
+        $reponses = $reponseRepository->searchReponses($query, $sortField, $sortOrder);
+
         return $this->render('reponse/admin/index.html.twig', [
-            'reponses' => $reponseRepository->findAll(),
+            'reponses' => $reponses,
         ]);
     }
 
     #[Route('/admin/new', name: 'app_reponse_admin_new', methods: ['GET', 'POST'])]
     public function adminNew(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        $reponse = new Reponse();
-        $form = $this->createForm(ReponseType::class, $reponse);
-        $form->handleRequest($request);
+{
+    $reponse = new Reponse();
+    $form = $this->createForm(ReponseType::class, $reponse);
+    $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($reponse);
-            $entityManager->flush();
+    if ($form->isSubmitted() && $form->isValid()) {
+        $entityManager->persist($reponse);
+        $entityManager->flush();
 
-            return $this->redirectToRoute('app_reponse_admin_index', [], Response::HTTP_SEE_OTHER);
-        }
+        // Send email to a fixed address (for now)
+        $recipient = 'sarahbelhadej19@gmail.com';
 
-        return $this->render('reponse/admin/new.html.twig', [
-            'reponse' => $reponse,
-            'form' => $form,
-        ]);
+        $subject = 'Nouvelle réponse à votre réclamation';
+        $content = sprintf("
+            <h2>Bonjour,</h2>
+            <p>Une réponse a été ajoutée à votre réclamation :</p>
+            <blockquote>%s</blockquote>
+            <p>Merci de nous avoir contactés.</p>
+            <p><em>L'équipe OrphenCare</em></p>
+        ", nl2br($reponse->getDescription()));
+
+        $this->emailService->sendEmail($recipient, $subject, $content);
+
+        $this->addFlash('success', 'Réponse enregistrée et email envoyé.');
+        return $this->redirectToRoute('app_reponse_admin_index', [], Response::HTTP_SEE_OTHER);
     }
+
+    return $this->render('reponse/admin/new.html.twig', [
+        'reponse' => $reponse,
+        'form' => $form,
+    ]);
+}
+
+    
 
     #[Route('/admin/{id}/edit', name: 'app_reponse_admin_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     public function adminEdit(Request $request, Reponse $reponse, EntityManagerInterface $entityManager): Response
@@ -97,4 +127,3 @@ final class ReponseController extends AbstractController
         return $this->redirectToRoute('app_reponse_admin_index', [], Response::HTTP_SEE_OTHER);
     }
 }
-

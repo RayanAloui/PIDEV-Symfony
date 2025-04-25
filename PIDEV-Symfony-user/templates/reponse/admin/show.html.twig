@@ -3,12 +3,12 @@
 {% block title %}Response Details{% endblock %}
 
 {% block body %}
-<section class="py-5">
+<section class="py-5" style="background-color: #fef9f2;">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
+                <div class="card shadow-sm" style="background-color: #fff8e1; border: 1px solid #e0d3b8;">
+                    <div class="card-header" style="background-color: #e0c097; color: #3e2c1c;">
                         <h5 class="mb-0">Response #{{ reponse.id }}</h5>
                     </div>
                     <div class="card-body">
@@ -34,7 +34,7 @@
                         </p>
 
                         <div class="mt-4">
-                            <a href="{{ path('app_reponse_index') }}" class="btn btn-secondary">
+                            <a href="{{ path('app_reponse_index') }}" class="btn btn-outline-secondary">
                                 <i class="fas fa-arrow-left me-1"></i> Back to List
                             </a>
                             

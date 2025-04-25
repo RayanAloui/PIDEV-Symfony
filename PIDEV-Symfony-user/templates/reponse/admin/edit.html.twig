@@ -3,11 +3,11 @@
 {% block title %}Edit Reponse{% endblock %}
 
 {% block body %}
-<div class="container py-5">
+<div class="container py-5" style="background-color: #fef9f2;">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
+            <div class="card shadow-sm" style="background-color: #fff8e1; border: 1px solid #e0d3b8;">
+                <div class="card-header" style="background-color: #e0c097; color: #3e2c1c;">
                     <h1 class="h5 mb-0">Edit Reponse</h1>
                 </div>
 
@@ -15,7 +15,7 @@
                     {{ include('reponse/admin/_form.html.twig', {'button_label': 'Update'}) }}
                 </div>
 
-                <div class="card-footer bg-light d-flex justify-content-between">
+                <div class="card-footer" style="background-color: #f9f3e5; d-flex justify-content-between">
                     <a href="{{ path('app_reponse_index') }}" class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left me-2"></i>Back to List
                     </a>

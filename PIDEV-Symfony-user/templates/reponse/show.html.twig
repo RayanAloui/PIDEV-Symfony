@@ -3,17 +3,18 @@
 {% block title %}Response Details{% endblock %}
 
 {% block body %}
-<section class="py-5">
+<section class="py-5" style="background-color: #fdf6e3;">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
+                <div class="card shadow" style="background-color: #f5f5dc; border: none;">
+                    <div class="card-header" style="background-color: #d4a373; color: white;">
                         <h5 class="mb-0">Response #{{ reponse.id }}</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" style="color: #4b3621;">
                         <h6 class="card-subtitle mb-3 text-muted">Status: 
-                            <span class="badge bg-{{ reponse.statut == 'Resolved' ? 'success' : 'warning' }}">
+                            <span class="badge" 
+                                  style="background-color: {{ reponse.statut == 'Resolved' ? '#6aa84f' : '#f4c430' }}; color: #fff;">
                                 {{ reponse.statut }}
                             </span>
                         </h6>
@@ -28,18 +29,23 @@
                             <strong>Description:</strong><br>
                             {{ reponse.description }}
                         </p>
+
                         <p class="mb-2">
                             <strong>Date:</strong>
                             {{ reponse.date ? reponse.date|date('F j, Y') : 'N/A' }}
                         </p>
 
-                        <div class="mt-4">
-                            <a href="{{ path('app_reponse_index') }}" class="btn btn-secondary">
+                        <div class="mt-4 d-flex gap-2">
+                            <a href="{{ path('app_reponse_index') }}" 
+                               class="btn" 
+                               style="background-color: #e6ccb2; color: #4b3621;">
                                 <i class="fas fa-arrow-left me-1"></i> Back to List
                             </a>
-                            
+
                             {% if is_granted('ROLE_ADMIN') %}
-                                <a href="{{ path('app_reponse_admin_edit', {'id': reponse.id}) }}" class="btn btn-warning ms-2">
+                                <a href="{{ path('app_reponse_admin_edit', {'id': reponse.id}) }}" 
+                                   class="btn" 
+                                   style="background-color: #f4a261; color: white;">
                                     <i class="fas fa-edit me-1"></i> Edit
                                 </a>
                             {% endif %}

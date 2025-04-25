@@ -3,7 +3,35 @@
 {% block body %}
 <h2>Liste des Réclamations</h2>
 
+<form method="get" class="mb-3 d-flex gap-2 align-items-center flex-wrap">
+    <!-- Search -->
+    <input type="text" name="q" value="{{ query }}" placeholder="Rechercher..." class="form-control" style="max-width: 250px;">
+
+    <!-- Filter by Type -->
+    <select name="type" class="form-control" style="max-width: 200px;">
+        <option value="">-- Filtrer par type --</option>
+        {% set collectedTypes = [] %}
+        {% for reclamation in reclamations %}
+            {% set currentType = reclamation.typereclamation %}
+            {% if currentType not in collectedTypes %}
+                <option value="{{ currentType }}" {% if type == currentType %}selected{% endif %}>{{ currentType }}</option>
+                {% set collectedTypes = collectedTypes|merge([currentType]) %}
+            {% endif %}
+        {% endfor %}
+    </select>
+
+    <!-- Sort Order -->
+    <select name="order" class="form-control" style="max-width: 180px;">
+        <option value="DESC" {% if app.request.get('order') == 'DESC' %}selected{% endif %}>Décroissant (plus récent)</option>
+        <option value="ASC" {% if app.request.get('order') == 'ASC' %}selected{% endif %}>Croissant (plus ancien)</option>
+    </select>
+
+    <button type="submit" class="btn btn-primary">Chercher</button>
+</form>
+
+
 <table id="userTable" class="display table table-striped">
+
     <thead>
         <tr>
             <th>ID</th>
@@ -24,6 +52,9 @@
             <td>{{ reclamation.mail }}</td>
             <td>
                 <a href="{{ path('app_reclamation_admin_show', {'id': reclamation.id}) }}" class="btn btn-sm btn-info">Voir</a>
+             
+
+
             </td>
         </tr>
     {% endfor %}

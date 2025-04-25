@@ -1,14 +1,14 @@
-{% extends 'front.html.twig' %}
+{% extends 'base.html.twig' %}
 
 {% block title %}New Response{% endblock %}
 
 {% block body %}
-<section class="py-5">
+<section class="py-5" style="background-color: #fef9f2;">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
+                <div class="card shadow-sm" style="background-color: #fff8e1; border: 1px solid #e0d3b8;">
+                    <div class="card-header" style="background-color: #e0c097; color: #3e2c1c;">
                         <h5 class="mb-0">Submit a New Response</h5>
                     </div>
                     <div class="card-body p-4">
@@ -19,7 +19,7 @@
                             {{ form_label(form.description) }}
                             {{ form_widget(form.description, {
                                 'attr': {
-                                    'class': 'form-control' ~ (form_errors(form.description) ? ' is-invalid' : ''),
+                                    'class': 'form-control bg-light' ~ (form_errors(form.description) ? ' is-invalid' : ''),
                                     'rows': 5,
                                     'placeholder': 'Enter response description'
                                 }
@@ -36,7 +36,7 @@
                             {{ form_label(form.date) }}
                             {{ form_widget(form.date, {
                                 'attr': {
-                                    'class': 'form-control' ~ (form_errors(form.date) ? ' is-invalid' : '')
+                                    'class': 'form-control bg-light' ~ (form_errors(form.date) ? ' is-invalid' : '')
                                 }
                             }) }}
                             {% if form_errors(form.date) %}
@@ -51,7 +51,7 @@
                             {{ form_label(form.statut) }}
                             {{ form_widget(form.statut, {
                                 'attr': {
-                                    'class': 'form-control' ~ (form_errors(form.statut) ? ' is-invalid' : '')
+                                    'class': 'form-control bg-light' ~ (form_errors(form.statut) ? ' is-invalid' : '')
                                 }
                             }) }}
                             {% if form_errors(form.statut) %}
@@ -66,7 +66,7 @@
                             {{ form_label(form.indice) }}
                             {{ form_widget(form.indice, {
                                 'attr': {
-                                    'class': 'form-control' ~ (form_errors(form.indice) ? ' is-invalid' : ''),
+                                    'class': 'form-control bg-light' ~ (form_errors(form.indice) ? ' is-invalid' : ''),
                                     'placeholder': 'Optional index/number'
                                 }
                             }) }}
@@ -79,12 +79,12 @@
 
                         <div class="row mt-4">
                             <div class="col-md-6">
-                                <button type="submit" class="btn btn-primary w-100">
+                                <button type="submit" class="btn w-100 text-white" style="background-color: #a67c52;">
                                     <i class="fa fa-paper-plane mr-1"></i> Submit Response
                                 </button>
                             </div>
                             <div class="col-md-6">
-                                <a href="{{ path('app_reponse_index') }}" class="btn btn-light w-100">
+                                <a href="{{ path('app_reponse_index') }}" class="btn btn-outline-secondary w-100">
                                     Cancel
                                 </a>
                             </div>

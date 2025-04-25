@@ -24,6 +24,30 @@
 </div>
 
         <div class="card shadow">
+          <form method="get" class="row g-3 mb-4">
+            <div class="col-md-4">
+          <input type="text" name="query" value="{{ app.request.get('query') }}" class="form-control" placeholder="Rechercher une réponse...">
+           </div>
+           <div class="col-md-3">
+          <select name="sortField" class="form-select">
+            <option value="date" {{ app.request.get('sortField') == 'date' ? 'selected' : '' }}>Date</option>
+            <option value="statut" {{ app.request.get('sortField') == 'statut' ? 'selected' : '' }}>Statut</option>
+            <option value="indice" {{ app.request.get('sortField') == 'indice' ? 'selected' : '' }}>Indice</option>
+           </select>
+          </div>
+         <div class="col-md-3">
+         <select name="sortOrder" class="form-select">
+            <option value="DESC" {{ app.request.get('sortOrder') == 'DESC' ? 'selected' : '' }}>Décroissant</option>
+            <option value="ASC" {{ app.request.get('sortOrder') == 'ASC' ? 'selected' : '' }}>Croissant</option>
+         </select>
+           </div>
+          <div class="col-md-2">
+          <button class="btn btn-outline-primary w-100" type="submit">
+            <i class="fas fa-search me-1"></i> Chercher
+         </button>
+         </div>
+         </form>
+
             <div class="card-body">
                 <div class="table-responsive">
                     <table id="responseTable" class="table table-striped table-hover">

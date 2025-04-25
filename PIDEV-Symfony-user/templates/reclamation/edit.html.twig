@@ -1,21 +1,55 @@
-{% extends 'base.html.twig' %}
+{% extends 'front.html.twig' %}
 
 {% block title %}Edit Reclamation{% endblock %}
 
 {% block body %}
+<style>
+    body {
+        background-color: #f5f5dc; /* light beige */
+    }
+    .card {
+        background-color: #fffaf0; /* floral white */
+        border: 1px solid #e6d8b9;
+    }
+    .card-header {
+        background-color: #d2b48c; /* tan */
+        color: #ffffff;
+    }
+    .card-footer {
+        background-color: #f9f6ee;
+        border-top: 1px solid #e4dac3;
+    }
+    .btn-outline-secondary {
+        border-color: #c3a675;
+        color: #c3a675;
+    }
+    .btn-outline-secondary:hover {
+        background-color: #c3a675;
+        color: white;
+    }
+    .btn-primary {
+        background-color: #c3a675;
+        border-color: #c3a675;
+    }
+    .btn-primary:hover {
+        background-color: #a68b5b;
+        border-color: #a68b5b;
+    }
+</style>
+
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h1 class="h4 mb-0">Edit Reclamation</h1>
+                <div class="card-header">
+                    <h1 class="h5 mb-0">Edit Reclamation</h1>
                 </div>
-                
+
                 <div class="card-body">
                     {{ include('reclamation/_form.html.twig', {'button_label': 'Update'}) }}
                 </div>
 
-                <div class="card-footer bg-light d-flex justify-content-between">
+                <div class="card-footer d-flex justify-content-between">
                     <a href="{{ path('app_reclamation_index') }}" class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left me-2"></i>Back to List
                     </a>
@@ -30,8 +64,8 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize flatpickr for the date field if present
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize flatpickr if the input is found
             const dateInput = document.getElementById('reclamation_date');
             if (dateInput) {
                 flatpickr(dateInput, {
@@ -41,7 +75,7 @@
                 });
             }
 
-            // Enhance select style if present
+            // Apply Bootstrap style to select
             const typeSelect = document.getElementById('reclamation_typereclamation');
             if (typeSelect) {
                 typeSelect.classList.add('form-select');

@@ -2,11 +2,10 @@
 
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-
+use Symfony\Component\Validator\Constraints as Assert;
 use App\Repository\ReclamationRepository;
 
 #[ORM\Entity(repositoryClass: ReclamationRepository::class)]
@@ -17,6 +16,41 @@ class Reclamation
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
+
+    #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "L'adresse email est obligatoire")]
+    #[Assert\Email(message: "L'adresse email '{{ value }}' n'est pas valide")]
+    #[Assert\Length(
+        max: 180,
+        maxMessage: "L'adresse email ne peut pas dépasser {{ limit }} caractères"
+    )]
+    private ?string $mail = null;
+
+    #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "La description est obligatoire")]
+    #[Assert\Length(
+        min: 20,
+        max: 1000,
+        minMessage: "La description doit contenir au moins {{ limit }} caractères",
+        maxMessage: "La description ne peut pas dépasser {{ limit }} caractères"
+    )]
+    private ?string $description = null;
+
+    #[ORM\Column(type: 'date', nullable: false)]
+    #[Assert\NotBlank(message: "La date est obligatoire")]
+    #[Assert\LessThanOrEqual(
+        "today",
+        message: "La date ne peut pas être dans le futur"
+    )]
+    private ?\DateTimeInterface $date = null;
+
+    #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "Le type de réclamation est obligatoire")]
+    #[Assert\Choice(
+        choices: ["technique", "facturation", "service", "autre"],
+        message: "Le type de réclamation doit être technique, facturation, service ou autre"
+    )]
+    private ?string $typereclamation = null;
 
     public function getId(): ?int
     {
@@ -29,9 +63,6 @@ class Reclamation
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $mail = null;
-
     public function getMail(): ?string
     {
         return $this->mail;
@@ -42,9 +73,6 @@ class Reclamation
         $this->mail = $mail;
         return $this;
     }
-
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $description = null;
 
     public function getDescription(): ?string
     {
@@ -57,9 +85,6 @@ class Reclamation
         return $this;
     }
 
-    #[ORM\Column(type: 'date', nullable: false)]
-    private ?\DateTimeInterface $date = null;
-
     public function getDate(): ?\DateTimeInterface
     {
         return $this->date;
@@ -71,9 +96,6 @@ class Reclamation
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $typereclamation = null;
-
     public function getTypereclamation(): ?string
     {
         return $this->typereclamation;
@@ -84,5 +106,4 @@ class Reclamation
         $this->typereclamation = $typereclamation;
         return $this;
     }
-
 }

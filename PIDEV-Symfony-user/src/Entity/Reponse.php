@@ -2,11 +2,8 @@
 
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-
+use Symfony\Component\Validator\Constraints as Assert;
 use App\Repository\ReponseRepository;
 
 #[ORM\Entity(repositoryClass: ReponseRepository::class)]
@@ -17,6 +14,44 @@ class Reponse
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
+
+    #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "La description est obligatoire")]
+    #[Assert\Length(
+        min: 10,
+        max: 1000,
+        minMessage: "La description doit contenir au moins {{ limit }} caractères",
+        maxMessage: "La description ne peut pas dépasser {{ limit }} caractères"
+    )]
+    private ?string $description = null;
+
+    #[ORM\Column(type: 'date', nullable: false)]
+    #[Assert\NotBlank(message: "La date est obligatoire")]
+    #[Assert\LessThanOrEqual(
+        "today",
+        message: "La date ne peut pas être dans le futur"
+    )]
+    private ?\DateTimeInterface $date = null;
+
+    #[ORM\Column(type: 'string', nullable: false)]
+    #[Assert\NotBlank(message: "Le statut est obligatoire")]
+    #[Assert\Choice(
+        choices: ["En attente", "Traité", "Rejeté"],
+        message: "Le statut doit être 'En attente', 'Traité' ou 'Rejeté'"
+    )]
+    private ?string $statut = null;
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    #[Assert\Type(
+        type: 'integer',
+        message: "L'indice doit être un nombre entier"
+    )]
+    #[Assert\PositiveOrZero(message: "L'indice doit être positif ou zéro")]
+    #[Assert\LessThan(
+        value: 100,
+        message: "L'indice doit être inférieur à 100"
+    )]
+    private ?int $indice = null;
 
     public function getId(): ?int
     {
@@ -29,9 +64,6 @@ class Reponse
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $description = null;
-
     public function getDescription(): ?string
     {
         return $this->description;
@@ -42,9 +74,6 @@ class Reponse
         $this->description = $description;
         return $this;
     }
-
-    #[ORM\Column(type: 'date', nullable: false)]
-    private ?\DateTimeInterface $date = null;
 
     public function getDate(): ?\DateTimeInterface
     {
@@ -57,9 +86,6 @@ class Reponse
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $statut = null;
-
     public function getStatut(): ?string
     {
         return $this->statut;
@@ -71,9 +97,6 @@ class Reponse
         return $this;
     }
 
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $indice = null;
-
     public function getIndice(): ?int
     {
         return $this->indice;
@@ -84,5 +107,4 @@ class Reponse
         $this->indice = $indice;
         return $this;
     }
-
 }
