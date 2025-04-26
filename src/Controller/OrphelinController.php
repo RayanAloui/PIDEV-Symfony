@@ -127,7 +127,7 @@ class OrphelinController extends AbstractController
         return $this->redirectToRoute('app_crud_orphelin');
     }
 
-    #[Route('/orphelins/search', name: 'app_orphelins_search', methods: ['GET'])]
+    /*#[Route('/orphelins/search', name: 'app_orphelins_search', methods: ['GET'])]
     public function search(Request $request, OrphelinRepository $orphelinRepository)
     {
         $query = $request->query->get('query', '');
@@ -142,8 +142,36 @@ class OrphelinController extends AbstractController
                 ];
             }, $orphelins),
         ]);
-    }
+    }*/
 
+    #[Route('/orphelins/search', name: 'app_orphelins_search', methods: ['GET'])]
+    public function search(Request $request, OrphelinRepository $orphelinRepository): JsonResponse
+    {
+        $query = $request->query->get('query', '');
+        $sortField = $request->query->get('sort', 'nomO');
+        $sortOrder = $request->query->get('order', 'asc');
+
+        $orphelins = $orphelinRepository->searchOrphelins($query, $sortField, $sortOrder);
+
+        $results = [];
+        foreach ($orphelins as $orphelin) {
+            $tuteurNom = $orphelin->getTuteur() ? $orphelin->getTuteur()->getNomT() . ' ' . $orphelin->getTuteur()->getPrenomT() : 'Non assigné';
+
+            $results[] = [
+                'id' => $orphelin->getIdO(),
+                'nom' => $orphelin->getNomO(),
+                'prenom' => $orphelin->getPrenomO(),
+                'dateNaissance' => $orphelin->getDateNaissance()->format('d/m/Y'),
+                'sexe' => $orphelin->getSexe(),
+                'situationScolaire' => $orphelin->getSituationScolaire() ?: 'Non spécifiée',
+                'tuteur' => $tuteurNom,
+                'deleteUrl' => $this->generateUrl('app_crud_orphelin_delete', ['id' => $orphelin->getIdO()]),
+                'editUrl' => $this->generateUrl('app_crud_orphelin_edit', ['id' => $orphelin->getIdO()])
+            ];
+        }
+
+        return new JsonResponse($results);
+    }
 
     #[Route('/orphelins/pdf', name: 'orphelins_pdf')]
     public function exportPdf(EntityManagerInterface $entityManager): Response
@@ -398,5 +426,19 @@ class OrphelinController extends AbstractController
     {
         $session->clear();
         return $this->redirectToRoute('orphelin_login');
+    }
+
+    #[Route('/chatbot/ask', name: 'chatbot_ask', methods: ['POST'])]
+    public function chatbotAsk(Request $request, EdenAiService $edenAiService): JsonResponse
+    {
+        $question = $request->request->get('question');
+
+        if (!$question) {
+            return new JsonResponse(['error' => 'Question vide.'], 400);
+        }
+
+        $answer = $edenAiService->askChatbot($question);
+
+        return new JsonResponse(['answer' => $answer]);
     }
 }

@@ -33,10 +33,10 @@ class EdenAiService
 
         $data = $response->toArray();
 
-        return $data['openai']['result'] ?? null; 
+        return $data['openai']['result'] ?? null;
     }
 
-    public function translateToEnglish(string $text): string
+    /*public function translateToEnglish(string $text): string
     {
         $response = $this->client->request('POST', 'https://api.edenai.run/v2/text/summarize', [
             'headers' => [
@@ -45,16 +45,41 @@ class EdenAiService
             ],
             'json' => [
                 'providers' => 'openai',
-                'text' => $text, 
-                'language' => 'fr',
+                'text' => $text,
+                'language' => 'en',
                 'length' => 'short',
             ],
         ]);
 
         $data = $response->toArray();
 
-        return $data['openai']['result'] ?? 'Erreur de traduction'; 
+        return $data['openai']['result'] ?? 'Erreur de traduction';
+    }*/
+
+    public function translateToEnglish(string $text): string
+    {
+        try {
+            $response = $this->client->request('POST', 'https://api.edenai.run/v2/translation/automatic_translation', [
+                'headers' => [
+                    'Authorization' => "Bearer {$this->apiKey}",
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'providers' => 'openai',
+                    'text' => $text,
+                    'source_language' => 'fr', 
+                    'target_language' => 'en', 
+                ],
+            ]);
+
+            $data = $response->toArray();
+
+            return $data['openai']['text'] ?? 'Erreur de traduction';
+        } catch (\Exception $e) {
+            return 'Erreur de traduction';
+        }
     }
+
 
     public function extractKeywords(string $text): array
     {
@@ -103,6 +128,30 @@ class EdenAiService
         } catch (\Exception $e) {
             // Tu peux logger ici si tu veux
             return null;
+        }
+    }
+
+    public function askChatbot(string $question): ?string
+    {
+        try {
+            $response = $this->client->request('POST', 'https://api.edenai.run/v2/text/chat', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'providers' => 'openai',
+                    'text' => $question,
+                    'chatbot_global_action' => "Réponds de manière simple, pédagogique et encourageante à un enfant.",
+                    'temperature' => 0.3,
+                ],
+            ]);
+
+            $data = $response->toArray();
+
+            return $data['openai']['generated_text'] ?? null;
+        } catch (\Exception $e) {
+            return "Désolé, je n'ai pas compris. Peux-tu reformuler ?";
         }
     }
 }

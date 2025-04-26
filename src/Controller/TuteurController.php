@@ -155,7 +155,7 @@ class TuteurController extends AbstractController
         return $this->redirectToRoute('app_crud_tuteur');
     }
 
-    #[Route('/tuteurs/search', name: 'app_tuteurs_search', methods: ['GET'])]
+    /*#[Route('/tuteurs/search', name: 'app_tuteurs_search', methods: ['GET'])]
     public function search(Request $request, TuteurRepository $tuteurRepository)
     {
         $query = $request->query->get('query', '');
@@ -172,6 +172,34 @@ class TuteurController extends AbstractController
                 ];
             }, $tuteurs),
         ]);
+    }*/
+
+    #[Route('/tuteurs/search', name: 'app_tuteur_search', methods: ['GET'])]
+    public function search(Request $request, TuteurRepository $tuteurRepository): JsonResponse
+    {
+        $query = $request->query->get('query', '');
+        $sortField = $request->query->get('sort', 'nomT');
+        $sortOrder = $request->query->get('order', 'asc');
+        
+        $tuteurs = $tuteurRepository->searchTuteurs($query, $sortField, $sortOrder);
+        
+        $results = [];
+        foreach ($tuteurs as $tuteur) {
+            $results[] = [
+                'id' => $tuteur->getIdT(),
+                'cin' => $tuteur->getCinT(),
+                'nom' => $tuteur->getNomT(),
+                'prenom' => $tuteur->getPrenomT(),
+                'telephone' => $tuteur->getTelephoneT() ?: '-',
+                'adresse' => $tuteur->getAdresseT() ?: '-',
+                'disponibilite' => $tuteur->getDisponibilite(),
+                'email' => $tuteur->getEmail(),
+                'editUrl' => $this->generateUrl('app_crud_tuteur_edit', ['id' => $tuteur->getIdT()]),
+                'deleteUrl' => $this->generateUrl('app_crud_tuteur_delete', ['id' => $tuteur->getIdT()])
+            ];
+        }
+        
+        return new JsonResponse($results);
     }
 
 
