@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Services\SmsService;
+use App\Services\BadWordsFilter; // Add this import
 
 #[Route('/reclamation')]
 final class ReclamationController extends AbstractController
@@ -49,22 +50,30 @@ final class ReclamationController extends AbstractController
     }
 
     #[Route('/new', name: 'app_reclamation_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, SmsService $smsService): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, SmsService $smsService, BadWordsFilter $badWordsFilter): Response
     {
         $reclamation = new Reclamation();
         $form = $this->createForm(ReclamationType::class, $reclamation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Filter bad words from description and subject
+            $description = $badWordsFilter->filter($reclamation->getDescription());
+            $reclamation->setDescription($description);
+           
+
+            // Persist the reclamation
             $entityManager->persist($reclamation);
             $entityManager->flush();
 
+            // Send SMS notification
             $message = "📬 Nouvelle réclamation de type '{$reclamation->getTypereclamation()}' reçue.\n";
             $message .= "📧 Email: {$reclamation->getMail()}\n";
             $message .= "📝 Description: " . substr($reclamation->getDescription(), 0, 100) . '...';
             
             $smsService->sendSms('+21655732015', $message);
             
+            $this->addFlash('success', 'Reclamation submitted successfully!');
 
             return $this->redirectToRoute('app_reclamation_index', [], Response::HTTP_SEE_OTHER);
         }
