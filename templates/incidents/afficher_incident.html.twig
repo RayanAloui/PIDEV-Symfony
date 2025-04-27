@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Incidents{% endblock %}
+
+{% block body %}
+    <h1>Liste des Incidents</h1>
+
+    <!-- Barre de recherche -->
+    <input type="text" id="search-input" class="form-control" placeholder="Rechercher par utilisateur, description, ou date..." style="margin-bottom: 20px;">
+
+    <!-- Tableau des incidents -->
+    {% if incidents is not empty %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Visite</th>
+                    <th>Utilisateur</th>
+                    <th>Description</th>
+                    <th>Date de l'incident</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="incidents-table-body">
+                {% for incident in incidents %}
+                    <tr>
+                        <td>{{ incident.id_visite.id }}</td>
+                        <td>{{ incident.id_user.name }} {{ incident.id_user.surname }}</td>
+                        <td>{{ incident.description }}</td>
+                        <td>{{ incident.dateincident|date('d/m/Y') }}</td>
+                        <td>
+                            <a href="{{ path('modifier_incident', {'id': incident.id}) }}" class="btn btn-warning">Modifier</a>
+                            <form method="post" action="{{ path('supprimer_incident', {'id': incident.id}) }}" style="display:inline-block;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ incident.id) }}">
+                                <button class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet incident ?')">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+         <a href="{{ path('ajouter_incident') }}" class="btn btn-primary">Ajouter incident</a>
+    {% else %}
+        <div class="alert alert-warning">Aucun incident enregistré.</div>
+    {% endif %}
+
+    <script>
+        // Fonction de recherche AJAX
+        document.getElementById('search-input').addEventListener('input', function() {
+            let searchValue = this.value;
+            loadIncidents(searchValue, null, 'asc');  // Charger les incidents selon la recherche
+        });
+
+        // Fonction AJAX pour charger les incidents filtrés et triés
+        function loadIncidents(search = '', sortBy = null, sortOrder = 'asc') {
+            $.ajax({
+                url: '{{ path('incidents_filtered') }}',
+                type: 'GET',
+                data: {
+                    search: search,
+                    sortBy: sortBy,
+                    sortOrder: sortOrder
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#incidents-table-body').html(response.html);  // Mettre à jour le tableau
+                    } else {
+                        console.error(response.message);
+                        $('#incidents-table-body').html(
+                            '<div class="alert alert-danger">Erreur lors du chargement des données</div>'
+                        );
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Erreur AJAX:', xhr.responseText);
+                    $('#incidents-table-body').html(
+                        '<div class="alert alert-danger">Erreur de communication avec le serveur</div>'
+                    );
+                }
+            });
+        }
+    </script>
+{% endblock %}

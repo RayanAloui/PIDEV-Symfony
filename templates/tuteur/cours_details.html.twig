@@ -1,0 +1,115 @@
+{% extends 'Front.html.twig' %}
+
+
+
+{% block body %}
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5efe6; /* Beige clair */
+            color: #5a3e36; /* Marron foncé */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+
+        h1 {
+            color: #4a2c2a;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .image-container {
+            margin: 20px 0;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .content {
+            padding: 20px;
+            background-color: #f8f3eb;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .content p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #4a2c2a;
+        }
+
+        .btn {
+            background-color: #b08968;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            display: inline-block;
+            margin-top: 15px;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: #8b5e3c;
+        }
+    </style>
+
+    <div class="container">
+        <h1>{{ cours.titre }}</h1>
+
+        <div class="image-container">
+             {% if cours.imageC %}
+                    <img src="{{ asset('assets/img/' ~ cours.imageC) }}" alt="Image" width="100">
+             {% else %}
+                    <img src="{{ asset('assets/img/default.jpg') }}" alt="Image par défaut" width="100">
+             {% endif %}
+        </div>
+
+        <div class="content">
+            <h4>📖 Contenu du cours :</h4>
+            <p>{{ cours.contenu|nl2br }}</p>
+        </div>
+
+         {# Affichage de la note moyenne du cours #}
+        <h3>Note moyenne : {{ cours.noteMoyenne|number_format(0) }} / 5</h3>
+
+        {# Liste des orphelins ayant noté le cours #}
+        <h3>Orphelins ayant noté ce cours</h3>
+        <ul>
+            {% for rating in ratings %}
+                <li>
+                    <strong>{{ rating.orphelin.nomO }} {{ rating.orphelin.prenomO }} :</strong>
+                    <span>{{ rating.note }} étoiles</span>
+                </li>
+            {% else %}
+                <li>Aucun orphelin n'a noté ce cours pour le moment.</li>
+            {% endfor %}
+        </ul>
+
+        <a href="{{ path('tuteur_dashboard') }}" class="btn">← Retour</a>
+    </div>
+{% endblock %}
+

@@ -1,0 +1,112 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des visites{% endblock %}
+
+{% block body %}
+    <h1>Liste des Visites</h1>
+  <a href="{{ path('afficher_incident') }}" class="btn btn-primary">Liste Incidents</a>
+  <br>
+
+
+  <br>
+  <br>
+  <br>
+  
+    <input type="text" id="search-input" class="form-control mb-3" placeholder="Rechercher un utilisateur...">
+
+    <div id="visites-container">
+        {% if visites is not empty %}
+      
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Utilisateur</th>
+                        <th class="sortable" data-sort-by="date" data-sort-order="asc">Date ▲</th>
+                        <th class="sortable" data-sort-by="heure" data-sort-order="asc">Heure ▲</th>
+                        <th>Motif</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="visite-table-body">
+                    {% for visite in visites %}
+                        <tr>
+                            <td>{{ visite.id_user.name }} {{ visite.id_user.surname }}</td>
+                            <td>{{ visite.date|date('d/m/Y') }}</td>
+                            <td>{{ visite.heure }}</td>
+                            <td>{{ visite.motif }}</td>
+                            <td>{{ visite.statut }}</td>
+                            <td>
+                                <a href="{{ path('modifier_visite', {'id': visite.id}) }}" class="btn btn-warning">Modifier</a>
+                                <a href="{{ path('visite_pdf', {'id': visite.id}) }}" class="btn btn-info">PDF</a>
+                                <form method="post" action="{{ path('supprimer_visite', {'id': visite.id}) }}" style="display:inline-block;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ visite.id) }}">
+                                    <button class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette visite?')">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-warning">Aucune visite enregistrée.</div>
+        {% endif %}
+    </div>
+
+    <a href="{{ path('ajouter_visite') }}" class="btn btn-primary">Ajouter une visite</a>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Recherche dynamique
+        $('#search-input').on('input', function() {
+            loadVisites($(this).val());
+        });
+
+        // Tri des colonnes
+        $(document).on('click', '.sortable', function() {
+            const sortBy = $(this).data('sort-by');
+            let sortOrder = $(this).data('sort-order');
+            sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+            
+            // Mise à jour de l'indicateur visuel
+            $('.sortable').each(function() {
+                $(this).html($(this).html().replace('▲', '').replace('▼', ''));
+            });
+            $(this).data('sort-order', sortOrder);
+            $(this).append(sortOrder === 'asc' ? ' ▲' : ' ▼');
+            
+            loadVisites($('#search-input').val(), sortBy, sortOrder);
+        });
+
+        function loadVisites(search = '', sortBy = 'date', sortOrder = 'asc') {
+            $.ajax({
+                url: '{{ path('visites_filtered') }}',
+                type: 'GET',
+                data: {
+                    search: search,
+                    sortBy: sortBy || 'date', // S'assure que sortBy n'est jamais vide
+                    sortOrder: sortOrder
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Remplace uniquement le contenu du tableau avec la nouvelle liste de visites
+                        $('#visite-table-body').html(response.html);
+                    } else {
+                        console.error(response.message);
+                        $('#visites-container').html(
+                            '<div class="alert alert-danger">Erreur lors du chargement des données</div>'
+                        );
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Erreur AJAX:', xhr.responseText);
+                    $('#visites-container').html(
+                        '<div class="alert alert-danger">Erreur de communication avec le serveur</div>'
+                    );
+                }
+            });
+        }
+    });
+</script>
+
+{% endblock %}

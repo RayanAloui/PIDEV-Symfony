@@ -1,0 +1,357 @@
+{% extends 'Front.html.twig' %}
+
+{% block content1 %}
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap');
+
+        .profile-container {
+            margin: 20px auto;
+            background-color: #1a1a2e;
+            padding: 30px;
+            border-radius: 8px;
+            color: #ffcc00;
+            border: 2px solid #5c6bc0;
+            box-shadow: 0 0 20px rgba(92, 107, 192, 0.6), 0 0 40px rgba(255, 204, 0, 0.3);
+            font-family: 'Rajdhani', 'Courier New', sans-serif;
+            max-width: 600px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-container::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 2px dashed #5c6bc0;
+            border-radius: 12px;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .profile-image-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #ffcc00;
+            box-shadow: 0 0 25px rgba(255, 204, 0, 0.7);
+            transition: transform 0.3s;
+        }
+
+        .profile-image:hover {
+            transform: scale(1.05);
+        }
+
+        .profile-info h2 {
+            font-size: 28px;
+            color: #ffcc00;
+            text-shadow: 0 0 8px rgba(255, 204, 0, 0.5);
+            margin-bottom: 25px;
+            text-align: center;
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        .profile-info h2::after {
+            content: "";
+            display: block;
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, #5c6bc0, #ffcc00);
+            margin: 10px auto;
+            border-radius: 3px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffcc00;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: rgba(30, 30, 50, 0.7);
+            border: 1px solid #5c6bc0;
+            border-radius: 6px;
+            color: #ffcc00;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #ffcc00;
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+            background-color: rgba(40, 40, 70, 0.9);
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            flex: 1;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-update {
+            background-color: #5c6bc0;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(92, 107, 192, 0.7);
+        }
+
+        .btn-update:hover {
+            background-color: #4a58b0;
+            box-shadow: 0 0 25px rgba(92, 107, 192, 0.9);
+        }
+
+        .btn-logout {
+            background-color: #ffcc00;
+            color: #1a1a2e;
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.7);
+        }
+
+        .btn-logout:hover {
+            background-color: #e6b800;
+            box-shadow: 0 0 25px rgba(255, 204, 0, 0.9);
+        }
+
+        .action-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .action-link {
+            color: #5c6bc0;
+            text-decoration: none;
+            font-weight: 600;
+            letter-spacing: 1px;
+            position: relative;
+            padding: 5px 0;
+            transition: all 0.3s;
+        }
+
+        .action-link:hover {
+            color: #ffcc00;
+        }
+
+        .action-link::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #ffcc00;
+            transition: width 0.3s;
+        }
+
+        .action-link:hover::after {
+            width: 100%;
+        }
+
+        .email-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .verified {
+            color: #00ff88;
+        }
+
+        .unverified {
+            color: #ff5555;
+        }
+
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 95%, rgba(92, 107, 192, 0.1) 96%, transparent 97%);
+            background-size: 100% 5px;
+            pointer-events: none;
+            animation: scanline 8s linear infinite;
+            z-index: 1;
+            opacity: 0.3;
+        }
+
+        @keyframes scanline {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
+
+        .input-icon {
+            position: relative;
+        }
+
+        .lock-icon {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            color: #ffcc00;
+            font-size: 16px;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        .action-link.disabled {
+    cursor: not-allowed;
+    color: gray;
+}
+
+    </style>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <div class="profile-container">
+        <div class="scanlines"></div>
+
+        <div class="profile-image-container">
+            <img src="{{ user.image is not null and user.image != '' ? asset('uploads/profile_images/' ~ user.image) : asset('/img/user.png') }}" 
+                 alt="Profile Image" 
+                 class="profile-image">
+        </div>
+
+        <div class="profile-info">
+            <h2>USER PROFILE</h2>
+
+            <form method="post" action="{{ path('app_profile_update') }}">
+                <div class="form-group">
+                    <label for="name">NAME</label>
+                    <input type="text"
+                           id="name"
+                           name="name"
+                           class="form-control"
+                           value="{{ user.name }}"
+                           pattern="[A-Za-zÀ-ÿ\s\-]+"
+                           title="Name must contain only letters"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="surname">SURNAME</label>
+                    <input type="text"
+                           id="surname"
+                           name="surname"
+                           class="form-control"
+                           value="{{ user.surname }}"
+                           pattern="[A-Za-zÀ-ÿ\s\-]+"
+                           title="Surname must contain only letters"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">EMAIL</label>
+                    <div class="input-icon">
+                        <input type="email"
+                               id="email"
+                               name="email"
+                               class="form-control"
+                               value="{{ user.email }}"
+                               required>
+                        <i class="fas fa-lock lock-icon"></i>
+                    </div>
+                    <div class="email-status">
+                        {% if user.isconfirmed %}
+                            <span class="verified">✓ Verified</span>
+                        {% else %}
+                            <span class="unverified">✗ Unverified</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="telephone">TELEPHONE</label>
+                    <div class="input-icon">
+                        <input type="text"
+                               id="telephone"
+                               name="telephone"
+                               class="form-control"
+                               value="{{ user.telephone }}"
+                               pattern="^[0-9]{8}$"
+                               title="Telephone must be exactly 8 digits">
+                        <i class="fas fa-lock lock-icon"></i>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-update">UPDATE</button>
+                    <a href="{{ path('app_logout') }}" class="btn btn-logout">LOGOUT</a>
+                </div>
+            </form>
+
+            <div class="action-links">
+                <a href="{{ path('app_change_password') }}" class="action-link">CHANGE PASSWORD</a>
+              
+
+
+                {% if user and not user.isConfirmed %}
+                    <a href="{{ path('app_confirm_email') }}" class="action-link">CONFIRM EMAIL</a>
+                {% else %}
+                    <span class="action-link disabled" style="pointer-events: none; opacity: 0.5;">EMAIL CONFIRMED</span>
+                {% endif %}
+
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,388 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    {% if not app.session.get('user_email') %}
+        <script>
+            window.location.href = "{{ path('app_login') }}";
+        </script>
+    {% endif %}
+    
+    <!-- Your other content goes here -->
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% block title %}User Index{% endblock %}
+
+{% block body %}
+    <style>
+        /* General page styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f2e3; /* Light beige background */
+            margin: 0;
+            padding: 0;
+            color: #3e2a47; /* Dark brown text */
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Page title styling */
+        .page-title {
+            font-size: 2.5rem;
+            color: #6f4f28; /* Warm brown */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Table Styling */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #d7c6b7; /* Light brown border */
+        }
+
+        .table th {
+            background-color: #c29c6e; /* Warm gold */
+            color: white;
+        }
+
+        .table tr:hover {
+            background-color: #f2e3d5; /* Light tan */
+        }
+
+        /* Action Button Styling */
+        .btn-action {
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            text-decoration: none;
+            margin: 2px;
+        }
+
+        .btn-show {
+            background-color: #9e7b5e; /* Darker brown */
+            color: white;
+        }
+
+        .btn-show:hover {
+            background-color: #7c5c42;
+        }
+
+        .btn-edit {
+            background-color: #a88f5b; /* Warm light brown */
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background-color: #8f6c47;
+        }
+
+        .btn-danger {
+            background-color: #b7472a; /* Red-brown */
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #9a3d22;
+        }
+
+        .btn-success {
+            background-color: #7b9f6f; /* Olive green-brown */
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #6c8d5f;
+        }
+
+        .btn-warning {
+            background-color: #d4b25e; /* Light yellow-brown */
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #c0a254;
+        }
+
+        /* Create New Button */
+        .btn-create {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #6f4f28; /* Deep brown */
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn-create:hover {
+            background-color: #4a3423; /* Darker brown */
+        }
+
+        /* Empty state */
+        .no-records {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2rem;
+            color: #a88f5b; /* Light brown */
+        }
+
+        /* Sort and Search Section */
+        .sort-search-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .sort-by {
+            font-size: 1rem;
+        }
+
+        .sort-by select {
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+        }
+
+        .search-bar input {
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+        }
+
+        /* Chart Container */
+        .chart-box {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 40px;
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            color: #6f4f28; /* Warm brown */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 400px;
+        }
+    </style>
+
+    <div class="container">
+        <h1 class="page-title">User Index</h1>
+
+       <!-- Sort and Search Section -->
+<div class="sort-search-container" style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+
+    <!-- Sort By Dropdown -->
+    <div class="sort-by" style="display: flex; align-items: center; gap: 8px;">
+        <label for="sort"></label>
+        <img src="{{ asset('img/trier.png') }}" alt="Sort icon" style="height: 50px;">
+        <form method="get" action="{{ path('app_user_index') }}">
+            <select id="sort" name="sort" onchange="this.form.submit()">
+                <option value="" {% if sort is empty %}selected{% endif %}></option>
+                <option value="email" {% if sort == 'email' %}selected{% endif %}>Email</option>
+                <option value="role" {% if sort == 'role' %}selected{% endif %}>Role</option>
+            </select>
+        </form>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-bar" style="display: flex; align-items: center; gap: 8px;">
+        <input type="text" id="searchInput" placeholder="Search users..." value="{{ search ?? '' }}">
+        <img src="{{ asset('img/search-engine-optimization.png') }}" alt="Search icon" style="height: 50px;">
+    </div>
+
+    <!-- PDF Export -->
+    <div>
+        <a href="{{ path('users_pdf') }}" class="btn" target="_blank" style="background-color: white; border: 1px solid #ccc;">
+            <img src="{{ asset('img/papier.png') }}" alt="Exporter en PDF" style="height: 70px;">
+        </a>
+    </div>
+
+</div>
+
+
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Surname</th>
+                        <th>Telephone</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>IsBlocked</th>
+                        <th>IsConfirmed</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="userList">
+                    {% include 'user/_user_list.html.twig' %}
+                </tbody>
+            </table>
+        </div>
+
+        <a href="{{ path('app_user_new') }}" class="btn-create">Create New</a>
+
+        <!-- Bar Chart for Active vs Blocked Users -->
+        <div class="chart-box">
+            <h2 class="chart-title">User Status (Active vs Blocked)</h2>
+            <div class="chart-container">
+                <canvas id="userBarChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Combined Pie Chart Box -->
+        <div class="chart-box">
+            <h2 class="chart-title">User Status & Role Distribution</h2>
+            <div class="chart-container" style="display: flex; justify-content: space-around;">
+                <!-- Pie Chart for Confirmation Status -->
+                <div style="width: 45%;">
+                    <canvas id="userPieChart"></canvas>
+                </div>
+                <!-- Pie Chart for Role Distribution -->
+                <div style="width: 45%;">
+                    <canvas id="userRolePieChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart.js Script -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            // Bar Chart
+            var ctxBar = document.getElementById('userBarChart').getContext('2d');
+            var userBarChart = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: ['Active', 'Blocked'],
+                    datasets: [{
+                        label: 'User Status',
+                        data: [{{ activeCount|json_encode() }}, {{ blockedCount|json_encode() }}],
+                        backgroundColor: ['#7b9f6f', '#b7472a'],
+                        borderColor: ['#6c8d5f', '#9a3d22'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // Pie Chart for Confirmed/Unconfirmed
+            var ctxPie = document.getElementById('userPieChart').getContext('2d');
+            var userPieChart = new Chart(ctxPie, {
+                type: 'pie',
+                data: {
+                    labels: ['Confirmed', 'Unconfirmed'],
+                    datasets: [{
+                        data: [{{ confirmedCount|json_encode() }}, {{ unconfirmedCount|json_encode() }}],
+                        backgroundColor: ['#6f4f28', '#f4c542'],
+                        borderColor: ['#5a4020', '#e3b033'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+
+            // Pie Chart for Roles
+            var ctxRolePie = document.getElementById('userRolePieChart').getContext('2d');
+            var userRolePieChart = new Chart(ctxRolePie, {
+                type: 'pie',
+                data: {
+                    labels: ['Admins', 'Clients', 'Orphans', 'Tutors'],
+                    datasets: [{
+                        data: [{{ admins|json_encode() }}, {{ clients|json_encode() }}, {{ orphelins|json_encode() }}, {{ tuteurs|json_encode() }}],
+                        backgroundColor: ['#c29c6e', '#7b9f6f', '#b7472a', '#d4b25e'],
+                        borderColor: ['#a88f5b', '#6c8d5f', '#9a3d22', '#c0a254'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+        </script>
+
+        <!-- 🔍 AJAX Search Script -->
+        <script>
+            let timeout = null;
+            document.getElementById('searchInput').addEventListener('input', function () {
+                clearTimeout(timeout);
+                const query = this.value;
+
+                timeout = setTimeout(() => {
+                    fetch('{{ path('app_user_index') }}?search=' + encodeURIComponent(query), {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        document.getElementById('userList').innerHTML = html;
+                    });
+                }, 300);
+            });
+        </script>
+    </div>
+{% endblock %}

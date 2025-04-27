@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Don #{{ don.idDon }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            line-height: 1.4;
+            margin: 0;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #8d6c5b;
+            padding-bottom: 10px;
+        }
+        .logo {
+            max-width: 200px;
+            margin-bottom: 15px;
+        }
+        h1 {
+            color: #8d6c5b;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .date {
+            font-style: italic;
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .info-table th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+            text-align: left;
+            padding: 10px;
+            border: 1px solid #ddd;
+            width: 30%;
+        }
+        .info-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        .footer {
+            margin-top: 50px;
+            font-size: 12px;
+            text-align: center;
+            color: #777;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        {% if logoData %}
+            <img src="{{ logoData }}" alt="OrphanCare Logo" class="logo">
+        {% endif %}
+        <h1>Détails du Don #{{ don.idDon }}</h1>
+        <div class="date">Document généré le {{ date|date('d/m/Y à H:i') }}</div>
+    </div>
+    
+    <table class="info-table">
+        <tr>
+            <th>Montant</th>
+            <td>{{ don.montant }} TND</td>
+        </tr>
+        <tr>
+            <th>Type de don</th>
+            <td>{{ don.typeDon }}</td>
+        </tr>
+        <tr>
+            <th>Date du don</th>
+            <td>{{ don.dateDon|date('d/m/Y') }}</td>
+        </tr>
+        <tr>
+            <th>Événement associé</th>
+            <td>{{ eventNom }}</td>
+        </tr>
+        <tr>
+            <th>Description</th>
+            <td>{{ don.description }}</td>
+        </tr>
+    </table>
+    
+    <div class="footer">
+        <p>OrphanCare - Tous droits réservés &copy; {{ date|date('Y') }}</p>
+        <p>Ce document est strictement confidentiel</p>
+    </div>
+</body>
+</html>

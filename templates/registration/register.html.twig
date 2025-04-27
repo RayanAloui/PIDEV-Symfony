@@ -1,0 +1,317 @@
+{% block stylesheets %}
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', sans-serif;
+        }
+        
+        body {
+            background-color: #0f0f1a;
+            background-image: 
+                linear-gradient(rgba(15, 15, 26, 0.9), rgba(15, 15, 26, 0.9)),
+                url('https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .register-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: #1a1a2e;
+            border-radius: 8px;
+            color: #ffcc00;
+            border: 2px solid #5c6bc0;
+            box-shadow: 0 0 20px rgba(92, 107, 192, 0.6),
+                        0 0 40px rgba(255, 204, 0, 0.3);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .register-container::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 2px dashed #5c6bc0;
+            border-radius: 12px;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .register-title {
+            color: #ffcc00;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 28px;
+            text-shadow: 0 0 8px rgba(255, 204, 0, 0.5);
+            letter-spacing: 2px;
+            position: relative;
+        }
+        
+        .register-title::after {
+            content: "";
+            display: block;
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, #5c6bc0, #ffcc00);
+            margin: 10px auto;
+            border-radius: 3px;
+        }
+        
+        .form-container div {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .form-container label {
+            display: block;
+            margin-bottom: 10px;
+            color: #ffcc00;
+            font-weight: 600;
+            letter-spacing: 1px;
+            font-size: 16px;
+        }
+        
+        .form-container input {
+            width: 100%;
+            padding: 14px 15px;
+            background-color: rgba(30, 30, 50, 0.7);
+            border: 1px solid #5c6bc0;
+            border-radius: 6px;
+            color: #ffcc00;
+            font-size: 16px;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+        }
+        
+        .form-container input:focus {
+            outline: none;
+            border-color: #ffcc00;
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+            background-color: rgba(40, 40, 70, 0.9);
+        }
+        
+        .form-container input::placeholder {
+            color: rgba(255, 204, 0, 0.5);
+        }
+        
+        .form-error {
+            color: #ff5555;
+            font-size: 14px;
+            margin-top: 5px;
+            animation: shake 0.5s;
+            text-shadow: 0 0 5px rgba(255, 85, 85, 0.5);
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        
+        .register-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #5c6bc0, #3a4a9c);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(92, 107, 192, 0.7);
+        }
+        
+        .register-btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .register-btn:hover {
+            background: linear-gradient(135deg, #4a58b0, #2f3c7a);
+            box-shadow: 0 0 25px rgba(92, 107, 192, 0.9);
+        }
+        
+        .register-btn:hover::before {
+            left: 100%;
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #5c6bc0;
+            font-size: 15px;
+        }
+        
+        .form-footer a {
+            color: #ffcc00;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .form-footer a::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #ffcc00;
+            transition: width 0.3s;
+        }
+        
+        .form-footer a:hover {
+            text-shadow: 0 0 5px rgba(255, 204, 0, 0.5);
+        }
+        
+        .form-footer a:hover::after {
+            width: 100%;
+        }
+        
+        /* Cyberpunk scanline effect */
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                transparent 95%,
+                rgba(92, 107, 192, 0.1) 96%,
+                transparent 97%
+            );
+            background-size: 100% 5px;
+            pointer-events: none;
+            animation: scanline 8s linear infinite;
+            z-index: 1;
+            opacity: 0.3;
+        }
+        
+        @keyframes scanline {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .register-container {
+                padding: 30px 20px;
+            }
+            
+            .register-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <div class="register-container">
+        <div class="scanlines"></div>
+        <h1 class="register-title">CREATE ACCOUNT</h1>
+
+        {{ form_start(form, {'attr': {'class': 'form-container', 'novalidate': 'novalidate'}}) }}
+
+            <!-- Form Fields (Name, Surname, etc.) -->
+
+            <div>
+                {{ form_label(form.name) }}
+                {{ form_widget(form.name, {'attr': {'placeholder': 'Enter your name', 'class': 'form-control'}}) }}
+                {% for error in form.name.vars.errors %}
+                    <div class="form-error">{{ error.message }}</div>
+                {% endfor %}
+            </div>
+
+            <div>
+                {{ form_label(form.surname) }}
+                {{ form_widget(form.surname, {'attr': {'placeholder': 'Enter your surname', 'class': 'form-control'}}) }}
+                {% for error in form.surname.vars.errors %}
+                    <div class="form-error">{{ error.message }}</div>
+                {% endfor %}
+            </div>
+
+            <div>
+                {{ form_label(form.telephone) }}
+                {{ form_widget(form.telephone, {'attr': {'placeholder': 'Enter your phone number', 'class': 'form-control'}}) }}
+                {% for error in form.telephone.vars.errors %}
+                    <div class="form-error">{{ error.message }}</div>
+                {% endfor %}
+            </div>
+
+            <div>
+                {{ form_label(form.email) }}
+                {{ form_widget(form.email, {'attr': {'placeholder': 'Enter your email', 'class': 'form-control'}}) }}
+                {% for error in form.email.vars.errors %}
+                    <div class="form-error">{{ error.message }}</div>
+                {% endfor %}
+            </div>
+
+            <div>
+                {{ form_label(form.password) }}
+                {{ form_widget(form.password, {'attr': {'placeholder': 'Create a password', 'class': 'form-control'}}) }}
+                {% for error in form.password.vars.errors %}
+                    <div class="form-error">{{ error.message }}</div>
+                {% endfor %}
+            </div>
+
+            <!-- reCAPTCHA Widget (directly rendered here) -->
+            <div class="form-group">
+                <div class="g-recaptcha" data-sitekey="6LfF2SErAAAAAGGFuT6Ns3a1zhG3dJyH2pHs68Mo" data-callback="onRecaptchaSuccess"></div>
+                <input type="hidden" name="recaptcha_token" id="recaptcha_token" />
+            </div>
+
+            <div>
+                {{ form_widget(form.submit, {'attr': {'class': 'register-btn', 'disabled': 'disabled'}}) }}
+            </div>
+
+            <div class="form-footer">
+                ALREADY HAVE AN ACCOUNT? <a href="{{ path('app_login') }}">SIGN IN</a>
+            </div>
+
+        {{ form_end(form) }}
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script>
+    function onRecaptchaSuccess(token) {
+        document.getElementById('recaptcha_token').value = token; // Set token to hidden field
+        document.querySelector('.register-btn').removeAttribute('disabled'); // Enable submit button
+    }
+</script>
+{% endblock %}
