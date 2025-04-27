@@ -441,4 +441,14 @@ class OrphelinController extends AbstractController
 
         return new JsonResponse(['answer' => $answer]);
     }
+
+    #[Route('/orphelins_qr', name: 'app_orphelins_qr')]
+    public function orphelinsQr(OrphelinRepository $orphelinRepository): Response
+    {
+        $orphelins = $orphelinRepository->findAll();
+
+        return $this->render('orphelin/qr_list.html.twig', [
+            'orphelins' => $orphelins,
+        ]);
+    }
 }

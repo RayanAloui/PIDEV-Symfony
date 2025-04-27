@@ -180,9 +180,9 @@ class TuteurController extends AbstractController
         $query = $request->query->get('query', '');
         $sortField = $request->query->get('sort', 'nomT');
         $sortOrder = $request->query->get('order', 'asc');
-        
+
         $tuteurs = $tuteurRepository->searchTuteurs($query, $sortField, $sortOrder);
-        
+
         $results = [];
         foreach ($tuteurs as $tuteur) {
             $results[] = [
@@ -198,7 +198,7 @@ class TuteurController extends AbstractController
                 'deleteUrl' => $this->generateUrl('app_crud_tuteur_delete', ['id' => $tuteur->getIdT()])
             ];
         }
-        
+
         return new JsonResponse($results);
     }
 
@@ -341,6 +341,16 @@ class TuteurController extends AbstractController
             'cours' => $cours,
             'ratings' => $ratings,
             'averageRating' => $averageRating,
+        ]);
+    }
+
+    #[Route('/tuteurs_qr', name: 'app_tuteurs_qr')]
+    public function tuteursQr(TuteurRepository $tuteurRepository): Response
+    {
+        $tuteurs = $tuteurRepository->findAll();
+
+        return $this->render('tuteur/qr_list.html.twig', [
+            'tuteurs' => $tuteurs,
         ]);
     }
 }
