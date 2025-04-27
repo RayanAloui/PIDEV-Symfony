@@ -141,6 +141,7 @@
                     <td>{{ don.description|slice(0, 30) }}{% if don.description|length > 30 %}...{% endif %}</td>
                     <td class="actions">
                         <a href="{{ path('app_crud_dons_edit', {'id': don.idDon}) }}" class="btn btn-warning">Modifier</a>
+                        <a href="{{ path('app_crud_dons_pdf', {'id': don.idDon}) }}" class="btn" style="background-color: #4a6fa5; color: white;">PDF</a>
                         <a href="{{ path('app_crud_dons_delete', {'id': don.idDon}) }}" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer cet orphelin ?');">Supprimer</a>
                     </td>
                 </tr>

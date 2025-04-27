@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Events;
 use App\Form\EventsType;
+use App\Service\EventImageService;
 use App\Repository\EventsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,10 +12,20 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[Route('/crud/events')]
 class EventsController extends AbstractController
 {
+    private $httpClient;
+    private $eventImageService;
+
+
+    public function __construct(HttpClientInterface $httpClient, EventImageService $eventImageService)
+    {
+        $this->httpClient = $httpClient;
+        $this->eventImageService = $eventImageService; // Mets ta vraie clé API Gemini ici
+    }
     #[Route('/list', name: 'app_crud_events', methods: ['GET'])]
     public function list(Request $request,EventsRepository $repository): Response
     {
@@ -47,6 +58,17 @@ class EventsController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Récupérer une image pour l'événement
+            $imagePath = $this->eventImageService->getImageForEvent(
+                $event->getNom(),
+                $event->getDescription(),
+                $event->getLieu()
+            );
+            
+            // Si une image a été trouvée, l'associer à l'événement
+            if ($imagePath) {
+                $event->setImage($imagePath);
+            }
             $entityManager->persist($event);
             $entityManager->flush();
             $this->addFlash('success', 'Événement ajouté avec succès.');
@@ -132,4 +154,6 @@ class EventsController extends AbstractController
         }
     }
 
+
+    
 }

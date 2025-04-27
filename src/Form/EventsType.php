@@ -90,7 +90,8 @@ class EventsType extends AbstractType
                         'maxMessage' => 'La description ne peut pas dépasser {{ limit }} caractères'
                     ])
                 ]
-            ]);
+            ])
+            ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

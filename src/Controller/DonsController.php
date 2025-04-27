@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use App\Service\WhatsAppService;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Stripe\Stripe;
@@ -173,8 +174,10 @@ public function createCheckoutSession(Dons $don): Response
     }
 
     #[Route('/merci', name: 'don_merci')]
-    public function merci(): Response
+    public function merci(WhatsAppService $whatsAppService): Response
     {
+        $message = "✅ Merci ! Votre don a bien été reçu. 🙏 - OrphanCare";
+        $whatsAppService->sendConfirmationMessage($message);
         return $this->render('dons/merci.html.twig');
     }
 

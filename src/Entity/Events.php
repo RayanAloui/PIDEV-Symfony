@@ -9,10 +9,14 @@ use Doctrine\Common\Collections\ArrayCollection;
 #[ORM\Entity]
 class Events
 {
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
     private int $id_event;
+
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $image = null;
 
     #[ORM\Column(type: "string", length: 100)]
     private string $nom;
@@ -89,6 +93,18 @@ class Events
         $this->description = $description;
         return $this;
     }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): self
+    {
+        $this->image = $image;
+        return $this;
+    }
+    
 
     /**
      * @return Collection<int, Dons>

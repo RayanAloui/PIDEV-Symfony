@@ -85,7 +85,11 @@
     {% for event in events %}
         <div class="col-lg-6">
             <div class="event-item">
-                <img src="{{ asset('img/event-1.jpg') }}" alt="Image"> {# Remplace avec un champ image si tu en as un #}
+                {% if event.image %}
+                    <img src="{{ asset(event.image) }}" alt="{{ event.nom }}">
+                {% else %}
+                    <img src="{{ asset('img/event-1.jpg') }}" alt="Image par défaut">
+                {% endif %}
                 <div class="event-content">
                     <div class="event-meta">
                         <p><i class="fa fa-calendar-alt"></i>{{ event.dateEvent|date('d-M-Y') }}</p>

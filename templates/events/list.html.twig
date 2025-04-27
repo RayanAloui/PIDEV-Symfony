@@ -126,6 +126,7 @@
                 <td>{{ event.description|slice(0, 30) }}{% if event.description|length > 30 %}...{% endif %}</td>
                 <td class="actions">
                     <a href="{{ path('app_crud_events_edit', {'id': event.idEvent}) }}" class="btn btn-warning">Modifier</a>
+                    <a href="{{ path('app_crud_events_pdf', {'id': event.idEvent}) }}" class="btn" style="background-color: #4a6fa5; color: white;">PDF</a>
                     <a href="{{ path('app_crud_events_delete', {'id': event.idEvent}) }}" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer cet événement ?');">Supprimer</a>
                 </td>
             </tr>
