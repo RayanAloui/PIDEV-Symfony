@@ -9,6 +9,8 @@ use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Repository\CourRepository;
 
+
+
 #[ORM\Entity(repositoryClass: CourRepository::class)]
 #[ORM\Table(name: 'cours')]
 class Cour
