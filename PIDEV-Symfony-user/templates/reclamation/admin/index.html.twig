@@ -29,9 +29,16 @@
     <button type="submit" class="btn btn-primary">Chercher</button>
 </form>
 
+<!-- PDF Export and Statistics Buttons -->
+<div class="mb-3">
+    <a href="{{ path('app_reclamation_admin_export_pdf', { q: query, type: type, order: app.request.get('order', 'DESC') }) }}" class="btn btn-success">
+        Exporter en PDF
+   <a href="{{ path('app_reclamation_admin_statistics') }}" class="btn btn-info">
+    <i class="fas fa-chart-bar me-1"></i> Voir les statistiques
+</a>
+</div>
 
 <table id="userTable" class="display table table-striped">
-
     <thead>
         <tr>
             <th>ID</th>
@@ -52,9 +59,6 @@
             <td>{{ reclamation.mail }}</td>
             <td>
                 <a href="{{ path('app_reclamation_admin_show', {'id': reclamation.id}) }}" class="btn btn-sm btn-info">Voir</a>
-             
-
-
             </td>
         </tr>
     {% endfor %}

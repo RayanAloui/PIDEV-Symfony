@@ -23,21 +23,20 @@ class ReclamationRepository extends ServiceEntityRepository
         ?string $type = null
     ): array {
         $qb = $this->createQueryBuilder('r')
-            ->orderBy('r.'.$sortField, $sortOrder);
-    
+            ->orderBy('r.' . $sortField, $sortOrder);
+
         if ($query) {
             $qb->andWhere('r.mail LIKE :query OR r.description LIKE :query OR r.typereclamation LIKE :query')
-               ->setParameter('query', '%'.$query.'%');
+               ->setParameter('query', '%' . $query . '%');
         }
-    
+
         if ($type) {
             $qb->andWhere('r.typereclamation = :type')
                ->setParameter('type', $type);
         }
-    
+
         return $qb->getQuery()->getResult();
     }
-    
 
     public function countReclamationsByType(): array
     {
@@ -76,5 +75,4 @@ class ReclamationRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-    
 }

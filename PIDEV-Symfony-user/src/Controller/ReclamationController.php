@@ -11,7 +11,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Services\SmsService;
-use App\Services\BadWordsFilter; // Add this import
+use App\Services\BadWordsFilter;
+use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse;
 
 #[Route('/reclamation')]
 final class ReclamationController extends AbstractController
@@ -33,9 +34,30 @@ final class ReclamationController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/{id}', name: 'app_reclamation_admin_show', methods: ['GET'])]
-    public function adminShow(Reclamation $reclamation): Response
+    #[Route('/admin/statistics', name: 'app_reclamation_admin_statistics', methods: ['GET'])]
+    public function statistics(ReclamationRepository $reclamationRepository): Response
     {
+        $byType = $reclamationRepository->countReclamationsByType();
+        
+        // Prepare data for Chart.js
+        $chartData = [
+            'labels' => array_column($byType, 'type'),
+            'counts' => array_map('intval', array_column($byType, 'count')),
+        ];
+
+        return $this->render('reclamation/admin/statistics.html.twig', [
+            'byType' => $byType,
+            'chartData' => json_encode($chartData),
+        ]);
+    }
+    #[Route('/admin/{id}', name: 'app_reclamation_admin_show', methods: ['GET'])]
+    public function adminShow(?Reclamation $reclamation): Response
+    {
+        if (!$reclamation) {
+            $this->addFlash('error', 'Réclamation non trouvée.');
+            return $this->redirectToRoute('app_reclamation_admin_index');
+        }
+
         return $this->render('reclamation/admin/show.html.twig', [
             'reclamation' => $reclamation,
         ]);
@@ -57,10 +79,9 @@ final class ReclamationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Filter bad words from description and subject
+            // Filter bad words from description
             $description = $badWordsFilter->filter($reclamation->getDescription());
             $reclamation->setDescription($description);
-           
 
             // Persist the reclamation
             $entityManager->persist($reclamation);
@@ -85,22 +106,31 @@ final class ReclamationController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_reclamation_show', methods: ['GET'])]
-    public function show(Reclamation $reclamation): Response
+    public function show(?Reclamation $reclamation): Response
     {
+        if (!$reclamation) {
+            $this->addFlash('error', 'Réclamation non trouvée.');
+            return $this->redirectToRoute('app_reclamation_index');
+        }
+
         return $this->render('reclamation/show.html.twig', [
             'reclamation' => $reclamation,
         ]);
     }
 
     #[Route('/{id}/edit', name: 'app_reclamation_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Reclamation $reclamation, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, ?Reclamation $reclamation, EntityManagerInterface $entityManager): Response
     {
+        if (!$reclamation) {
+            $this->addFlash('error', 'Réclamation non trouvée.');
+            return $this->redirectToRoute('app_reclamation_index');
+        }
+
         $form = $this->createForm(ReclamationType::class, $reclamation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
             return $this->redirectToRoute('app_reclamation_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -111,13 +141,40 @@ final class ReclamationController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_reclamation_delete', methods: ['POST'])]
-    public function delete(Request $request, Reclamation $reclamation, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, ?Reclamation $reclamation, EntityManagerInterface $entityManager): Response
     {
+        if (!$reclamation) {
+            $this->addFlash('error', 'Réclamation non trouvée.');
+            return $this->redirectToRoute('app_reclamation_index');
+        }
+
         if ($this->isCsrfTokenValid('delete' . $reclamation->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($reclamation);
             $entityManager->flush();
         }
 
         return $this->redirectToRoute('app_reclamation_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/admin/export/pdf', name: 'app_reclamation_admin_export_pdf', methods: ['GET'])]
+    public function exportPdf(Request $request, ReclamationRepository $reclamationRepository, \Knp\Snappy\Pdf $knpSnappyPdf): Response
+    {
+        $query = $request->query->get('q');
+        $type = $request->query->get('type');
+        $sort = $request->query->get('sort', 'date');
+        $order = $request->query->get('order', 'DESC');
+
+        $reclamations = $reclamationRepository->searchReclamations($query, $sort, $order, $type);
+
+        $html = $this->renderView('reclamation/reclamation_pdf.html.twig', [
+            'reclamations' => $reclamations,
+        ]);
+
+        return new PdfResponse(
+            $knpSnappyPdf->getOutputFromHtml($html),
+            'reclamations-report.pdf',
+            'application/pdf',
+            'attachment'
+        );
     }
 }

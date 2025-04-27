@@ -1,0 +1,8 @@
+knp_snappy:
+    pdf:
+        enabled: true
+        binary: '"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"'
+        options:
+            no-outline: true
+            page-size: A4
+            encoding: UTF-8

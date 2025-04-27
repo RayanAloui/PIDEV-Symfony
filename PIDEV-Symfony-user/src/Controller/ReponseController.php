@@ -12,6 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Knp\Bundle\SnappyBundle\Snappy\Response\PdfResponse; // Added import
 
 #[Route('/reponse')]
 final class ReponseController extends AbstractController
@@ -50,45 +51,59 @@ final class ReponseController extends AbstractController
 
         return $this->render('reponse/admin/index.html.twig', [
             'reponses' => $reponses,
+            'query' => $query,
+            'sortField' => $sortField,
+            'sortOrder' => $sortOrder,
         ]);
     }
-
+    #[Route('/admin/statistics', name: 'app_reponse_admin_statistics', methods: ['GET'])]
+    public function statistics(ReponseRepository $reponseRepository): Response
+    {
+        $byStatus = $reponseRepository->countReponsesByStatut();
+        $chartData = [
+            'labels' => array_column($byStatus, 'statut'),
+            'counts' => array_map('intval', array_column($byStatus, 'reponseCount')),
+            'averageIndices' => array_map('floatval', array_column($byStatus, 'averageIndice')),
+        ];
+        return $this->render('reponse/admin/statistics.html.twig', [
+            'byStatus' => $byStatus,
+            'chartData' => json_encode($chartData),
+        ]);
+    }
     #[Route('/admin/new', name: 'app_reponse_admin_new', methods: ['GET', 'POST'])]
     public function adminNew(Request $request, EntityManagerInterface $entityManager): Response
-{
-    $reponse = new Reponse();
-    $form = $this->createForm(ReponseType::class, $reponse);
-    $form->handleRequest($request);
+    {
+        $reponse = new Reponse();
+        $form = $this->createForm(ReponseType::class, $reponse);
+        $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        $entityManager->persist($reponse);
-        $entityManager->flush();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($reponse);
+            $entityManager->flush();
 
-        // Send email to a fixed address (for now)
-        $recipient = 'sarahbelhadej19@gmail.com';
+            // Send email to a fixed address
+            $recipient = 'sarahbelhadej19@gmail.com';
+            $subject = 'Nouvelle réponse à votre réclamation';
+            $content = sprintf(
+                "<h2>Bonjour,</h2>
+                <p>Une réponse a été ajoutée à votre réclamation :</p>
+                <blockquote>%s</blockquote>
+                <p>Merci de nous avoir contactés.</p>
+                <p><em>L'équipe OrphenCare</em></p>",
+                nl2br($reponse->getDescription())
+            );
 
-        $subject = 'Nouvelle réponse à votre réclamation';
-        $content = sprintf("
-            <h2>Bonjour,</h2>
-            <p>Une réponse a été ajoutée à votre réclamation :</p>
-            <blockquote>%s</blockquote>
-            <p>Merci de nous avoir contactés.</p>
-            <p><em>L'équipe OrphenCare</em></p>
-        ", nl2br($reponse->getDescription()));
+            $this->emailService->sendEmail($recipient, $subject, $content);
 
-        $this->emailService->sendEmail($recipient, $subject, $content);
+            $this->addFlash('success', 'Réponse enregistrée et email envoyé.');
+            return $this->redirectToRoute('app_reponse_admin_index', [], Response::HTTP_SEE_OTHER);
+        }
 
-        $this->addFlash('success', 'Réponse enregistrée et email envoyé.');
-        return $this->redirectToRoute('app_reponse_admin_index', [], Response::HTTP_SEE_OTHER);
+        return $this->render('reponse/admin/new.html.twig', [
+            'reponse' => $reponse,
+            'form' => $form,
+        ]);
     }
-
-    return $this->render('reponse/admin/new.html.twig', [
-        'reponse' => $reponse,
-        'form' => $form,
-    ]);
-}
-
-    
 
     #[Route('/admin/{id}/edit', name: 'app_reponse_admin_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     public function adminEdit(Request $request, Reponse $reponse, EntityManagerInterface $entityManager): Response
@@ -125,5 +140,26 @@ final class ReponseController extends AbstractController
         }
 
         return $this->redirectToRoute('app_reponse_admin_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/admin/export/pdf', name: 'app_reponse_admin_export_pdf', methods: ['GET'])]
+    public function exportPdf(Request $request, ReponseRepository $reponseRepository, \Knp\Snappy\Pdf $knpSnappyPdf): Response
+    {
+        $query = $request->query->get('query', '');
+        $sortField = $request->query->get('sortField', 'date');
+        $sortOrder = $request->query->get('sortOrder', 'DESC');
+
+        $reponses = $reponseRepository->searchReponses($query, $sortField, $sortOrder);
+
+        $html = $this->renderView('reponse/reponse_pdf.html.twig', [
+            'reponses' => $reponses,
+        ]);
+
+        return new PdfResponse(
+            $knpSnappyPdf->getOutputFromHtml($html),
+            'reponses-report.pdf',
+            'application/pdf',
+            'attachment'
+        );
     }
 }
