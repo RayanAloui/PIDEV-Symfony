@@ -1,15 +1,13 @@
 <?php
+// src/Entity/Participant.php
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-
 use App\Repository\ParticipantRepository;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ParticipantRepository::class)]
-#[ORM\Table(name: 'participant')]
 class Participant
 {
     #[ORM\Id]
@@ -17,57 +15,38 @@ class Participant
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
+
+    #[ORM\ManyToOne(targetEntity: Activite::class)]
+    #[ORM\JoinColumn(name: 'idActivite', referencedColumnName: 'id', nullable: false)]
+    private ?Activite $activite = null;
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function setId(int $id): self
+    public function getUser(): ?User
     {
-        $this->id = $id;
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $nom = null;
-
-    public function getNom(): ?string
+    public function getActivite(): ?Activite
     {
-        return $this->nom;
+        return $this->activite;
     }
 
-    public function setNom(string $nom): self
+    public function setActivite(?Activite $activite): self
     {
-        $this->nom = $nom;
+        $this->activite = $activite;
         return $this;
     }
-
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $prenom = null;
-
-    public function getPrenom(): ?string
-    {
-        return $this->prenom;
-    }
-
-    public function setPrenom(string $prenom): self
-    {
-        $this->prenom = $prenom;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $age = null;
-
-    public function getAge(): ?int
-    {
-        return $this->age;
-    }
-
-    public function setAge(?int $age): self
-    {
-        $this->age = $age;
-        return $this;
-    }
-
 }

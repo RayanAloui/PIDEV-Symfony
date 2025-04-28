@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<h2>Statistiques des réclamations</h2>
+
+<a href="{{ path('app_reclamation_admin_index') }}" class="btn btn-primary mb-3">
+    <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+</a>
+
+<h3>Réclamations par type</h3>
+<canvas id="reclamationsChart" width="400" height="200"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+    const ctx = document.getElementById('reclamationsChart').getContext('2d');
+    const chartData = {{ chartData|raw }};
+
+    new Chart(ctx, {
+        type: 'bar', // Change to 'pie' for a pie chart
+        data: {
+            labels: chartData.labels,
+            datasets: [{
+                label: 'Nombre de réclamations',
+                data: chartData.counts,
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Réclamations par type'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Nombre'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Type'
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+<h3>Détails par type</h3>
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Nombre</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in byType %}
+            <tr>
+                <td>{{ item.type }}</td>
+                <td>{{ item.count }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="2">Aucune donnée disponible</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

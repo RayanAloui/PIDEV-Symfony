@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Activité{% endblock %}
+
+{% block body %}
+<style>
+    /* Back to List Link */
+    .back-link {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #6f4f28;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .back-link:hover {
+        background-color: rgb(215, 141, 13);
+    }
+
+    /* Delete Form Container Styles */
+    .delete-form-container {
+        margin-top: 30px;
+        text-align: center;
+    }
+
+    .delete-form-container .btn-delete {
+        padding: 14px;
+        width: 100%;
+        background-color: #e74c3c; /* Red for delete */
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-top: 20px;
+    }
+
+    .delete-form-container .btn-delete:hover {
+        background-color: #c0392b; /* Darker red on hover */
+    }
+</style>
+
+<div class="container">
+    <h1>Modifier Activité</h1>
+
+    <!-- Back to List Link -->
+    <a href="{{ path('app_activite_index') }}" class="back-link">
+        ← Retour à la liste
+    </a>
+
+    <!-- Edit Activité Form -->
+    {{ include('activite/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+
+    <!-- Delete Form -->
+    <div class="delete-form-container">
+        {{ include('activite/_delete_form.html.twig') }}
+    </div>
+</div>
+
+{% endblock %}

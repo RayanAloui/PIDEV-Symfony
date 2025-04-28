@@ -1,0 +1,66 @@
+{% extends 'back.html.twig' %}
+
+{% block title %}Tuteurs QR{% endblock %}
+
+{% block body %}
+<div class="min-h-screen bg-gray-50 p-8">
+    <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">Liste des Tuteurs avec QR Code</h1>
+
+    <a href="{{ path('app_crud_tuteur') }}" class="btn btn-danger mb-4 inline-block bg-red-600 text-white p-3 rounded-full shadow-md hover:bg-red-700 transition duration-300">Retour à la Liste des Tuteurs</a>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8">
+        {% for tuteur in tuteurs %}
+            <div class="bg-white rounded-2xl shadow-lg p-8 flex flex-col items-center text-center transition-all hover:shadow-2xl hover:-translate-y-2 duration-300">
+                <!-- En-tête -->
+                <div class="mb-6">
+                     <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ tuteur.nomT }} {{ tuteur.prenomT }}</h2>
+                </div>
+
+                <!-- QR Code -->
+                {% set qrData = {
+                    "CIN ": tuteur.cinT,
+                    "Nom ": tuteur.nomT,
+                    "Prenom ": tuteur.prenomT,
+                    "Email ": tuteur.email,
+                    "Telephone ": tuteur.telephoneT,
+                    "Disponibilite ": tuteur.disponibilite,
+                    "Adresse ": tuteur.adresseT
+                }|json_encode %}
+
+                <div class="relative w-full flex-1 flex items-center justify-center">
+                    <img src="{{ qr_code_data_uri(qrData) }}" 
+                         alt="QR Code" 
+                         class="rounded-xl border-2 border-gray-100 p-3 bg-white shadow-inner hover:shadow-md transition duration-200"
+                         style="min-width: 160px; min-height: 160px">
+                </div>
+
+                <!-- Footer -->
+                <div class="mt-6 w-full">
+                    <p class="text-sm text-gray-500 mb-4">
+                        Scanner pour les détails complets
+                    </p>
+                    
+                    <button 
+                        onclick="downloadQRImage('{{ qr_code_data_uri(qrData) }}')" 
+                        class="w-full bg-emerald-600 text-white py-3 px-6 rounded-xl text-sm font-semibold hover:bg-emerald-700 transition duration-200 shadow-md">
+                        📥 Télécharger
+                    </button>
+                </div>
+            </div>
+            <p></p>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function downloadQRImage(url) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `qr_code_${Date.now()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+{% endblock %}

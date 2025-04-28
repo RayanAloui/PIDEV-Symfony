@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ActiviteRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-
-use App\Repository\ActiviteRepository;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ActiviteRepository::class)]
 #[ORM\Table(name: 'activite')]
@@ -17,19 +17,50 @@ class Activite
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\NotBlank]
+    private ?string $nom = null;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\NotBlank]
+    private ?string $categorie = null;
+
+    #[ORM\Column(type: 'integer')]
+    #[Assert\Positive]
+    private ?int $duree = null;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\NotBlank]
+    private ?string $nomDuTuteur = null;
+
+    #[ORM\Column(type: 'string')]
+    #[Assert\NotBlank]
+    private ?string $dateActivite = null;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\NotBlank]
+    private ?string $lieu = null;
+
+    #[ORM\Column(type: 'text')]
+    #[Assert\NotBlank]
+    private ?string $description = null;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\NotBlank]
+    private ?string $statut = null;
+
+    #[ORM\OneToMany(mappedBy: 'activite', targetEntity: Participant::class, cascade: ['persist', 'remove'])]
+    private Collection $participants;
+
+    public function __construct()
+    {
+        $this->participants = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
-
-    public function setId(int $id): self
-    {
-        $this->id = $id;
-        return $this;
-    }
-
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $nom = null;
 
     public function getNom(): ?string
     {
@@ -42,9 +73,6 @@ class Activite
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $categorie = null;
-
     public function getCategorie(): ?string
     {
         return $this->categorie;
@@ -56,50 +84,38 @@ class Activite
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $duree = null;
-
-    public function getDuree(): ?string
+    public function getDuree(): ?int
     {
         return $this->duree;
     }
 
-    public function setDuree(string $duree): self
+    public function setDuree(int $duree): self
     {
         $this->duree = $duree;
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $nom_du_tuteur = null;
-
-    public function getNom_du_tuteur(): ?string
+    public function getNomDuTuteur(): ?string
     {
-        return $this->nom_du_tuteur;
+        return $this->nomDuTuteur;
     }
 
-    public function setNom_du_tuteur(string $nom_du_tuteur): self
+    public function setNomDuTuteur(string $nomDuTuteur): self
     {
-        $this->nom_du_tuteur = $nom_du_tuteur;
+        $this->nomDuTuteur = $nomDuTuteur;
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $date_activite = null;
-
-    public function getDate_activite(): ?string
+    public function getDateActivite(): ?string
     {
-        return $this->date_activite;
+        return $this->dateActivite;
     }
 
-    public function setDate_activite(string $date_activite): self
+    public function setDateActivite(string $dateActivite): self
     {
-        $this->date_activite = $date_activite;
+        $this->dateActivite = $dateActivite;
         return $this;
     }
-
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $lieu = null;
 
     public function getLieu(): ?string
     {
@@ -112,9 +128,6 @@ class Activite
         return $this;
     }
 
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $description = null;
-
     public function getDescription(): ?string
     {
         return $this->description;
@@ -125,9 +138,6 @@ class Activite
         $this->description = $description;
         return $this;
     }
-
-    #[ORM\Column(type: 'string', nullable: false)]
-    private ?string $statut = null;
 
     public function getStatut(): ?string
     {
@@ -140,28 +150,33 @@ class Activite
         return $this;
     }
 
-    public function getNomDuTuteur(): ?string
+    /**
+     * @return Collection<int, Participant>
+     */
+    public function getParticipants(): Collection
     {
-        return $this->nom_du_tuteur;
+        return $this->participants;
     }
 
-    public function setNomDuTuteur(string $nom_du_tuteur): static
+    public function addParticipant(Participant $participant): self
     {
-        $this->nom_du_tuteur = $nom_du_tuteur;
+        if (!$this->participants->contains($participant)) {
+            $this->participants->add($participant);
+            $participant->setActivite($this);
+        }
 
         return $this;
     }
 
-    public function getDateActivite(): ?string
+    public function removeParticipant(Participant $participant): self
     {
-        return $this->date_activite;
-    }
-
-    public function setDateActivite(string $date_activite): static
-    {
-        $this->date_activite = $date_activite;
+        if ($this->participants->removeElement($participant)) {
+            // set the owning side to null (unless already changed)
+            if ($participant->getActivite() === $this) {
+                $participant->setActivite(null);
+            }
+        }
 
         return $this;
     }
-
 }

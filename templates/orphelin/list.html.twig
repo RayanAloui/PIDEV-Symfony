@@ -94,144 +94,145 @@
     }
 
     /* Conteneur du formulaire */
-.form-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
+    .form-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
 
-/* Champ de recherche */
-input[type="search"] {
-    flex-grow: 1;
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    transition: border 0.3s ease;
-}
+    /* Barre de recherche */
+    .search-container {
+        position: relative;
+        margin-bottom: 20px;
+        margin-top: 20px;
+    }
 
-input[type="search"]:focus {
-    border-color: #b08968;
-    outline: none;
-}
+    .search-input {
+        width: 100%;
+        padding: 10px 35px 10px 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        transition: border 0.3s ease;
+    }
 
-/* Bouton de recherche */
-button {
-    background-color: #b08968;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    font-size: 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
+    .search-input:focus {
+        border-color: #b08968;
+        outline: none;
+    }
 
-button:hover {
-    background-color: #b08968;
-}
+    #clearSearch {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #999;
+        font-weight: bold;
+    }
 
-    .search-bar {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
+    #loadingIndicator {
+        display: none;
+        position: absolute;
+        right: 40px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
 
-/* Style des boutons */
-.chart-button {
-    background-color: #4CAF50;
-    color: white;
-    padding: 14px 20px;
-    margin: 10px;
-    font-size: 18px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
+    /* Style des boutons */
+    .chart-button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 14px 20px;
+        margin: 10px;
+        font-size: 18px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
 
-.chart-button:hover {
-    background-color: #45a049;
-}
+    .chart-button:hover {
+        background-color: #45a049;
+    }
 
-/* Espacement et taille des graphiques */
-canvas {
-    width: 100% !important;
-    height: 450px !important; /* Taille du graphique */
-    margin: 40px 0; /* Espacement autour des graphiques */
-}
+    /* Espacement et taille des graphiques */
+    canvas {
+        width: 100% !important;
+        height: 450px !important; /* Taille du graphique */
+        margin: 40px 0; /* Espacement autour des graphiques */
+    }
 
-/* Spécifier le conteneur des graphiques */
-#pieChartContainer, #barChartContainer, #lineChartContainer {
-    margin-bottom: 40px; /* Ajout d'espace entre chaque graphique */
-    border: 2px solid #ddd; /* Bordure légère autour des graphiques */
-    border-radius: 10px; /* Coins arrondis pour les graphiques */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombre douce pour donner un effet de profondeur */
-}
+    /* Spécifier le conteneur des graphiques */
+    #pieChartContainer, #barChartContainer, #lineChartContainer {
+        margin-bottom: 40px; /* Ajout d'espace entre chaque graphique */
+        border: 2px solid #ddd; /* Bordure légère autour des graphiques */
+        border-radius: 10px; /* Coins arrondis pour les graphiques */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombre douce pour donner un effet de profondeur */
+    }
 
-/* Titre des graphiques */
-h3 {
-    text-align: center;
-    font-size: 30px;
-    font-weight: bold;
-    margin-bottom: 30px;
-}
+    /* Titre des graphiques */
+    h3 {
+        text-align: center;
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 30px;
+    }
 
+    /* Indicateurs de tri */
+    .sort-indicator {
+        margin-left: 5px;
+        display: inline-block;
+    }
 </style>
 
 <body>
     <div class="container">
         <h1>Liste des Orphelins</h1>
-        <a href="{{ path('app_crud_orphelin_add') }}" class="btn btn-warning">Ajouter un Orphelin</a>
-
-        <a href="{{ path('orphelins_pdf') }}" class="btn btn-danger">📄 Exporter en PDF</a>
-
-        <a href="{{ path('app_crud_tuteur') }}" class="btn btn-danger">Liste des tuteurs</a>
-
-        <a href="{{ path('app_crud_cours') }}" class="btn btn-danger">Liste des cours</a>
 
         <p></p>
 
-        {{ form_start(form) }}
-            {{ form_widget(form.query) }}
-        {{ form_end(form) }}
+        <a href="{{ path('app_crud_orphelin_add') }}" class="btn btn-warning">Ajouter un Orphelin</a>
+        <a href="{{ path('orphelins_pdf') }}" class="btn btn-danger">📄 Exporter en PDF</a>
+        <a href="{{ path('app_crud_tuteur') }}" class="btn btn-danger">Liste des tuteurs</a>
+        <a href="{{ path('app_crud_cours') }}" class="btn btn-danger">Liste des cours</a>
+        <a href="{{ path('app_orphelins_qr') }}" class="btn btn-danger">QR Code</a>
+
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Rechercher par nom, prénom, tuteur ou date (JJ/MM/AAAA)...">
+            <span id="clearSearch">✖</span>
+            <span id="loadingIndicator">
+                <img src="{{ asset('images/loading.gif') }}" alt="Chargement..." width="20" height="20">
+            </span>
+        </div>
         
-        <table>
+        <table id="orphelinsTable">
             <thead>
                 <tr>
-                     <th>
-                     <a href="{{ path('app_crud_orphelin', { sort: 'nomO', order: sortOrder == 'asc' ? 'desc' : 'asc' }) }}">
-                        Nom {{ sortField == 'nomO' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}
-                     </a>
-                     </th>
                     <th>
-                    <a href="{{ path('app_crud_orphelin', { sort: 'prenomO', order: sortOrder == 'asc' ? 'desc' : 'asc' }) }}">
-                      Prénom {{ sortField == 'prenomO' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}
-                    </a>
+                        <span class="sort-link" data-field="nomO">Nom</span>
+                        <span class="sort-indicator">{{ sortField == 'nomO' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}</span>
                     </th>
                     <th>
-                    <a href="{{ path('app_crud_orphelin', { sort: 'dateNaissance', order: sortOrder == 'asc' ? 'desc' : 'asc' }) }}">
-                         Date de naissance {{ sortField == 'dateNaissance' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}
-                    </a>
+                        <span class="sort-link" data-field="prenomO">Prénom</span>
+                        <span class="sort-indicator">{{ sortField == 'prenomO' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}</span>
                     </th>
                     <th>
-                    <a href="{{ path('app_crud_orphelin', { sort: 'sexe', order: sortOrder == 'asc' ? 'desc' : 'asc' }) }}">
-                         Sexe {{ sortField == 'sexe' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}
-                    </a>
+                        <span class="sort-link" data-field="dateNaissance">Date de naissance</span>
+                        <span class="sort-indicator">{{ sortField == 'dateNaissance' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}</span>
                     </th>
                     <th>
-                    <a href="{{ path('app_crud_orphelin', { sort: 'situationScolaire', order: sortOrder == 'asc' ? 'desc' : 'asc' }) }}">
-                         Situation Scolaire {{ sortField == 'situationScolaire' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}
-                    </a>
+                        <span class="sort-link" data-field="sexe">Sexe</span>
+                        <span class="sort-indicator">{{ sortField == 'sexe' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}</span>
                     </th>
                     <th>
-                    <a href="{{ path('app_crud_orphelin', { sort: 'tuteur', order: sortOrder == 'asc' ? 'desc' : 'asc' }) }}">
-                         Tuteur {{ sortField == 'tuteur' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}
-                    </a>
+                        <span class="sort-link" data-field="situationScolaire">Situation Scolaire</span>
+                        <span class="sort-indicator">{{ sortField == 'situationScolaire' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}</span>
+                    </th>
+                    <th>
+                        <span class="sort-link" data-field="tuteur">Tuteur</span>
+                        <span class="sort-indicator">{{ sortField == 'tuteur' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}</span>
                     </th>
                     <th>Actions</th>
                 </tr>
@@ -282,187 +283,229 @@ h3 {
 
         <h3>📊 Statistiques Graphiques</h3>
 
-<!-- Boutons pour changer de graphique -->
-<div style="text-align: center;">
-    <button id="pieButton" class="chart-button">Pie Chart</button>
-    <button id="barButton" class="chart-button">Bar Chart</button>
-    <button id="lineButton" class="chart-button">Line Chart</button>
-</div>
+        <!-- Boutons pour changer de graphique -->
+        <div style="text-align: center;">
+            <button id="pieButton" class="chart-button">Pie Chart</button>
+            <button id="barButton" class="chart-button">Bar Chart</button>
+            <button id="lineButton" class="chart-button">Line Chart</button>
+        </div>
 
-<!-- Conteneurs des graphiques -->
-<div id="pieChartContainer" style="display: none;">
-    <canvas id="pieChart"></canvas>
-</div>
-<div id="barChartContainer" style="display: none;">
-    <canvas id="barChart"></canvas>
-</div>
-<div id="lineChartContainer" style="display: none;">
-    <canvas id="lineChart"></canvas>
-</div>
+        <!-- Conteneurs des graphiques -->
+        <div id="pieChartContainer" style="display: none;">
+            <canvas id="pieChart"></canvas>
+        </div>
+        <div id="barChartContainer" style="display: none;">
+            <canvas id="barChart"></canvas>
+        </div>
+        <div id="lineChartContainer" style="display: none;">
+            <canvas id="lineChart"></canvas>
+        </div>
 
-<!-- Inclure Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <!-- Inclure Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        fetch("{{ path('app_orphelin_stats') }}")
-            .then(response => response.json())
-            .then(data => {
-                const labels = data.labels;
-                const counts = data.counts;
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                fetch("{{ path('app_orphelin_stats') }}")
+                    .then(response => response.json())
+                    .then(data => {
+                        const labels = data.labels;
+                        const counts = data.counts;
 
-                // 🎯 Configuration des options de base pour les graphiques
-                const config = (type, ctx, title) => ({
-                    type: type,
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Nombre d\'orphelins',
-                            data: counts,
-                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#9C27B0'],
-                            borderColor: '#000',
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: title,  // Titre pour chaque graphique
-                                font: {
-                                    size: 22,
-                                    weight: 'bold'
-                                }
+                        // 🎯 Configuration des options de base pour les graphiques
+                        const config = (type, ctx, title) => ({
+                            type: type,
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Nombre d\'orphelins',
+                                    data: counts,
+                                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#9C27B0'],
+                                    borderColor: '#000',
+                                    borderWidth: 2
+                                }]
                             },
-                            legend: {
-                                display: true,
-                                position: 'top', // Afficher la légende en haut
-                                labels: {
-                                    font: {
-                                        size: 18
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    title: {
+                                        display: true,
+                                        text: title,  // Titre pour chaque graphique
+                                        font: {
+                                            size: 22,
+                                            weight: 'bold'
+                                        }
+                                    },
+                                    legend: {
+                                        display: true,
+                                        position: 'top', // Afficher la légende en haut
+                                        labels: {
+                                            font: {
+                                                size: 18
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            font: {
+                                                size: 18
+                                            }
+                                        }
+                                    },
+                                    x: {
+                                        ticks: {
+                                            font: {
+                                                size: 18
+                                            }
+                                        }
                                     }
                                 }
                             }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    font: {
-                                        size: 18
-                                    }
-                                }
-                            },
-                            x: {
-                                ticks: {
-                                    font: {
-                                        size: 18
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
+                        });
 
-                // 📌 Pie Chart
-                const pieChart = new Chart(document.getElementById('pieChart'), config('pie', 'pieChart', 'Répartition des orphelins par tuteur'));
+                        // 📌 Pie Chart
+                        const pieChart = new Chart(document.getElementById('pieChart'), config('pie', 'pieChart', 'Répartition des orphelins par tuteur'));
 
-                // 📌 Bar Chart
-                const barChart = new Chart(document.getElementById('barChart'), config('bar', 'barChart', 'Nombre d\'orphelins par tuteur'));
+                        // 📌 Bar Chart
+                        const barChart = new Chart(document.getElementById('barChart'), config('bar', 'barChart', 'Nombre d\'orphelins par tuteur'));
 
-                // 📌 Line Chart
-                const lineChart = new Chart(document.getElementById('lineChart'), config('line', 'lineChart', 'Évolution du nombre d\'orphelins par tuteur'));
+                        // 📌 Line Chart
+                        const lineChart = new Chart(document.getElementById('lineChart'), config('line', 'lineChart', 'Évolution du nombre d\'orphelins par tuteur'));
 
-                // Logique pour afficher/masquer les graphiques en fonction des boutons
-                const pieButton = document.getElementById('pieButton');
-                const barButton = document.getElementById('barButton');
-                const lineButton = document.getElementById('lineButton');
+                        // Logique pour afficher/masquer les graphiques en fonction des boutons
+                        const pieButton = document.getElementById('pieButton');
+                        const barButton = document.getElementById('barButton');
+                        const lineButton = document.getElementById('lineButton');
 
-                const pieChartContainer = document.getElementById('pieChartContainer');
-                const barChartContainer = document.getElementById('barChartContainer');
-                const lineChartContainer = document.getElementById('lineChartContainer');
+                        const pieChartContainer = document.getElementById('pieChartContainer');
+                        const barChartContainer = document.getElementById('barChartContainer');
+                        const lineChartContainer = document.getElementById('lineChartContainer');
 
-                // Cacher tous les graphiques au départ
-                pieChartContainer.style.display = 'none';
-                barChartContainer.style.display = 'none';
-                lineChartContainer.style.display = 'none';
+                        // Cacher tous les graphiques au départ
+                        pieChartContainer.style.display = 'none';
+                        barChartContainer.style.display = 'none';
+                        lineChartContainer.style.display = 'none';
 
-                // Afficher le PieChart lorsqu'on clique sur le bouton
-                pieButton.addEventListener('click', () => {
-                    pieChartContainer.style.display = 'block';
-                    barChartContainer.style.display = 'none';
-                    lineChartContainer.style.display = 'none';
-                });
+                        // Afficher le PieChart lorsqu'on clique sur le bouton
+                        pieButton.addEventListener('click', () => {
+                            pieChartContainer.style.display = 'block';
+                            barChartContainer.style.display = 'none';
+                            lineChartContainer.style.display = 'none';
+                        });
 
-                // Afficher le BarChart lorsqu'on clique sur le bouton
-                barButton.addEventListener('click', () => {
-                    pieChartContainer.style.display = 'none';
-                    barChartContainer.style.display = 'block';
-                    lineChartContainer.style.display = 'none';
-                });
+                        // Afficher le BarChart lorsqu'on clique sur le bouton
+                        barButton.addEventListener('click', () => {
+                            pieChartContainer.style.display = 'none';
+                            barChartContainer.style.display = 'block';
+                            lineChartContainer.style.display = 'none';
+                        });
 
-                // Afficher le LineChart lorsqu'on clique sur le bouton
-                lineButton.addEventListener('click', () => {
-                    pieChartContainer.style.display = 'none';
-                    barChartContainer.style.display = 'none';
-                    lineChartContainer.style.display = 'block';
-                });
-            })
-            .catch(error => {
-                console.error("Erreur lors de la récupération des données:", error);
+                        // Afficher le LineChart lorsqu'on clique sur le bouton
+                        lineButton.addEventListener('click', () => {
+                            pieChartContainer.style.display = 'none';
+                            barChartContainer.style.display = 'none';
+                            lineChartContainer.style.display = 'block';
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Erreur lors de la récupération des données:", error);
+                    });
             });
-    });
-</script>
-
-
-
-
+        </script>
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const searchInput = document.querySelector(".search-input");
-            const orphelinsList = document.getElementById("orphelins-list");
-
-            searchInput.addEventListener("input", function () {
-                let query = this.value.trim();
-
-                if (query === '') {
-        fetch('/orphelin/list') 
-            .then(response => response.text())
-            .then(html => {
-                let parser = new DOMParser();
-                let doc = parser.parseFromString(html, 'text/html');
-                let tbody = doc.querySelector('#orphelinsList'); 
-                document.getElementById('orphelinsList').innerHTML = tbody.innerHTML;
-            });
-        return;
-    }
-
-                fetch(`/orphelins/search?query=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        orphelinsList.innerHTML = ""; // Effacer le tableau avant d'ajouter de nouveaux résultats
-
-                        if (data.orphelins.length === 0) {
-                            orphelinsList.innerHTML = "<tr><td colspan='5'>Aucun orphelin trouvé.</td></tr>";
-                            return;
-                        }
-
-                        data.orphelins.forEach(orphelin => {
-                            let row = `<tr>
-                                <td>${orphelin.nomO}</td>
-                                <td>${orphelin.prenomO}</td>
-                                <td>${orphelin.dateNaissance}</td>
-                            </tr>`;
-                            orphelinsList.innerHTML += row;
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const clearSearch = document.getElementById('clearSearch');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const tbody = document.querySelector('#orphelinsTable tbody');
+            let currentSortField = '{{ sortField }}';
+            let currentSortOrder = '{{ sortOrder }}';
+            let searchTimeout;
+            
+            // Fonction pour effectuer la recherche
+            function performSearch() {
+                const query = searchInput.value.trim();
+                clearTimeout(searchTimeout);
+                
+                loadingIndicator.style.display = 'inline-block';
+                
+                searchTimeout = setTimeout(() => {
+                    fetch(`{{ path('app_orphelins_search') }}?query=${encodeURIComponent(query)}&sort=${currentSortField}&order=${currentSortOrder}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            updateTable(data);
+                            loadingIndicator.style.display = 'none';
+                        })
+                        .catch(error => {
+                            console.error('Erreur lors de la recherche:', error);
+                            loadingIndicator.style.display = 'none';
                         });
+                }, 300); // Délai pour éviter les requêtes multiples
+            }
+            
+            // Fonction pour mettre à jour le tableau avec les résultats
+            function updateTable(results) {
+                tbody.innerHTML = '';
+                
+                if (results.length === 0) {
+                    const noResultsRow = document.createElement('tr');
+                    noResultsRow.id = 'no-results';
+                    noResultsRow.innerHTML = `<td colspan="7" class="no-data">Aucun orphelin trouvé</td>`;
+                    tbody.appendChild(noResultsRow);
+                } else {
+                    results.forEach(orphelin => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${orphelin.nom}</td>
+                            <td>${orphelin.prenom}</td>
+                            <td>${orphelin.dateNaissance}</td>
+                            <td>${orphelin.sexe}</td>
+                            <td>${orphelin.situationScolaire || ''}</td>
+                            <td>${orphelin.tuteur}</td>
+                            <td class="actions">
+                                <a href="/orphelin/delete/${orphelin.id}" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer cet orphelin ?');">Supprimer</a>
+                                <a href="${orphelin.editUrl}" class="btn btn-info">Modifier</a>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
                     });
+                }
+            }
+            
+            // Gestion du tri
+            document.querySelectorAll('.sort-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    const field = this.getAttribute('data-field');
+                    const newOrder = (field === currentSortField && currentSortOrder === 'asc') ? 'desc' : 'asc';
+                    
+                    currentSortField = field;
+                    currentSortOrder = newOrder;
+                    
+                    // Mise à jour des indicateurs de tri
+                    document.querySelectorAll('.sort-indicator').forEach(indicator => {
+                        indicator.textContent = '';
+                    });
+                    this.nextElementSibling.textContent = (newOrder === 'asc') ? '🔼' : '🔽';
+                    
+                    performSearch();
+                });
+            });
+            
+            // Évènement de recherche
+            searchInput.addEventListener('input', performSearch);
+            
+            // Évènement pour effacer la recherche
+            clearSearch.addEventListener('click', function() {
+                searchInput.value = '';
+                performSearch();
             });
         });
     </script>
 </body>
-
 {% endblock %}

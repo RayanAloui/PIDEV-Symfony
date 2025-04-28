@@ -19,27 +19,48 @@ class OrphelinRepository extends ServiceEntityRepository
     public function searchOrphelins(string $query, string $sortField = 'nomO', string $sortOrder = 'asc')
     {
         $qb = $this->createQueryBuilder('o')
-            ->leftJoin('o.tuteur', 't') // Joindre la table Tuteur
-            ->addSelect('t') // Récupérer les données du tuteur pour les afficher
+            ->leftJoin('o.tuteur', 't')
+            ->addSelect('t');
 
-            // Correction du tri sur le tuteur
-            ->orderBy(
-                $sortField === 'tuteur' ? 't.nomT' : "o.$sortField",
-                $sortOrder
-            );
+        // Gestion du tri
+        if ($sortField === 'tuteur') {
+            $qb->orderBy('t.nomT', $sortOrder)
+                ->addOrderBy('t.prenomT', $sortOrder);
+        } else {
+            // Assurez-vous que le champ de tri existe dans l'entité
+            if (property_exists('App\Entity\Orphelin', $sortField)) {
+                $qb->orderBy("o.$sortField", $sortOrder);
+            } else {
+                // Tri par défaut
+                $qb->orderBy('o.nomO', $sortOrder);
+            }
+        }
 
-        // Gestion de la recherche par Nom, Prénom et Nom du Tuteur
-        $qb->where('o.nomO LIKE :query')
-            ->orWhere('o.prenomO LIKE :query')
-            ->orWhere('t.nomT LIKE :query') // Recherche par Tuteur
-            ->setParameter('query', "%$query%");
+        // Si la requête n'est pas vide
+        if (!empty($query)) {
+            $qb->andWhere($qb->expr()->orX(
+                $qb->expr()->like('o.nomO', ':query'),
+                $qb->expr()->like('o.prenomO', ':query'),
+                $qb->expr()->like('t.nomT', ':query'),
+                $qb->expr()->like('t.prenomT', ':query'),
+                // Recherche par nom prénom du tuteur
+                $qb->expr()->like('CONCAT(t.nomT, \' \', t.prenomT)', ':query')
+            ))
+                ->setParameter('query', "%$query%");
 
-        // ✅ Vérification si l'entrée est une date (JJ/MM/AAAA)
-        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $query)) {
-            $dateParts = explode('/', $query);
-            $formattedDate = "{$dateParts[2]}-{$dateParts[1]}-{$dateParts[0]}"; // Convertir JJ/MM/AAAA → YYYY-MM-DD
-            $qb->orWhere('o.dateNaissance = :dateNaissance')
-                ->setParameter('dateNaissance', $formattedDate);
+            // Vérifier si la recherche est une date au format JJ/MM/AAAA
+            if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $query)) {
+                try {
+                    $dateParts = explode('/', $query);
+                    $formattedDate = "{$dateParts[2]}-{$dateParts[1]}-{$dateParts[0]}";
+
+                    // Ajouter la condition de recherche par date
+                    $qb->orWhere('o.dateNaissance = :dateNaissance')
+                        ->setParameter('dateNaissance', new \DateTime($formattedDate));
+                } catch (\Exception $e) {
+                    // La date n'est pas valide, on ignore cette partie de la recherche
+                }
+            }
         }
 
         return $qb->getQuery()->getResult();
