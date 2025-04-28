@@ -1,0 +1,229 @@
+{% extends 'back.html.twig' %}
+
+{% block body %}
+
+<style>
+     .btn {
+        display: inline-block;
+        padding: 10px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .btn-warning {
+        background-color: #d4a373; /* Marron clair */
+        color: white;
+    }
+
+    .btn-warning:hover {
+        background-color: #b08968;
+    }
+
+    .btn-danger {
+        background-color: #a23e48;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #822727;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-family: Arial, sans-serif;
+    }
+
+    table th, table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    table th {
+        background-color: #8d6c5b;
+        color: white;
+        font-weight: bold;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #f5f5f5;
+    }
+
+    table tr:hover {
+        background-color: #f0f0f0;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 3px 7px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: bold;
+        background-color: #4a6fa5;
+        color: white;
+    }
+     .search-container {
+        margin: 20px 0;
+        display: flex;
+        align-items: center;
+    }
+    
+    .search-input {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        width: 300px;
+        font-size: 14px;
+    }
+    
+    .search-clear {
+        margin-left: 10px;
+        color: #777;
+        cursor: pointer;
+    }
+    
+    .loading {
+        display: inline-block;
+        margin-left: 10px;
+        font-style: italic;
+        color: #777;
+        display: none;
+    }
+</style>
+<div class="container">
+    <center><h1>Liste des Événements</h1></center>
+    <a href="{{ path('app_crud_events_add') }}" class="btn btn-warning">Ajouter un Événement</a>
+     <p></p>
+
+     <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Rechercher un événement..." value="{{ query|default('') }}">
+        <span id="clearSearch" class="search-clear" title="Effacer la recherche">❌</span>
+        <span id="loadingIndicator" class="loading">Recherche en cours...</span>
+    </div>
+    <p></p>
+
+<table id="eventsTable">
+    <thead>
+        <tr>
+            
+            <th>Nom</th>
+            <th>Date</th>
+            <th>Lieu</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for event in events %}
+            <tr>
+                
+                <td>{{ event.nom }}</td>
+                <td>{{ event.dateEvent|date('d/m/Y') }}</td>
+                <td>{{ event.lieu }}</td>
+                <td>{{ event.description|slice(0, 30) }}{% if event.description|length > 30 %}...{% endif %}</td>
+                <td class="actions">
+                    <a href="{{ path('app_crud_events_edit', {'id': event.idEvent}) }}" class="btn btn-warning">Modifier</a>
+                    <a href="{{ path('app_crud_events_pdf', {'id': event.idEvent}) }}" class="btn" style="background-color: #4a6fa5; color: white;">PDF</a>
+                    <a href="{{ path('app_crud_events_delete', {'id': event.idEvent}) }}" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer cet événement ?');">Supprimer</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 15px; color: #777;">Aucun événement trouvé</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const clearSearch = document.getElementById('clearSearch');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const tbody = document.querySelector('#eventsTable tbody');
+    let currentSortField = '{{ sortField|default('nom') }}';
+    let currentSortOrder = '{{ sortOrder|default('asc') }}';
+    let searchTimeout;
+    
+    // Fonction pour effectuer la recherche
+    function performSearch() {
+        const query = searchInput.value.trim();
+        clearTimeout(searchTimeout);
+        
+        loadingIndicator.style.display = 'inline-block';
+        
+        searchTimeout = setTimeout(() => {
+            fetch(`{{ path('app_crud_events_search') }}?query=${encodeURIComponent(query)}&sort=${currentSortField}&order=${currentSortOrder}`)
+                .then(response => response.json())
+                .then(data => {
+                    updateTable(data);
+                    loadingIndicator.style.display = 'none';
+                })
+                .catch(error => {
+                    console.error('Erreur lors de la recherche:', error);
+                    loadingIndicator.style.display = 'none';
+                });
+        }, 300); // Délai pour éviter les requêtes multiples
+    }
+    
+    // Fonction pour mettre à jour le tableau avec les résultats
+    function updateTable(results) {
+        tbody.innerHTML = '';
+        
+        if (results.length === 0) {
+            const noResultsRow = document.createElement('tr');
+            noResultsRow.innerHTML = `<td colspan="5" style="text-align: center; padding: 15px; color: #777;">Aucun événement trouvé</td>`;
+            tbody.appendChild(noResultsRow);
+        } else {
+            results.forEach(event => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${event.nom}</td>
+                    <td>${event.dateEvent}</td>
+                    <td>${event.lieu}</td>
+                    <td>${event.description}</td>
+                    <td class="actions">
+                        <a href="${event.editUrl}" class="btn btn-warning">Modifier</a>
+                        <a href="${event.deleteUrl}" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer cet événement ?');">Supprimer</a>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+    }
+    
+    // Gestion du tri
+    document.querySelectorAll('.sort-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const field = this.dataset.field;
+            const newOrder = (field === currentSortField && currentSortOrder === 'asc') ? 'desc' : 'asc';
+            
+            currentSortField = field;
+            currentSortOrder = newOrder;
+            
+            // Mise à jour des indicateurs de tri
+            document.querySelectorAll('.sort-indicator').forEach(indicator => {
+                indicator.textContent = '';
+            });
+            this.querySelector('.sort-indicator').textContent = (newOrder === 'asc') ? '🔼' : '🔽';
+            
+            performSearch();
+        });
+    });
+    
+    // Évènement de recherche
+    searchInput.addEventListener('input', performSearch);
+    
+    // Évènement pour effacer la recherche
+    clearSearch.addEventListener('click', function() {
+        searchInput.value = '';
+        performSearch();
+    });
+});
+</script>
+{% endblock %}

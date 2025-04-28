@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+     {% block style %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #faefe0;
+            transition: background 0.3s ease;
+        }
+        .topbar {
+    width: 100%;
+    height: 60px;
+    background: #e6c49a; /* Changed this line */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+        .topbar h1 {
+    font-size: 22px;
+    margin: 0;
+    font-weight: bold; /* Makes the title bold */
+    color: black; /* Changes the title color to black */
+}
+
+        .logout-btn {
+            background: red;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: #e6c49a;
+            color: white;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            padding: 30px 20px;
+            transition: width 0.3s ease;
+            overflow: hidden;
+            box-shadow: 4px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+        .sidebar h2 {
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            padding: 15px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            transition: background 0.3s ease;
+            cursor: pointer;
+        }
+        .sidebar ul li:hover, .sidebar ul li.active {
+            background: #efa54f;
+        }
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .sidebar ul li i {
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        .content {
+            margin-left: 270px;
+            margin-top: 80px;
+            padding: 40px;
+            transition: margin-left 0.3s ease;
+        }
+        .notification-day-group {
+        margin-bottom: 40px;
+    }
+
+    .notification-date-header {
+        background-color: #d6b78a;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+    }
+
+    .notification-card {
+        background-color: white;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .notification-card h6 {
+        font-size: 1.1rem;
+        color: #3e4a61;
+    }
+
+    .notification-card p {
+        margin: 5px 0;
+    }
+
+    .notification-card small {
+        color: #666;
+    }
+
+    .btn-warning {
+        background-color: #efa54f;
+        border: none;
+    }
+
+    .btn-warning:hover {
+        background-color: #e39228;
+    }
+    </style>
+   {% endblock %}
+    
+</head>
+<body>
+   <div class="topbar">
+    <h1>Admin Dashboard</h1>
+
+    <!-- Logout button as a form to trigger the logout -->
+    <form action="{{ path('app_logout') }}" method="post" style="display: inline;">
+        <button type="submit" class="logout-btn">Log Out</button>
+    </form>
+</div>
+
+    <div class="sidebar">
+        <h2>Admin Panel</h2>
+        <ul>
+            <li><a href="{{ path('app_notification_index') }}"><i>🏠</i>Dashboard</a></li>
+             <li><a href="{{ path('app_user_index') }}"><i>👥</i>Users</a></li>
+            <li><a href="{{ path('app_crud_tuteur') }}"><i>🎓</i>Tuteurs</a></li>
+            <li><a href="#"><i>📩</i>Réclamations</a></li>
+            <li><a href="#"><i>💰</i>Dons</a></li>
+            <li><a href="#"><i>🏃</i>Activities</a></li>
+            <li><a href="#"><i>🏥</i>Visites</a></li>
+            <li><a href="#"><i>⚙️</i>Settings</a></li>
+        </ul>
+    </div>
+  <div class="content">
+{% block body %}
+    <div id="notifications-top"></div>
+    <h2 class="text-center mb-4">📢 Mes Notifications</h2>
+    <p class="text-muted text-center">Total: {{ totalNotifications }} notifications</p>
+
+    {% if notificationsGroupedByDate is not empty %}
+        <div class="container">
+            {% for date, notifications in notificationsGroupedByDate %}
+                <div class="mb-4 p-3 rounded" style="background-color: #e6c49a;">
+                    <h5 class="mb-3 text-white"><i class="far fa-calendar-alt"></i> {{ date|date('d M Y') }}</h5>
+
+                    {% for notification in notifications %}
+                        <div class="p-3 mb-3 rounded bg-white shadow-sm">
+                            <h6 class="mb-1"><strong>Activité :</strong> {{ notification.activite }}</h6>
+                            <p class="mb-1"><strong>Utilisateur :</strong> {{ notification.username }}</p>
+                            <small class="text-muted"><i class="far fa-clock"></i> {{ notification.date|date('d/m/Y') }} à {{ notification.heure }}</small>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container d-flex justify-content-center mt-4">
+            {% if currentPage > 1 %}
+                <a class="btn btn-success me-2" href="{{ path('app_notification_index', { page: currentPage - 1 }) }}">
+                    <i class="fas fa-chevron-left"></i> Précédent
+                </a>
+            {% else %}
+                <button class="btn btn-secondary me-2" disabled><i class="fas fa-chevron-left"></i> Précédent</button>
+            {% endif %}
+
+            {% if currentPage < totalPages %}
+                <a class="btn btn-success ms-2" href="{{ path('app_notification_index', { page: currentPage + 1 }) }}">
+                    Suivant <i class="fas fa-chevron-right"></i>
+                </a>
+            {% else %}
+                <button class="btn btn-secondary ms-2" disabled>Suivant <i class="fas fa-chevron-right"></i></button>
+            {% endif %}
+        </div>
+
+        <!-- Back to top button -->
+        <div class="d-flex justify-content-center mt-4">
+            <a href="#notifications-top" class="btn btn-danger">
+                🔝 Retour en haut
+            </a>
+        </div>
+    {% else %}
+        <p class="text-muted text-center">Aucune notification pour le moment.</p>
+    {% endif %}
+{% endblock %}
+
+</div>
+
+    <script>
+        $(document).ready(function() {
+            $('#userTable').DataTable();
+        });
+    </script>
+</body>
+</html>
+<script>
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>

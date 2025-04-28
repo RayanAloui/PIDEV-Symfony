@@ -1,0 +1,193 @@
+{% extends 'Front.html.twig' %}
+
+{% block title %}Confirm Email{% endblock %}
+
+{% block content1 %}
+    <style>
+        /* Container for the confirm email page */
+        .profile-container {
+            margin: 20px;
+            background-color: #1a1a2e; /* Dark background for the container */
+            padding: 30px;
+            border-radius: 8px;
+            color: #ffcc00; /* Yellow text color for a striking look */
+            border: 2px solid #5c6bc0; /* Border color */
+            box-shadow: 0 0 20px rgba(92, 107, 192, 0.6),
+                        0 0 40px rgba(255, 204, 0, 0.3); /* Soft glowing shadow effect */
+            font-family: 'Rajdhani', 'Courier New', sans-serif;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative dashed border effect around the container */
+        .profile-container::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 2px dashed #5c6bc0; /* Dashed border for futuristic touch */
+            border-radius: 12px;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        /* Form field styling for a consistent and clean layout */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        /* Labels for the input fields to make them clear */
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffcc00; /* Yellow label color */
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* Styling for the input fields (for verification code) */
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: rgba(30, 30, 50, 0.7); /* Dark background for the input */
+            border: 1px solid #5c6bc0;
+            border-radius: 6px;
+            color: #ffcc00; /* Yellow text in the input field */
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px); /* Blurred background effect */
+        }
+
+        /* Focused input field styling to highlight the field */
+        .form-control:focus {
+            outline: none;
+            border-color: #ffcc00; /* Yellow border when focused */
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.4); /* Glowing effect */
+            background-color: rgba(40, 40, 70, 0.9); /* Darker background on focus */
+        }
+
+        /* Button group styling for alignment and spacing */
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 15px;
+        }
+
+        /* Basic button styling */
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            flex: 1;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Button hover effect to give a smooth gradient animation */
+        .btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        /* Effect for moving the gradient when button is hovered */
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        /* Submit button specific styling */
+        .btn-submit {
+            background-color: #5c6bc0; /* Blue background */
+            color: #fff; /* White text */
+            box-shadow: 0 0 15px rgba(92, 107, 192, 0.7); /* Subtle shadow effect */
+        }
+
+        /* Hover effect for the submit button */
+        .btn-submit:hover {
+            background-color: #4a58b0;
+            box-shadow: 0 0 25px rgba(92, 107, 192, 0.9); /* Darker blue on hover */
+        }
+
+        /* Scanline effect for a cyberpunk look */
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                transparent 95%,
+                rgba(92, 107, 192, 0.1) 96%,
+                transparent 97%
+            );
+            background-size: 100% 5px;
+            pointer-events: none;
+            animation: scanline 8s linear infinite;
+            z-index: 1;
+            opacity: 0.3;
+        }
+
+        /* Scanline animation for dynamic visual effect */
+        @keyframes scanline {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
+
+        /* Importing font for styling */
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap');
+    </style>
+
+    <!-- Main container for the confirm email form -->
+    <div class="profile-container">
+        <!-- Overlay effect for scanlines (visual style) -->
+        <div class="scanlines"></div>
+
+        <h1>Confirm Your Email</h1>
+
+        <!-- Message informing the user that a verification code has been sent -->
+        <p>A verification code has been sent to your email. Please check your inbox and enter the code below to confirm your identity.</p>
+
+        <!-- Display flash messages for success or error -->
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% endfor %}
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+
+        <!-- Form for entering the verification code -->
+        <form method="post" action="{{ path('app_verify_code') }}">
+            <!-- Field for entering the verification code -->
+            <div class="form-group">
+                <label for="verificationCode">Verification Code</label>
+                <input type="text" id="verificationCode" name="verificationCode" class="form-control" required>
+            </div>
+
+            <!-- Submit button for confirming the verification code -->
+            <div class="btn-group">
+                <button type="submit" class="btn btn-submit">Submit</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

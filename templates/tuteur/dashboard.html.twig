@@ -1,0 +1,158 @@
+{% extends 'Front.html.twig' %}
+
+{% block title %}Tableau de bord - Tuteur{% endblock %}
+
+{% block body %}
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f5efe6;
+        color: #5a3e36;
+        margin: 0;
+        padding: 0;
+    }
+
+    .dashboard-container {
+        max-width: 1000px;
+        margin: 50px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.15);
+        text-align: center;
+    }
+
+    .dashboard-container h1 {
+        color: #4a2c2a;
+        font-size: 24px;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
+
+    .dashboard-container p {
+        font-size: 18px;
+        color: #555;
+    }
+
+    .logout-btn {
+        display: inline-block;
+        background-color: #b08968;
+        padding: 12px 20px;
+        border: none;
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 16px;
+        margin: 10px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+
+    .logout-btn:hover {
+        background-color: #8b5e3c;
+    }
+
+    .courses-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
+    }
+
+    .course-card {
+        background-color: #fff7f0;
+        border: 1px solid #e0d4c3;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+        text-align: left;
+        transition: transform 0.2s;
+    }
+
+    .course-card:hover {
+        transform: scale(1.02);
+    }
+
+    .course-card img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+
+    .course-info h2 {
+        font-size: 20px;
+        color: #4a2c2a;
+        margin-bottom: 10px;
+    }
+
+    .course-info p {
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 15px;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 8px 12px;
+        font-size: 14px;
+        margin: 5px 5px 0 0;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .btn-warning {
+        background-color: #f0ad4e;
+        color: white;
+    }
+
+    .btn-danger {
+        background-color: #d9534f;
+        color: white;
+    }
+
+    .btn-info {
+        background-color: #5bc0de;
+        color: white;
+    }
+</style>
+
+<div class="dashboard-container">
+    <h1>Bienvenue, {{ prenomT }} {{ nomT }}</h1>
+    <p>Vous êtes connecté à votre espace tuteur.</p>
+    <a href="{{ path('tuteur_logout') }}" class="logout-btn">Se déconnecter</a>
+    <a href="{{ path('tuteur_cours_ajouter') }}" class="logout-btn">Ajouter un cours</a>
+    <a href="{{ path('tuteur_orphelins') }}" class="logout-btn">Voir mes orphelins</a>
+</div>
+
+<div class="dashboard-container">
+    <h1>Mes Cours</h1>
+
+    <div class="courses-container">
+        {% for cour in cours %}
+            <div class="course-card">
+                {% if cour.imageC %}
+                    <img src="{{ asset('assets/img/' ~ cour.imageC) }}" alt="Image">
+                {% else %}
+                    <img src="{{ asset('assets/img/default.jpg') }}" alt="Image par défaut">
+                {% endif %}
+                <div class="course-info">
+                    <h2>{{ cour.titre }}</h2>
+                    <p>{{ cour.contenu|slice(0, 100) }}...</p>
+                </div>
+                <a href="{{ path('tuteur_cours_modifier', {'id': cour.idC}) }}" class="btn btn-warning">Modifier</a>
+                <a href="{{ path('tuteur_cours_supprimer', {'id': cour.idC}) }}" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer ce cours ?');">Supprimer</a>
+                <a href="{{ path('tuteur_cours_details', { 'id': cour.idC }) }}" class="btn btn-info">👀 Consulter</a>
+            </div>
+        {% else %}
+            <p>Aucun cours disponible.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+
+
+

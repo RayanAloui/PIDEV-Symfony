@@ -1,0 +1,181 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New User{% endblock %}
+
+{% block body %}
+<style>
+    /* Container Styles */
+    .container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Title Styles */
+    h1 {
+        font-size: 2rem;
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+
+    /* Back to List Link */
+    .back-link {
+        display: inline-block;
+        padding: 8px 15px;
+        background-color: #6f4f28;
+        color: white;
+        text-decoration: none;
+        font-size: 1rem;
+        font-weight: 500;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+        margin-bottom: 20px;
+    }
+
+    .back-link:hover {
+        background-color:rgb(209, 105, 13);
+    }
+
+    /* Form Styles (optional) */
+    .form-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 30px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+
+    .form-container input,
+    .form-container select,
+    .form-container textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .form-container .btn {
+        width: 100%;
+        padding: 14px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .form-container .btn:hover {
+        background-color: #0056b3;
+    }
+    .form-container .form-error {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+/* Error Message Styles */
+.form-container .form-error {
+    color: red;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+/* Style the Save Button in Brown */
+.save-btn {
+    background-color: #6f4f28 !important;
+    color: white !important;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 14px;
+    width: 100%;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.save-btn:hover {
+    background-color: #5a3d21 !important;
+}
+
+</style>
+
+    <div class="container">
+        <h1>Create New User</h1>
+        
+        <!-- Back to List Link -->
+        <a href="{{ path('app_user_index') }}" class="back-link">
+            ← Back to List
+        </a>
+
+        <!-- Include Form -->
+      
+
+                {{ form_start(form, {'attr': {'class': 'form-container', 'novalidate': 'novalidate'}}) }}
+
+    <div>
+        {{ form_label(form.name) }}
+        {{ form_widget(form.name) }}
+        {% for error in form.name.vars.errors %}
+            <div class="form-error">{{ error.message }}</div>
+        {% endfor %}
+    </div>
+
+    <div>
+        {{ form_label(form.surname) }}
+        {{ form_widget(form.surname) }}
+        {% for error in form.surname.vars.errors %}
+            <div class="form-error">{{ error.message }}</div>
+        {% endfor %}
+    </div>
+
+    <div>
+        {{ form_label(form.telephone) }}
+        {{ form_widget(form.telephone) }}
+        {% for error in form.telephone.vars.errors %}
+            <div class="form-error">{{ error.message }}</div>
+        {% endfor %}
+    </div>
+
+    <div>
+        {{ form_label(form.email) }}
+        {{ form_widget(form.email) }}
+        {% for error in form.email.vars.errors %}
+            <div class="form-error">{{ error.message }}</div>
+        {% endfor %}
+    </div>
+
+    <div>
+        {{ form_label(form.password) }}
+        {{ form_widget(form.password) }}
+        {% for error in form.password.vars.errors %}
+            <div class="form-error">{{ error.message }}</div>
+        {% endfor %}
+    </div>
+
+    <div>
+        {{ form_label(form.role) }}
+        {{ form_widget(form.role) }}
+        {% for error in form.role.vars.errors %}
+            <div class="form-error">{{ error.message }}</div>
+        {% endfor %}
+    </div>
+
+    {{ form_row(form.save, {'attr': {'class': 'btn save-btn'}}) }}
+
+{{ form_end(form) }}
+
+
+
+
+
+    </div>
+{% endblock %}
+

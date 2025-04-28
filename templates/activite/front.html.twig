@@ -1,0 +1,211 @@
+{% extends 'Front.html.twig' %}
+
+{% block title %}Activités Disponibles{% endblock %}
+
+{% block content1 %}
+    <style>
+        /* General page styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f2e3; /* Light beige background */
+            margin: 0;
+            padding: 0;
+            color: #3e2a47; /* Dark brown text */
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+           
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Page title styling */
+        .page-title {
+            font-size: 2.5rem;
+            color: #6f4f28; /* Warm brown */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .search-bar input {
+            padding: 10px;
+            width: 300px;
+            border-radius: 5px;
+            border: 1px solid #d7c6b7;
+            font-size: 1rem;
+        }
+
+        .search-bar button {
+            padding: 10px 20px;
+            background-color: #c29c6e; /* Warm gold */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .search-bar button:hover {
+            background-color: #9e7b5e; /* Darker brown */
+        }
+
+        /* Activity Cards */
+        .activities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .activity-card {
+            background-color: #f2e3d5; /* Light tan */
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .activity-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .activity-card h3 {
+            font-size: 1.5rem;
+            color: #6f4f28; /* Warm brown */
+            margin: 0 0 10px 0;
+        }
+
+        .activity-card p {
+            margin: 5px 0;
+            font-size: 1rem;
+            color: #3e2a47;
+        }
+
+        .activity-card .join-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #7b9f6f; /* Olive green-brown */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .activity-card .join-btn:hover {
+            background-color: #6c8d5f; /* Darker green */
+        }
+
+        .activity-card .join-btn.disabled {
+            background-color: #a88f5b; /* Light brown */
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Empty state */
+        .no-activities {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2rem;
+            color: #a88f5b; /* Light brown */
+        }
+
+        /* Flash Messages */
+        .flash-message {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .flash-success {
+            background-color: #7b9f6f;
+            color: white;
+        }
+
+        .flash-error {
+            background-color: #b7472a;
+            color: white;
+        }
+
+        .flash-warning {
+            background-color: #d4b25e;
+            color: white;
+        }
+    </style>
+
+    <div class="container">
+        <h1 class="page-title">Activités Disponibles</h1>
+
+        <!-- Flash Messages -->
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="flash-message flash-{{ label }}">{{ message }}</div>
+            {% endfor %}
+        {% endfor %}
+
+    <div class="sort-search-container">
+        <!-- Filter By Dropdown -->
+            <div class="sort-by">
+                <label for="filter">Filter by:</label>
+                <form method="get" action="{{ path('app_activite_front') }}">
+                    <select id="filter" name="filter" onchange="this.form.submit()">
+                        <option value="" {% if filter is empty %}selected{% endif %}></option>
+                        <option value="Active" {% if filter == 'Active' %}selected{% endif %}>Active</option>
+                        <option value="Inactive" {% if filter == 'Inactive' %}selected{% endif %}>Inactive</option>
+                        <option value="Completed" {% if filter == 'Completed' %}selected{% endif %}>Completed</option>
+                    </select>
+                </form>
+            </div>
+
+
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <form method="get" action="{{ path('app_activite_front') }}">
+                    <input type="text" name="search" placeholder="Rechercher une activité..." value="{{ search }}">
+                    <button type="submit">Rechercher</button>
+                </form>
+            </div>
+
+    </div>
+
+        
+
+        <!-- Activities Grid -->
+        <div class="activities-grid">
+            {% for activite in activites %}
+                <div class="activity-card">
+                    <h3>{{ activite.nom }}</h3>
+                    <p><strong>Catégorie :</strong> {{ activite.categorie }}</p>
+                    <p><strong>Date :</strong> {{ activite.dateActivite|date('d/m/Y') }}</p>
+                    <p><strong>Lieu :</strong> {{ activite.lieu }}</p>
+                    <p><strong>Tuteur :</strong> {{ activite.nomDuTuteur }}</p>
+                    <p><strong>Statut :</strong> {{ activite.statut }}</p>
+                    <p><strong>Description :</strong> {{ activite.description|slice(0, 100) }}{% if activite.description|length > 100 %}...{% endif %}</p>
+                    {% set isJoined = app.user and activite.participants|filter(p => p.user.id == app.user.id)|length > 0 %}
+                    <form method="post" action="{{ path('app_activite_join', {'id': activite.id}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('join' ~ activite.id) }}">
+                        <button type="submit" class="join-btn {{ isJoined ? 'disabled' : '' }}" {{ isJoined ? 'disabled' : '' }}>
+                            {{ isJoined ? 'Déjà inscrit' : 'Rejoindre' }}
+                        </button>
+                    </form>
+                </div>
+            {% else %}
+                <div class="no-activities">Aucune activité disponible.</div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

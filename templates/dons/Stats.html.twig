@@ -1,0 +1,153 @@
+{% extends 'back.html.twig' %}
+
+{% block body %}
+<style>
+    .chart-container {
+        margin-bottom: 40px;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        background-color: white;
+    }
+    
+    h1 {
+        color: #8d6c5b;
+        margin-bottom: 30px;
+    }
+    
+    .stats-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .btn-back {
+        background-color: #8d6c5b;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    
+    .btn-back:hover {
+        background-color: #6d4c3b;
+    }
+    
+    .chart-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #8d6c5b;
+        margin-bottom: 15px;
+    }
+</style>
+
+<div class="container">
+    <div class="stats-header">
+        <h1>Statistiques des Dons</h1>
+        <a href="{{ path('app_crud_dons') }}" class="btn-back">
+            Retour à la liste des dons
+        </a>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="chart-container">
+                <div class="chart-title">Répartition des dons par type</div>
+                <div id="piechart" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="chart-container">
+                <div class="chart-title">Montant total des dons par mois</div>
+                <div id="columnchart" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="chart-container">
+                <div class="chart-title">Évolution des dons au fil du temps</div>
+                <div id="linechart" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawCharts);
+
+        function drawCharts() {
+            // Pie Chart - Répartition par type de don
+            var pieData = new google.visualization.DataTable();
+            pieData.addColumn('string', 'Type de Don');
+            pieData.addColumn('number', 'Nombre');
+            
+            var pieChartData = {{ pieChartData|raw }};
+            pieChartData.forEach(function(item) {
+                pieData.addRow([item.type, item.count]);
+            });
+            
+            var pieOptions = {
+                title: 'Répartition des dons par type',
+                height: 400,
+                width: '100%',
+                colors: ['#d4a373', '#8d6c5b', '#a23e48', '#4a6fa5', '#6b705c']
+            };
+            
+            var pieChart = new google.visualization.PieChart(document.getElementById('piechart'));
+            pieChart.draw(pieData, pieOptions);
+
+            // Column Chart - Montant par mois
+            var columnData = new google.visualization.DataTable();
+            columnData.addColumn('string', 'Mois');
+            columnData.addColumn('number', 'Montant total');
+            
+            var columnChartData = {{ columnChartData|raw }};
+            columnChartData.forEach(function(item) {
+                columnData.addRow([item.month, item.total]);
+            });
+            
+            var columnOptions = {
+                title: 'Montant total des dons par mois',
+                height: 400,
+                width: '100%',
+                colors: ['#8d6c5b'],
+                legend: { position: 'none' }
+            };
+            
+            var columnChart = new google.visualization.ColumnChart(document.getElementById('columnchart'));
+            columnChart.draw(columnData, columnOptions);
+
+            // Line Chart - Évolution au fil du temps
+            var lineData = new google.visualization.DataTable();
+            lineData.addColumn('string', 'Date');
+            lineData.addColumn('number', 'Montant cumulé');
+            
+            var lineChartData = {{ lineChartData|raw }};
+            lineChartData.forEach(function(item) {
+                lineData.addRow([item.date, item.total]);
+            });
+            
+            var lineOptions = {
+                title: 'Évolution des dons au fil du temps',
+                height: 400,
+                width: '100%',
+                colors: ['#a23e48'],
+                curveType: 'function',
+                legend: { position: 'none' }
+            };
+            
+            var lineChart = new google.visualization.LineChart(document.getElementById('linechart'));
+            lineChart.draw(lineData, lineOptions);
+        }
+    </script>
+</div>
+{% endblock %}

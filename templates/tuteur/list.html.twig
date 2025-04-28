@@ -1,0 +1,358 @@
+{% extends 'back.html.twig' %}
+
+{% block body %}
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f5efe6; /* Beige clair */
+        color: #5a3e36; /* Marron foncé */
+        margin: 0;
+        padding: 0;
+    }
+
+    h1 {
+        text-align: center;
+        color: #4a2c2a;
+        font-size: 32px;
+    }
+
+    .container {
+        width: 90%;
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 10px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: 0.3s;
+        margin-right: 10px;
+        margin-bottom: 15px;
+    }
+
+    .btn-warning {
+        background-color: #d4a373; /* Marron clair */
+        color: white;
+    }
+
+    .btn-warning:hover {
+        background-color: #b08968;
+    }
+
+    .btn-danger {
+        background-color: #a23e48;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #822727;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    table th, table td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    table th {
+        background-color: #8d6c5b; /* Marron doux */
+        color: white;
+    }
+
+    table th a {
+        color: white;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    table tr:nth-child(even) {
+        background-color: #f5efe6;
+    }
+
+    table tr:hover {
+        background-color: #e6d5c7;
+        transition: 0.3s;
+    }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .no-data {
+        text-align: center;
+        padding: 15px;
+        color: #b08968;
+    }
+
+    /* Barre de recherche */
+    .search-container {
+        display: flex;
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    .search-input {
+        flex-grow: 1;
+        padding: 12px 15px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        transition: border 0.3s ease;
+    }
+
+    .search-input:focus {
+        border-color: #b08968;
+        outline: none;
+    }
+
+    .clear-search {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        font-size: 18px;
+        color: #999;
+        cursor: pointer;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .clear-search:hover {
+        color: #a23e48;
+    }
+
+    .loading-indicator {
+        display: none;
+        margin-left: 10px;
+        color: #8d6c5b;
+    }
+
+    .top-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .buttons-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .top-actions {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .search-container {
+            width: 100%;
+            margin-top: 15px;
+        }
+    }
+</style>
+
+<div class="container">
+    <h1>Liste des Tuteurs</h1>
+    
+    <p></p>
+    
+    <div class="top-actions">
+        <div class="buttons-group">
+            <a href="{{ path('app_crud_tuteur_add') }}" class="btn btn-warning">Ajouter un Tuteur</a>
+            <a href="{{ path('tuteurs_pdf') }}" class="btn btn-danger">📄 Exporter en PDF</a>
+            <a href="{{ path('app_crud_orphelin') }}" class="btn btn-danger">Liste des orphelins</a>
+            <a href="{{ path('app_crud_cours') }}" class="btn btn-danger">Liste des cours</a>
+            <a href="{{ path('app_tuteurs_qr') }}" class="btn btn-danger">QR Code</a>
+        </div>
+    </div>
+    
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Rechercher par CIN, nom, prénom, téléphone ou email...">
+        <button id="clearSearch" class="clear-search">✕</button>
+        <span id="loadingIndicator" class="loading-indicator">
+            <i class="fas fa-spinner fa-spin"></i> Chargement...
+        </span>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>
+                    <a href="#" class="sort-link" data-field="cinT">
+                        CIN <span class="sort-indicator">{{ sortField == 'cinT' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}</span>
+                    </a>
+                </th>
+                <th>
+                    <a href="#" class="sort-link" data-field="nomT">
+                        Nom <span class="sort-indicator">{{ sortField == 'nomT' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}</span>
+                    </a>
+                </th>
+                <th>
+                    <a href="#" class="sort-link" data-field="prenomT">
+                        Prénom <span class="sort-indicator">{{ sortField == 'prenomT' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}</span>
+                    </a>
+                </th>
+                <th>
+                    <a href="#" class="sort-link" data-field="telephoneT">
+                        Téléphone <span class="sort-indicator">{{ sortField == 'telephoneT' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}</span>
+                    </a>
+                </th>
+                <th>
+                    <a href="#" class="sort-link" data-field="adresseT">
+                        Adresse <span class="sort-indicator">{{ sortField == 'adresseT' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}</span>
+                    </a>
+                </th>
+                <th>
+                    <a href="#" class="sort-link" data-field="disponibilite">
+                        Disponibilité <span class="sort-indicator">{{ sortField == 'disponibilite' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}</span>
+                    </a>
+                </th>
+                <th>
+                    <a href="#" class="sort-link" data-field="email">
+                        Email <span class="sort-indicator">{{ sortField == 'email' ? (sortOrder == 'asc' ? '🔼' : '🔽') : '' }}</span>
+                    </a>
+                </th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="tuteurs-list">
+            {% for tuteur in tuteurs %}
+                <tr>
+                    <td>{{ tuteur.cinT }}</td>
+                    <td>{{ tuteur.nomT }}</td>
+                    <td>{{ tuteur.prenomT }}</td>
+                    <td>{{ tuteur.telephoneT }}</td>
+                    <td>{{ tuteur.adresseT }}</td>
+                    <td>{{ tuteur.disponibilite }}</td>
+                    <td>{{ tuteur.email }}</td>
+                    <td class="actions">
+                        <a href="{{ path('app_crud_tuteur_edit', {'id': tuteur.idT}) }}" class="btn btn-warning">Modifier</a>
+                        <a href="{{ path('app_crud_tuteur_delete', {'id': tuteur.idT}) }}" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer ce tuteur ?');">Supprimer</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="8" class="no-data">Aucun tuteur trouvé.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const clearSearch = document.getElementById('clearSearch');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const tbody = document.getElementById('tuteurs-list');
+        let currentSortField = '{{ sortField }}';
+        let currentSortOrder = '{{ sortOrder }}';
+        let searchTimeout;
+        
+        // Fonction pour effectuer la recherche
+        function performSearch() {
+            const query = searchInput.value.trim();
+            clearTimeout(searchTimeout);
+            
+            loadingIndicator.style.display = 'inline-block';
+            
+            searchTimeout = setTimeout(() => {
+                fetch(`{{ path('app_tuteur_search') }}?query=${encodeURIComponent(query)}&sort=${currentSortField}&order=${currentSortOrder}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateTable(data);
+                        loadingIndicator.style.display = 'none';
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la recherche:', error);
+                        loadingIndicator.style.display = 'none';
+                    });
+            }, 300); // Délai pour éviter les requêtes multiples
+        }
+        
+        // Fonction pour mettre à jour le tableau avec les résultats
+        function updateTable(results) {
+            tbody.innerHTML = '';
+            
+            if (results.length === 0) {
+                const noResultsRow = document.createElement('tr');
+                noResultsRow.innerHTML = `<td colspan="8" class="no-data">Aucun tuteur trouvé.</td>`;
+                tbody.appendChild(noResultsRow);
+            } else {
+                results.forEach(tuteur => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${tuteur.cin}</td>
+                        <td>${tuteur.nom}</td>
+                        <td>${tuteur.prenom}</td>
+                        <td>${tuteur.telephone}</td>
+                        <td>${tuteur.adresse}</td>
+                        <td>${tuteur.disponibilite}</td>
+                        <td>${tuteur.email}</td>
+                        <td class="actions">
+                            <a href="${tuteur.editUrl}" class="btn btn-warning">Modifier</a>
+                            <a href="${tuteur.deleteUrl}" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer ce tuteur ?');">Supprimer</a>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        }
+        
+        // Gestion du tri
+        document.querySelectorAll('.sort-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const field = this.dataset.field;
+                const newOrder = (field === currentSortField && currentSortOrder === 'asc') ? 'desc' : 'asc';
+                
+                currentSortField = field;
+                currentSortOrder = newOrder;
+                
+                // Mise à jour des indicateurs de tri
+                document.querySelectorAll('.sort-indicator').forEach(indicator => {
+                    indicator.textContent = '';
+                });
+                this.querySelector('.sort-indicator').textContent = (newOrder === 'asc') ? '🔼' : '🔽';
+                
+                performSearch();
+            });
+        });
+        
+        // Évènement de recherche
+        searchInput.addEventListener('input', performSearch);
+        
+        // Évènement pour effacer la recherche
+        clearSearch.addEventListener('click', function() {
+            searchInput.value = '';
+            performSearch();
+        });
+    });
+</script>
+{% endblock %}

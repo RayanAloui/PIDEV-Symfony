@@ -1,0 +1,39 @@
+parameters:
+    cours_images_directory: '%kernel.project_dir%/public/assets/img'
+    edenai_api_key: '%env(EDENAI_API_KEY)%'
+    google_recaptcha_site_key: '%env(GOOGLE_RECAPTCHA_SITE_KEY)%'
+    google_recaptcha_secret_key: '%env(GOOGLE_RECAPTCHA_SECRET_KEY)%'
+    stripe_secret_key: '%env(STRIPE_SECRET_KEY)%'
+    gemini_api_key: '%env(GEMINI_API_KEY)%'
+    app.unsplash_access_key: 'I-yNOjKs2_EIl8p0-6LJ9wemef3me55-wt53m8mSns4'
+   
+    
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    Knp\Snappy\Pdf:
+        arguments:
+            $binary: '"C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe"'
+   
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+    ReCaptcha\ReCaptcha:
+        arguments:
+            $secret: '%env(GOOGLE_RECAPTCHA_SECRET_KEY)%'
+            $requestMethod: '@ReCaptcha\RequestMethod'
+    
+
+    ReCaptcha\RequestMethod: '@ReCaptcha\RequestMethod\CurlPost'
+    ReCaptcha\RequestMethod\CurlPost: null
+    ReCaptcha\RequestMethod\Curl: null
+twig:
+    globals:
+        google_recaptcha_site_key: '%env(GOOGLE_RECAPTCHA_SITE_KEY)%'

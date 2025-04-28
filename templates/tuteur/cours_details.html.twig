@@ -1,0 +1,389 @@
+{% extends 'Front.html.twig' %}
+
+{% block content1 %}
+<style>
+    :root {
+        --primary-color: #5a3e36;
+        --secondary-color: #8b5e3c;
+        --accent-color: #b08968;
+        --light-bg: #f5efe6;
+        --content-bg: #f8f3eb;
+        --white: #ffffff;
+        --text-color: #4a2c2a;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--light-bg);
+        color: var(--text-color);
+        margin: 0;
+        padding: 40px 20px;
+        line-height: 1.6;
+    }
+
+    .course-container {
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px;
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+    }
+
+    .course-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--accent-color);
+    }
+
+    .course-title {
+        color: var(--primary-color);
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        font-weight: 700;
+    }
+
+    .image-container {
+        margin: 30px 0;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        position: relative;
+    }
+
+    .image-container img {
+        width: 100%;
+        max-height: 400px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .image-container:hover img {
+        transform: scale(1.02);
+    }
+
+    .content-section {
+        padding: 30px;
+        background-color: var(--content-bg);
+        border-radius: 12px;
+        margin: 30px 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-title {
+        color: var(--secondary-color);
+        font-size: 1.5rem;
+        margin-top: 0;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-title i {
+        font-size: 1.2em;
+    }
+
+    .course-content {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: var(--text-color);
+    }
+
+    .ratings-container {
+        margin: 40px 0;
+    }
+
+    .average-rating {
+        font-size: 1.8rem;
+        color: var(--secondary-color);
+        font-weight: bold;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .ratings-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .rating-item {
+        background: var(--white);
+        padding: 15px 20px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .rating-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .student-name {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .rating-stars {
+        color: #ffc107;
+        font-weight: bold;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 20px;
+        color: var(--secondary-color);
+        font-style: italic;
+    }
+
+    .btn {
+        background-color: var(--accent-color);
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn:hover {
+        background-color: var(--secondary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn i {
+        font-size: 1.1em;
+    }
+
+    /* Chatbot styles */
+    #chatbot-container {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1000;
+    }
+
+    #open-chatbot {
+        padding: 12px 25px;
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: var(--shadow);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    #open-chatbot:hover {
+        background-color: var(--secondary-color);
+        transform: translateY(-2px);
+    }
+
+    #chatbot-box {
+        display: none;
+        width: 350px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        margin-top: 15px;
+    }
+
+    #chatbot-messages {
+        height: 300px;
+        padding: 15px;
+        overflow-y: auto;
+        background-color: #f9f9f9;
+    }
+
+    #chatbot-input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    #send-question {
+        width: 100%;
+        padding: 12px;
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        font-weight: 600;
+    }
+
+    #send-question:hover {
+        background-color: var(--secondary-color);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .course-container {
+            padding: 25px;
+        }
+        
+        .course-title {
+            font-size: 2rem;
+        }
+        
+        #chatbot-container {
+            right: 15px;
+            bottom: 15px;
+        }
+        
+        #chatbot-box {
+            width: 280px;
+        }
+    }
+</style>
+
+<div class="course-container">
+    <div class="course-header">
+        <h1 class="course-title">{{ cours.titre }}</h1>
+        
+        <div class="image-container">
+            {% if cours.imageC %}
+                <img src="{{ asset('assets/img/' ~ cours.imageC) }}" alt="{{ cours.titre }}">
+            {% else %}
+                <img src="{{ asset('assets/img/default.jpg') }}" alt="Image par défaut">
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="content-section">
+        <h2 class="section-title"><i class="fas fa-book-open"></i> Contenu du cours</h2>
+        <div class="course-content">
+            {{ cours.contenu|nl2br }}
+        </div>
+    </div>
+
+    <div class="ratings-container">
+        <div class="content-section">
+            <h2 class="section-title"><i class="fas fa-star"></i> Évaluations</h2>
+            
+            <div class="average-rating">
+                <span>Note moyenne :</span>
+                <span>{{ cours.noteMoyenne|number_format(1) }} / 5</span>
+            </div>
+            
+            <h3>Orphelins ayant noté ce cours</h3>
+            <ul class="ratings-list">
+                {% for rating in ratings %}
+                    <li class="rating-item">
+                        <span class="student-name">{{ rating.orphelin.nomO }} {{ rating.orphelin.prenomO }}</span>
+                        <span class="rating-stars">{{ rating.note }} ★</span>
+                    </li>
+                {% else %}
+                    <li class="empty-state">Aucun orphelin n'a noté ce cours pour le moment.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <a href="{{ path('tuteur_dashboard') }}" class="btn"><i class="fas fa-arrow-left"></i> Retour</a>
+</div>
+
+<!-- Chatbot Container -->
+<div id="chatbot-container">
+    <button id="open-chatbot">
+        <i class="fas fa-robot"></i> Assistant de cours
+    </button>
+    
+    <div id="chatbot-box">
+        <div id="chatbot-messages">
+            <div class="chatbot-welcome">
+                <p><b>Assistant :</b> Bonjour ! Je suis ici pour répondre à vos questions sur ce cours. Comment puis-je vous aider ?</p>
+            </div>
+        </div>
+        <input type="text" id="chatbot-input" placeholder="Posez votre question ici...">
+        <button id="send-question">Envoyer</button>
+    </div>
+</div>
+
+<script>
+    const openBtn = document.getElementById('open-chatbot');
+    const chatbotBox = document.getElementById('chatbot-box');
+    const sendBtn = document.getElementById('send-question');
+    const input = document.getElementById('chatbot-input');
+    const messages = document.getElementById('chatbot-messages');
+
+    openBtn.addEventListener('click', () => {
+        chatbotBox.style.display = chatbotBox.style.display === 'none' ? 'block' : 'none';
+    });
+
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendQuestion();
+        }
+    });
+
+    sendBtn.addEventListener('click', sendQuestion);
+
+    async function sendQuestion() {
+        const question = input.value.trim();
+        if (!question) return;
+
+        // Add user message to chat
+        messages.innerHTML += `<div class="user-message"><b>Vous :</b> ${question}</div>`;
+        input.value = '';
+        messages.scrollTop = messages.scrollHeight;
+
+        try {
+            // Show typing indicator
+            messages.innerHTML += `<div class="typing-indicator">Assistant est en train de répondre...</div>`;
+            messages.scrollTop = messages.scrollHeight;
+
+            const response = await fetch('{{ path('chatbot_ask') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'question=' + encodeURIComponent(question) + '&context=' + encodeURIComponent(`Cours: {{ cours.titre }}\n\nContenu: {{ cours.contenu }}`)
+            });
+            
+            const data = await response.json();
+
+            // Remove typing indicator
+            const typingIndicators = document.querySelectorAll('.typing-indicator');
+            typingIndicators.forEach(indicator => indicator.remove());
+
+            if (data.answer) {
+                messages.innerHTML += `<div class="bot-message"><b>Assistant :</b> ${data.answer}</div>`;
+            } else {
+                messages.innerHTML += `<div class="bot-message"><b>Assistant :</b> Je n'ai pas pu trouver de réponse à votre question. Pouvez-vous la reformuler ?</div>`;
+            }
+            messages.scrollTop = messages.scrollHeight;
+        } catch (error) {
+            console.error('Chatbot error:', error);
+            messages.innerHTML += `<div class="bot-message"><b>Assistant :</b> Désolé, je rencontre des difficultés techniques. Réessayez plus tard.</div>`;
+            messages.scrollTop = messages.scrollHeight;
+        }
+    }
+</script>
+{% endblock %}

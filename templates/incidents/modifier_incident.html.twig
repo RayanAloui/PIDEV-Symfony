@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier un incident{% endblock %}
+
+{% block body %}
+    <h1>Modifier un incident</h1>
+    
+    <form method="post" novalidate>
+        <div class="form-group">
+            <label for="visite">Visite</label>
+            <select id="visite" name="id_visite" class="form-control" required>
+                {% for visite in visites %}
+                    <option value="{{ visite.id }}" {% if visite.id == incident.id_visite.id %}selected{% endif %}>
+                        {{ visite.id }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="user">Utilisateur</label>
+            <select id="user" name="id_user" class="form-control" required>
+                {% for user in users %}
+                    <option value="{{ user.id }}" {% if user.id == incident.id_user.id %}selected{% endif %}>
+                        {{ user.name }} {{ user.surname }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" class="form-control" required>{{ incident.description }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="dateincident">Date de l'incident</label>
+            <input type="date" id="dateincident" name="dateincident" class="form-control" value="{{ incident.dateincident|date('Y-m-d') }}" required>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+        <a href="{{ path('afficher_incident') }}" class="btn btn-secondary">Annuler</a>
+    </form>
+{% endblock %}

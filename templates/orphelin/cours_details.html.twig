@@ -1,0 +1,467 @@
+{% extends 'Front.html.twig' %}
+
+{% block title %}Détails du Cours{% endblock %}
+
+{% block content1 %}
+<style>
+    :root {
+        --primary-color: #4a2c2a;
+        --secondary-color: #5a3e36;
+        --accent-color: #8e6e53;
+        --light-bg: #f5efe6;
+        --white: #ffffff;
+        --text-color: #333333;
+        --highlight: #f8d7b2;
+    }
+    
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: var(--light-bg);
+        color: var(--text-color);
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+    }
+
+    .course-container {
+        max-width: 900px;
+        margin: 30px auto;
+        padding: 40px;
+        background: var(--white);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .course-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--highlight);
+    }
+
+    .course-title {
+        color: var(--primary-color);
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        font-weight: 700;
+    }
+
+    .course-image-container {
+        position: relative;
+        margin-bottom: 30px;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .course-image {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .course-image:hover {
+        transform: scale(1.02);
+    }
+
+    .section-title {
+        color: var(--secondary-color);
+        font-size: 1.8rem;
+        margin: 30px 0 15px;
+        padding-bottom: 8px;
+        border-bottom: 1px dashed var(--accent-color);
+    }
+
+    .course-content {
+        font-size: 1.1rem;
+        color: var(--text-color);
+        margin-bottom: 30px;
+        padding: 20px;
+        background-color: rgba(248, 215, 178, 0.2);
+        border-radius: 8px;
+        line-height: 1.8;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin: 25px 0;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background-color: var(--accent-color);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--secondary-color);
+        transform: translateY(-2px);
+    }
+
+    .btn-success {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background-color: #3e8e41;
+    }
+
+    .keywords-container {
+        background-color: rgba(142, 110, 83, 0.1);
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+
+    .keywords-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        list-style: none;
+        padding: 0;
+    }
+
+    .keywords-list li {
+        background-color: var(--accent-color);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+
+    .audio-player {
+        width: 100%;
+        margin: 20px 0;
+    }
+
+    .translation-container {
+        background-color: rgba(74, 44, 42, 0.05);
+        padding: 20px;
+        border-radius: 8px;
+        margin: 25px 0;
+        border-left: 4px solid var(--accent-color);
+    }
+
+    .rating-form {
+        background-color: rgba(248, 215, 178, 0.3);
+        padding: 25px;
+        border-radius: 12px;
+        margin: 30px 0;
+    }
+
+    .rating-form h3 {
+        margin-top: 0;
+        color: var(--secondary-color);
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        margin-top: 30px;
+        text-decoration: none;
+        color: var(--accent-color);
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+
+    .back-link:hover {
+        color: var(--primary-color);
+    }
+
+    .back-link::before {
+        content: "←";
+        margin-right: 8px;
+    }
+
+    /* Chatbot styles */
+    #chatbot-container {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1000;
+    }
+
+    #open-chatbot {
+        padding: 12px 20px;
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    #open-chatbot:hover {
+        background-color: var(--secondary-color);
+        transform: translateY(-2px);
+    }
+
+    #chatbot-box {
+        display: none;
+        width: 350px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        margin-top: 15px;
+    }
+
+    #chatbot-messages {
+        height: 300px;
+        padding: 15px;
+        overflow-y: auto;
+        background-color: #f9f9f9;
+    }
+
+    #chatbot-input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+
+    #send-question {
+        width: 100%;
+        padding: 12px;
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    #send-question:hover {
+        background-color: var(--secondary-color);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .course-container {
+            padding: 25px;
+            margin: 15px;
+        }
+        
+        .course-title {
+            font-size: 2rem;
+        }
+        
+        #chatbot-container {
+            right: 15px;
+            bottom: 15px;
+        }
+        
+        #chatbot-box {
+            width: 280px;
+        }
+    }
+</style>
+
+<div class="course-container">
+    <div class="course-header">
+        <h1 class="course-title">{{ cours.titre }}</h1>
+        <div class="course-image-container">
+            <img src="{{ asset('assets/img/' ~ cours.imageC) }}" alt="{{ cours.titre }}" class="course-image">
+        </div>
+    </div>
+
+    <section class="course-section">
+        <h2 class="section-title">Contenu du cours</h2>
+        <div class="course-content">
+            {{ cours.contenu }}
+        </div>
+        
+        <div class="action-buttons">
+            <form method="get" action="{{ path('orphelin_cours_details', {id: cours.idC}) }}">
+                <input type="hidden" name="tts" value="1">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-volume-up"></i> Lire à haute voix
+                </button>
+            </form>
+            
+            <form method="get">
+                <button type="submit" name="extract_keywords" value="1" class="btn btn-primary">
+                    <i class="fas fa-key"></i> Extraire les mots-clés
+                </button>
+            </form>
+            
+            <button id="translateBtn" class="btn btn-primary">
+                <i class="fas fa-language"></i> Traduire en anglais
+            </button>
+        </div>
+        
+        {% if audioUrl %}
+            <div class="audio-player">
+                <h3 class="section-title">Écouter le cours</h3>
+                <audio controls class="w-100">
+                    <source src="{{ audioUrl }}" type="audio/mpeg">
+                    Votre navigateur ne prend pas en charge l'audio.
+                </audio>
+            </div>
+        {% endif %}
+        
+        {% if keywords is defined and keywords is not empty %}
+            <div class="keywords-container">
+                <h3 class="section-title">Mots-clés importants</h3>
+                <ul class="keywords-list">
+                    {% for keyword in keywords %}
+                        <li>{{ keyword }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        
+        <div id="translatedText" class="translation-container" style="display: none;">
+            <h3 class="section-title">Traduction anglaise</h3>
+            <p id="translatedContent"></p>
+        </div>
+    </section>
+
+    <section class="course-section">
+        <h2 class="section-title">Résumé du cours</h2>
+        <div class="course-content">
+            {{ cours.resume }}
+        </div>
+    </section>
+
+    <section class="rating-form">
+        <h3 class="section-title">Évaluer ce cours</h3>
+        {{ form_start(form) }}
+            <div class="form-group">
+                {{ form_label(form.note) }}
+                {{ form_widget(form.note, {'attr': {'class': 'form-control'}}) }}
+            </div>
+            <div class="form-group">
+               
+               
+            </div>
+            <button type="submit" class="btn btn-primary">Soumettre l'évaluation</button>
+        {{ form_end(form) }}
+    </section>
+
+    <a href="{{ path('orphelin_dashboard') }}" class="back-link">Retour aux cours</a>
+</div>
+
+<!-- Chatbot Container -->
+<div id="chatbot-container">
+    <button id="open-chatbot">
+        <i class="fas fa-robot"></i> Assistant de cours
+    </button>
+    
+    <div id="chatbot-box">
+        <div id="chatbot-messages">
+            <div class="chatbot-welcome">
+                <p><b>Assistant :</b> Bonjour ! Je suis ici pour répondre à vos questions sur ce cours. Comment puis-je vous aider ?</p>
+            </div>
+        </div>
+        <input type="text" id="chatbot-input" placeholder="Posez votre question ici...">
+        <button id="send-question">Envoyer</button>
+    </div>
+</div>
+
+<script>
+    // Translation functionality
+    document.getElementById('translateBtn').addEventListener('click', function () {
+        const contentToTranslate = `{{ cours.contenu|e('js') }}`;
+        
+        fetch('', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ text: contentToTranslate })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.translated) {
+                const translatedContainer = document.getElementById('translatedText');
+                document.getElementById('translatedContent').textContent = data.translated;
+                translatedContainer.style.display = 'block';
+                translatedContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+        })
+        .catch(error => {
+            console.error('Translation error:', error);
+        });
+    });
+
+    // Chatbot functionality
+    const openBtn = document.getElementById('open-chatbot');
+    const chatbotBox = document.getElementById('chatbot-box');
+    const sendBtn = document.getElementById('send-question');
+    const input = document.getElementById('chatbot-input');
+    const messages = document.getElementById('chatbot-messages');
+
+    openBtn.addEventListener('click', () => {
+        chatbotBox.style.display = chatbotBox.style.display === 'none' ? 'block' : 'none';
+    });
+
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendQuestion();
+        }
+    });
+
+    sendBtn.addEventListener('click', sendQuestion);
+
+    async function sendQuestion() {
+        const question = input.value.trim();
+        if (!question) return;
+
+        // Add user message to chat
+        messages.innerHTML += `<div class="user-message"><b>Vous :</b> ${question}</div>`;
+        input.value = '';
+        messages.scrollTop = messages.scrollHeight;
+
+        try {
+            // Show typing indicator
+            messages.innerHTML += `<div class="typing-indicator">Assistant est en train de répondre...</div>`;
+            messages.scrollTop = messages.scrollHeight;
+
+            const response = await fetch('{{ path('chatbot_ask') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'question=' + encodeURIComponent(question) + '&context=' + encodeURIComponent(`Cours: {{ cours.titre }}\n\nContenu: {{ cours.contenu }}`)
+            });
+            
+            const data = await response.json();
+
+            // Remove typing indicator
+            const typingIndicators = document.querySelectorAll('.typing-indicator');
+            typingIndicators.forEach(indicator => indicator.remove());
+
+            if (data.answer) {
+                messages.innerHTML += `<div class="bot-message"><b>Assistant :</b> ${data.answer}</div>`;
+            } else {
+                messages.innerHTML += `<div class="bot-message"><b>Assistant :</b> Je n'ai pas pu trouver de réponse à votre question. Pouvez-vous la reformuler ?</div>`;
+            }
+            messages.scrollTop = messages.scrollHeight;
+        } catch (error) {
+            console.error('Chatbot error:', error);
+            messages.innerHTML += `<div class="bot-message"><b>Assistant :</b> Désolé, je rencontre des difficultés techniques. Réessayez plus tard.</div>`;
+            messages.scrollTop = messages.scrollHeight;
+        }
+    }
+</script>
+{% endblock %}
