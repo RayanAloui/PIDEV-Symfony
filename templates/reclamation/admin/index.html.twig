@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<h2>Liste des Réclamations</h2>
+<a href="{{ path('app_reponse_admin_index') }}" class="btn btn-outline-primary rounded-circle p-2" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+    <img src="https://cdn-icons-png.flaticon.com/512/14802/14802802.png" alt="Icon" style="width: 24px; height: 24px;">
+</a>
+
+<form method="get" class="mb-3 d-flex gap-2 align-items-center flex-wrap">
+    <!-- Search -->
+    <input type="text" name="q" value="{{ query }}" placeholder="Rechercher..." class="form-control" style="max-width: 250px;">
+
+    <!-- Filter by Type -->
+    <select name="type" class="form-control" style="max-width: 200px;">
+        <option value="">-- Filtrer par type --</option>
+        {% set collectedTypes = [] %}
+        {% for reclamation in reclamations %}
+            {% set currentType = reclamation.typereclamation %}
+            {% if currentType not in collectedTypes %}
+                <option value="{{ currentType }}" {% if type == currentType %}selected{% endif %}>{{ currentType }}</option>
+                {% set collectedTypes = collectedTypes|merge([currentType]) %}
+            {% endif %}
+        {% endfor %}
+    </select>
+
+    <!-- Sort Order -->
+    <select name="order" class="form-control" style="max-width: 180px;">
+        <option value="DESC" {% if app.request.get('order') == 'DESC' %}selected{% endif %}>Décroissant (plus récent)</option>
+        <option value="ASC" {% if app.request.get('order') == 'ASC' %}selected{% endif %}>Croissant (plus ancien)</option>
+    </select>
+
+    <button type="submit" class="btn btn-primary">Chercher</button>
+</form>
+
+<!-- PDF Export and Statistics Buttons -->
+<div class="mb-3">
+    <a href="{{ path('app_reclamation_admin_export_pdf', { q: query, type: type, order: app.request.get('order', 'DESC') }) }}" class="btn btn-success">
+        Exporter en PDF
+   <a href="{{ path('app_reclamation_admin_statistics') }}" class="btn btn-info">
+    <i class="fas fa-chart-bar me-1"></i> Voir les statistiques
+</a>
+</div>
+
+<table id="userTable" class="display table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Date</th>
+            <th>Mail</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for reclamation in reclamations %}
+        <tr>
+            <td>{{ reclamation.id }}</td>
+            <td>{{ reclamation.typereclamation }}</td>
+            <td>{{ reclamation.description }}</td>
+            <td>{{ reclamation.date ? reclamation.date|date('Y-m-d') : '' }}</td>
+            <td>{{ reclamation.mail }}</td>
+            <td>
+                <a href="{{ path('app_reclamation_admin_show', {'id': reclamation.id}) }}" class="btn btn-sm btn-info">Voir REC</a>
+                 <a href="{{ path('app_reponse_reclamation', {'id': reclamation.id}) }}" class="btn btn-sm btn-info">Voir REP</a>
+
+                
+               <a href="{{ path('app_reponse_admin_new', {'id': reclamation.id}) }}" class="btn btn-light w-100">
+    Répondre
+</a>
+
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

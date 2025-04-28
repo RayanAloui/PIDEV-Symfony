@@ -1,0 +1,177 @@
+{% extends 'Front.html.twig' %}
+
+{% block title %}New Reclamation{% endblock %}
+
+{% block content1 %}
+<style>
+    body {
+        background-color: #f5f5dc; /* light beige */
+    }
+    .card {
+        background-color: #fffaf0; /* floral white for soft beige card */
+        border: 1px solid #e6d8b9;
+    }
+    .card-header {
+        background-color: #d2b48c; /* tan */
+        color: #ffffff;
+    }
+    .btn-primary {
+        background-color: #c3a675;
+        border-color: #c3a675;
+    }
+    .btn-primary:hover {
+        background-color: #a68b5b;
+        border-color: #a68b5b;
+    }
+    .btn-light {
+        background-color: #f5f5dc;
+        border: 1px solid #dcd2b2;
+    }
+    .form-control {
+        background-color: #fffaf0;
+        border: 1px solid #d3c2a3;
+    }
+
+    /* Styles for Reclamations */
+    .reclamation-item {
+        background-color: #e7f4e7; /* light green */
+        border: 1px solid #c6d9c6;
+    }
+
+    .reclamation-item strong {
+        color: #4d944d; /* dark green for text */
+    }
+
+    /* Styles for Responses */
+    .response-item {
+        background-color: #f7f7f7; /* light gray */
+        border: 1px solid #d1d1d1;
+    }
+
+    .response-item strong {
+        color: #707070; /* gray text */
+    }
+
+</style>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">Submit a New Reclamation</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                           {{ form_label(form.mail, 'Mail') }}
+                           {{ form_widget(form.mail, { 'attr': { 'value': user_email, 'class': 'form-control', 'readonly': 'readonly' } }) }}
+
+                            <div class="form-group mb-4">
+                                {{ form_label(form.description, 'Description') }}
+                                {{ form_widget(form.description, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.description) ? ' is-invalid' : ''),
+                                        'rows': '6'
+                                    }
+                                }) }}
+                                {% if form_errors(form.description) %}
+                                    <div class="invalid-feedback">
+                                        {{ form_errors(form.description) }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group mb-4">
+                                {{ form_label(form.typereclamation, 'Type of Reclamation') }}
+                                {{ form_widget(form.typereclamation, {'attr': {'class': 'form-control' ~ (form_errors(form.typereclamation) ? ' is-invalid' : '')}}) }}
+                                {% if form_errors(form.typereclamation) %}
+                                    <div class="invalid-feedback">
+                                        {{ form_errors(form.typereclamation) }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group mb-4">
+                                {{ form_label(form.date, 'Date') }}
+                                {{ form_widget(form.date, {'attr': {'class': 'form-control' ~ (form_errors(form.date) ? ' is-invalid' : '')}}) }}
+                                {% if form_errors(form.date) %}
+                                    <div class="invalid-feedback">
+                                        {{ form_errors(form.date) }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- reCAPTCHA Widget -->
+                            <div class="form-group">
+                                <div class="g-recaptcha" data-sitekey="6LfF2SErAAAAAGGFuT6Ns3a1zhG3dJyH2pHs68Mo" data-callback="onRecaptchaSuccess"></div>
+                                <input type="hidden" name="recaptcha_token" id="recaptcha_token" />
+                            </div>
+
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fa fa-paper-plane mr-1"></i> Submit Reclamation
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <a href="{{ path('app_reclamation_index') }}" class="btn btn-light w-100">
+                                        Cancel
+                                    </a>
+                                </div>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+       <h2 class="text-center my-5">Your Reclamations</h2>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow mb-5">
+            <div class="card-header">
+                <h5 class="mb-0">Previous Reclamations</h5>
+            </div>
+            <div class="card-body p-4">
+                {% if user_reclamations is not empty %}
+                    <ul class="list-group">
+                        {% for rec in user_reclamations %}
+                            <li class="list-group-item reclamation-item">
+                                <strong>Type:</strong> {{ rec.typereclamation }}<br>
+                                <strong>Description:</strong> {{ rec.description|slice(0, 100) ~ '...' }}<br>
+                                <strong>Statut:</strong> {{ rec.typereclamation }}<br>
+
+                                <!-- Affichage des réponses pour chaque réclamation -->
+                                {% set responses = user_reponses[rec.id] %}
+                                {% if responses is not empty %}
+                                    <ul class="list-group mt-3">
+                                        {% for rep in responses %}
+                                            <li class="list-group-item response-item">
+                                                <strong>Description:</strong> {{ rep.description|slice(0, 100) ~ '...' }}<br>
+                                                <strong>Statut:</strong> {{ rep.statut }}<br>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p class="text-muted">No responses yet.</p>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">You have no previous reclamations.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+    </div>
+</section>
+{% block scripts %}
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+{% endblock %}
+{% endblock %}

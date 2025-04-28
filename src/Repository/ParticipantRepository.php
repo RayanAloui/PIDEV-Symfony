@@ -15,6 +15,15 @@ class ParticipantRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Participant::class);
     }
+    public function findByActivite($idActivite)
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.activite = :activite') 
+            ->setParameter('activite', $idActivite)
+            ->getQuery()
+            ->getResult();
+    }
+    
 
     //    /**
     //     * @return Participant[] Returns an array of Participant objects

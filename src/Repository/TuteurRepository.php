@@ -18,12 +18,20 @@ class TuteurRepository extends ServiceEntityRepository
 
     public function searchTuteurs(string $query, string $sortField = 'nomT', string $sortOrder = 'asc')
     {
-        return $this->createQueryBuilder('t')
-            ->where('t.nomT LIKE :query OR t.prenomT LIKE :query OR t.cinT LIKE :query OR t.telephoneT LIKE :query OR t.email LIKE :query')
-            ->setParameter('query', "%$query%")
-            ->orderBy("t.$sortField", $sortOrder)
-            ->getQuery()
-            ->getResult();
+        $qb = $this->createQueryBuilder('t');
+
+        // Appliquer le tri
+        $qb->orderBy("t.$sortField", $sortOrder);
+
+        // Recherche sur les champs demandés
+        $qb->where('t.cinT LIKE :query')
+           ->orWhere('t.nomT LIKE :query')
+           ->orWhere('t.prenomT LIKE :query')
+           ->orWhere('t.telephoneT LIKE :query')
+           ->orWhere('t.email LIKE :query')
+           ->setParameter('query', "%$query%");
+
+        return $qb->getQuery()->getResult();
     }
 
 

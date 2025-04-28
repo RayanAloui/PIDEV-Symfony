@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<h2>Détails de la Réclamation</h2>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Type: {{ reclamation.typereclamation }}</h5>
+        <p class="card-text"><strong>Description:</strong> {{ reclamation.description }}</p>
+        <p class="card-text"><strong>Date:</strong> {{ reclamation.date ? reclamation.date|date('Y-m-d') : '' }}</p>
+        <p class="card-text"><strong>Mail:</strong> {{ reclamation.mail }}</p>
+        <a href="{{ path('app_reclamation_admin_index') }}" class="btn btn-secondary mt-3">Retour à la liste</a>
+    </div>
+</div>
+{% endblock %}

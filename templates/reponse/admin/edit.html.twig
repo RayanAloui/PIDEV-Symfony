@@ -1,0 +1,51 @@
+{% extends 'front.html.twig' %}
+
+{% block title %}Edit Reponse{% endblock %}
+
+{% block body %}
+<div class="container py-5" style="background-color: #fef9f2;">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm" style="background-color: #fff8e1; border: 1px solid #e0d3b8;">
+                <div class="card-header" style="background-color: #e0c097; color: #3e2c1c;">
+                    <h1 class="h5 mb-0">Edit Reponse</h1>
+                </div>
+
+                <div class="card-body">
+                    {{ include('reponse/admin/_form.html.twig', {'button_label': 'Update'}) }}
+                </div>
+
+                <div class="card-footer" style="background-color: #f9f3e5; d-flex justify-content-between">
+                    <a href="{{ path('app_reponse_index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to List
+                    </a>
+                    {{ include('reponse/admin/_delete_form.html.twig') }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize flatpickr if the input is found
+            const dateInput = document.getElementById('reponse_date');
+            if (dateInput) {
+                flatpickr(dateInput, {
+                    enableTime: true,
+                    dateFormat: "Y-m-d H:i",
+                    defaultDate: "{{ reponse.date is defined and reponse.date ? reponse.date|date('Y-m-d H:i') : '' }}"
+                });
+            }
+
+            // Apply Bootstrap style to select
+            const statutSelect = document.getElementById('reponse_statut');
+            if (statutSelect) {
+                statutSelect.classList.add('form-select');
+            }
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,86 @@
+{# templates/activite/pdf_list.html.twig #}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des activités</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            color: #2c3e50;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 12px;
+            color: #7f8c8d;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Liste des activités</h1>
+        <p>Document généré le {{ "now"|date("d/m/Y") }}</p>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Catégorie</th>
+                <th>Lieu</th>
+                <th>Durée</th>
+                <th>Statut</th>
+                <th>Tuteur</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for activite in activites %}
+            <tr>
+                <td>{{ activite.nom }}</td>
+                <td>{{ activite.categorie }}</td>
+                <td>{{ activite.lieu }}</td>
+                <td>{{ activite.duree }} h</td>
+                <td>{{ activite.statut }}</td>
+                <td>{{ activite.nomDuTuteur }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="footer">
+        <p>Total des activités: {{ activites|length }}</p>
+        <p>© {{ "now"|date("Y") }} - Votre organisation</p>
+    </div>
+</body>
+</html>

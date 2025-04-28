@@ -6,6 +6,8 @@ parameters:
     stripe_secret_key: '%env(STRIPE_SECRET_KEY)%'
     gemini_api_key: '%env(GEMINI_API_KEY)%'
     app.unsplash_access_key: 'I-yNOjKs2_EIl8p0-6LJ9wemef3me55-wt53m8mSns4'
+   
+    
 
 services:
     _defaults:
@@ -15,6 +17,7 @@ services:
     Knp\Snappy\Pdf:
         arguments:
             $binary: '"C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe"'
+   
 
     App\:
         resource: '../src/'
@@ -26,6 +29,7 @@ services:
         arguments:
             $secret: '%env(GOOGLE_RECAPTCHA_SECRET_KEY)%'
             $requestMethod: '@ReCaptcha\RequestMethod'
+    
 
     ReCaptcha\RequestMethod: '@ReCaptcha\RequestMethod\CurlPost'
     ReCaptcha\RequestMethod\CurlPost: null

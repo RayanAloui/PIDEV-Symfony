@@ -439,6 +439,17 @@ public function googleApiSignUp(Request $request, EntityManagerInterface $entity
             $entityManager->flush();
             $session->set('user_email', $email);
             $session->set('user_role', "client");
+
+
+              // Create a new notification
+              $notification = new Notification();
+              $notification->setDate(new \DateTime());
+              $notification->setHeure((new \DateTime())->format('H:i'));
+              $notification->setActivite('Register From  API GOOGLE WITH WEB');
+              $notification->setUsername($user->getEmail()); // or getUsername() if that makes more sense
+  
+              $entityManager->persist($notification);
+              $entityManager->flush();
         }
 
         // After sign up -> redirect to login page

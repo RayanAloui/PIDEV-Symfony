@@ -1,0 +1,96 @@
+{% extends 'front.html.twig' %}
+
+{% block title %}
+    <title>My Reclamations - OrphanCare</title>
+{% endblock %}
+
+{% block body %}
+<section class="py-5" style="background-color: #fdf6e3;">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0" style="color: #8b5e3c;">My Reclamations</h2>
+                    <a href="{{ path('app_reclamation_new') }}" class="btn" style="background-color: #d4a373; color: white; border: none;">
+                        <i class="fa fa-plus mr-2"></i> New Reclamation
+                    </a>
+                </div>
+                <hr style="border-color: #e8c8a0;">
+            </div>
+        </div>
+
+        <div class="row">
+            {% if reclamations is empty %}
+                <div class="col-12">
+                    <div class="alert" style="background-color: #fef3d1; color: #4b3621; border-left: 4px solid #d4a373;" role="alert">
+                        <i class="fa fa-info-circle mr-2"></i>
+                        You haven't submitted any reclamations yet.
+                    </div>
+                </div>
+            {% else %}
+                {% for reclamation in reclamations %}
+                    <div class="col-12 mb-4">
+                        <div class="card shadow-sm" style="background-color: #f5f5dc; border: none; border-left: 4px solid #d4a373;">
+                            <div class="card-body p-3" style="color: #4b3621;">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <span class="badge me-2" style="background-color: #e8c8a0; color: #4b3621;">{{ reclamation.typereclamation }}</span>
+                                            <small>{{ reclamation.date|date('F j, Y') }}</small>
+                                        </div>
+                                        <h5 style="color: #8b5e3c; margin-bottom: 1rem;">{{ reclamation.mail }}</h5>
+                                        <p class="mb-3">{{ reclamation.description|slice(0, 150) ~ (reclamation.description|length > 150 ? '...' : '') }}</p>
+                                    </div>
+                                    <div class="col-md-4 d-flex align-items-center justify-content-end">
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ path('app_reclamation_show', {'id': reclamation.id}) }}" 
+                                               class="btn btn-sm" 
+                                               style="background-color: #e8c8a0; color: #4b3621;">
+                                                <i class="fa fa-eye mr-1"></i> View
+                                            </a>
+                                            <a href="{{ path('app_reclamation_edit', {'id': reclamation.id}) }}" 
+                                               class="btn btn-sm" 
+                                               style="background-color: #d4a373; color: white;">
+                                                <i class="fa fa-edit mr-1"></i> Edit
+                                            </a>
+                                            <form method="post" 
+                                                  action="{{ path('app_reclamation_delete', {'id': reclamation.id}) }}" 
+                                                  onsubmit="return confirm('Are you sure you want to delete this reclamation?');" 
+                                                  style="display: inline-block;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reclamation.id) }}">
+                                                <button class="btn btn-sm" 
+                                                        style="background-color: #b38b6d; color: white;">
+                                                    <i class="fa fa-trash mr-1"></i> Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<style>
+    .btn:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(139, 94, 60, 0.1);
+    }
+    .badge {
+        font-weight: 500;
+        padding: 0.35em 0.65em;
+    }
+</style>
+{% endblock %}

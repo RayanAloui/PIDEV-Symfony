@@ -1,0 +1,91 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Participant{% endblock %}
+
+{% block body %}
+    <h1>Participant</h1>
+    <style>
+        h1 {
+            font-size: 24px;
+            color: #6b3d29;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .table {
+            width: 80%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: #f9f9f9;
+        }
+
+        .table th, .table td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        .table th {
+            background-color: #6b3d29;
+            color: white;
+            font-weight: bold;
+        }
+
+        .table td {
+            background-color: #fff;
+        }
+
+        .table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .table tr:hover {
+            background-color: #ddd;
+        }
+
+        .btn {
+            background-color: #6b3d29;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            background-color: #d29b6a;
+        }
+
+        .back-link {
+            margin-right: 10px;
+        }
+    </style>
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ participant.id }}</td>
+            </tr>
+            <tr>
+                <th>Nom</th>
+                <td>{{ participant.nom }}</td>
+            </tr>
+            <tr>
+                <th>Prenom</th>
+                <td>{{ participant.prenom }}</td>
+            </tr>
+            <tr>
+                <th>Age</th>
+                <td>{{ participant.age }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_participant_index') }}">back to list</a>
+
+    <a href="{{ path('app_participant_edit', {'id': participant.id}) }}">edit</a>
+
+    {{ include('participant/_delete_form.html.twig') }}
+{% endblock %}

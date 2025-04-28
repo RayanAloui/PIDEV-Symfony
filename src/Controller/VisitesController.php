@@ -206,7 +206,7 @@ class VisitesController extends AbstractController
             $this->addFlash('warning', 'Visite ajoutée, mais erreur lors de l’envoi WhatsApp ❌');
         }
 
-        return $this->redirectToRoute('afficher_visite');
+        return $this->redirectToRoute('app_front');
     }
 
     $users = $em->getRepository(User::class)->findAll();
