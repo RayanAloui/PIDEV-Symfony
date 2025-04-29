@@ -10,7 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-
+use League\OAuth2\Client\Provider\Google;
 use App\Form\RegistrationType;
 use App\Form\AddUserType;
 
@@ -25,6 +25,8 @@ use App\Services\SmsService;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use GuzzleHttp\Client;
 
 
 use Knp\Snappy\Pdf;
@@ -41,7 +43,7 @@ final class UserController extends AbstractController
     #[Route(name: 'app_user_index', methods: ['GET'])]
     public function index(UserRepository $userRepository, Request $request, SessionInterface $session): Response
     {
-        // Vérifier si l'utilisateur est connecté
+        // Vérifier si l'utilisateur est connecté et doit etre admin
         if (!$session->get('user_email') || $session->get('user_role') !== 'admin') {
             return $this->redirectToRoute('app_login');
         }
@@ -234,16 +236,24 @@ public function edit(Request $request, User $user, EntityManagerInterface $entit
 
 
 
-    }
-        #[Route('/{id}/block', name: 'app_user_block', methods: ['POST'])]
+    }#[Route('/{id}/block', name: 'app_user_block', methods: ['POST'])]
     public function blockUser(User $user, EntityManagerInterface $entityManager): Response
     {
+        if ($user->getRole()=="admin") {
+            return new Response("
+                <script>
+                    alert('You cannot block an admin user.');
+                    window.location.href = '" . $this->generateUrl('app_user_index') . "';
+                </script>
+            ");
+        }
+    
         $user->setIsBlocked(1);
         $entityManager->flush();
-
-        $this->addFlash('warning', 'User has been blocked.');
+    
         return $this->redirectToRoute('app_user_index');
     }
+    
 
 
         #[Route('/{id}/activate', name: 'app_user_activate', methods: ['POST'])]
@@ -290,6 +300,13 @@ public function edit(Request $request, User $user, EntityManagerInterface $entit
 
 
 
+
+
+   
+    
+
+    
+    
  
 
 }

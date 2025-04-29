@@ -375,7 +375,7 @@
 
                 timeout = setTimeout(() => {
                     fetch('{{ path('app_user_index') }}?search=' + encodeURIComponent(query), {
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }// Indique qu'on fait une requête AJAX
                     })
                     .then(response => response.text())
                     .then(html => {
