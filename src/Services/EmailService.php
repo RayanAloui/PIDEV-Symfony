@@ -47,7 +47,7 @@ class EmailService
 
             // Send the email
             $mail->send();
-            echo 'Email sent successfully to ' . $recipient;
+           
         } catch (Exception $e) {
             echo "Email could not be sent. Mailer Error: {$mail->ErrorInfo}";
         }
