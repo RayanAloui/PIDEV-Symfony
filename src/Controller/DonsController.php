@@ -95,7 +95,7 @@ public function createCheckoutSession(Dons $don): Response
         'payment_method_types' => ['card'],
         'line_items' => [[
             'price_data' => [
-                'currency' => 'eur',
+                'currency' => 'DNT',
                 'product_data' => [
                     'name' => 'Don pour OrphanCare',
                 ],

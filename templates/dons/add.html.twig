@@ -287,151 +287,118 @@
 
 
     <script>
-         document.addEventListener('DOMContentLoaded', function() {
-            const chatbotButton = document.getElementById('chatbot-button');
-            const chatbotContainer = document.getElementById('chatbot-container');
-            const closeChat = document.getElementById('close-chat');
-            const sendButton = document.getElementById('send-button');
-            const userInput = document.getElementById('user-input');
-            const messagesContainer = document.getElementById('chatbot-messages');
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatbotButton = document.getElementById('chatbot-button');
+        const chatbotContainer = document.getElementById('chatbot-container');
+        const closeChat = document.getElementById('close-chat');
+        const sendButton = document.getElementById('send-button');
+        const userInput = document.getElementById('user-input');
+        const messagesContainer = document.getElementById('chatbot-messages');
+        
+        // API Gemini key
+        const API_KEY = 'AIzaSyCMmaP4ZJQiR1eARtoJ5m2QbmNAlJyaVbQ';
+        
+        // Questions et réponses prédéfinies pour des réponses plus rapides
+        const predefinedQA = {
+            "bonjour": "Bonjour ! Je suis l'assistant virtuel d'OrphanCare. Comment puis-je vous aider aujourd'hui ?",
+            "salut": "Bonjour ! Je suis l'assistant virtuel d'OrphanCare. Comment puis-je vous aider aujourd'hui ?",
+            "comment faire un don?": "Vous pouvez faire un don en remplissant le formulaire sur cette page. Nous acceptons différents types de dons (financiers, matériels ou en nature), et vous pouvez les associer à un événement spécifique si vous le souhaitez.",
+            "quels types de dons acceptez-vous?": "Nous acceptons trois types de dons :\n- Financiers : par virement, chèque ou carte bancaire\n- Matériels : vêtements, jouets, équipements scolaires\n- En nature : nourriture, médicaments ou services bénévoles",
+            "où va mon argent?": "Tous les dons sont utilisés pour aider les orphelins pris en charge par OrphanCare. Les fonds servent à l'éducation (30%), la santé (25%), la nourriture (25%) et le logement (20%).",
+            "est-ce que mon don est déductible d'impôts?": "Oui, tous les dons à OrphanCare sont déductibles d'impôts à hauteur de 66% dans la limite de 20% de votre revenu imposable. Vous recevrez automatiquement un reçu fiscal après votre don.",
+            "qui est orphancare?": "OrphanCare est une organisation à but non lucratif créée en 2025 par des Etudiant à ESPRIT, dédiée à l'assistance des orphelins. Notre mission est de fournir éducation, soins de santé et logement aux enfants sans famille."
+        };
+        
+        // Instructions de contexte pour l'API Gemini
+        const contextInstructions = `Tu es l'assistant virtuel d'OrphanCare, une organisation qui aide les orphelins.
+            Réponds toujours avec politesse et précision.
             
-            // API Gemini key
-            const API_KEY = 'AIzaSyCMmaP4ZJQiR1eARtoJ5m2QbmNAlJyaVbQ';
+            Informations sur OrphanCare:
+            - Organisation à but non lucratif créée en 2010
+            - Mission: aider les orphelins en fournissant éducation, soins de santé et logement
+            - Activités: programmes éducatifs, soins médicaux, aide psychologique, et logement
+            - Les dons sont utilisés pour les besoins essentiels des enfants
+            - Les dons sont déductibles d'impôts à 66%
+            - Possibilité de faire des dons financiers, matériels ou en nature
+            - Site web: www.orphancare.org
             
-            // Questions et réponses prédéfinies pour des réponses plus rapides
-            const predefinedQA = {
-                "bonjour": "Bonjour ! Je suis l'assistant virtuel d'OrphanCare. Comment puis-je vous aider aujourd'hui ?",
-                "salut": "Bonjour ! Je suis l'assistant virtuel d'OrphanCare. Comment puis-je vous aider aujourd'hui ?",
-                "comment faire un don?": "Vous pouvez faire un don en remplissant le formulaire sur cette page. Nous acceptons différents types de dons (financiers, matériels ou en nature), et vous pouvez les associer à un événement spécifique si vous le souhaitez.",
-                "quels types de dons acceptez-vous?": "Nous acceptons trois types de dons :\n- Financiers : par virement, chèque ou carte bancaire\n- Matériels : vêtements, jouets, équipements scolaires\n- En nature : nourriture, médicaments ou services bénévoles",
-                "où va mon argent?": "Tous les dons sont utilisés pour aider les orphelins pris en charge par OrphanCare. Les fonds servent à l'éducation (30%), la santé (25%), la nourriture (25%) et le logement (20%).",
-                "est-ce que mon don est déductible d'impôts?": "Oui, tous les dons à OrphanCare sont déductibles d'impôts à hauteur de 66% dans la limite de 20% de votre revenu imposable. Vous recevrez automatiquement un reçu fiscal après votre don.",
-                "qui est orphancare?": "OrphanCare est une organisation à but non lucratif créée en 2025 par des Etudiant à ESPRIT, dédiée à l'assistance des orphelins. Notre mission est de fournir éducation, soins de santé et logement aux enfants sans famille."
-            };
+            Informations sur les dons:
+            - Types de dons: financiers, matériels, ou en nature
+            - Les dons peuvent être ponctuels ou mensuels
+            - Possibilité d'associer un don à un événement spécifique
+            - Chaque don aide directement un enfant dans le besoin
             
-            // Instructions de contexte pour l'API Gemini
-            const contextInstructions = `Tu es l'assistant virtuel d'OrphanCare, une organisation qui aide les orphelins.
-                Réponds toujours avec politesse et précision.
-                
-                Informations sur OrphanCare:
-                - Organisation à but non lucratif créée en 2010
-                - Mission: aider les orphelins en fournissant éducation, soins de santé et logement
-                - Activités: programmes éducatifs, soins médicaux, aide psychologique, et logement
-                - Les dons sont utilisés pour les besoins essentiels des enfants
-                - Les dons sont déductibles d'impôts à 66%
-                - Possibilité de faire des dons financiers, matériels ou en nature
-                - Site web: www.orphancare.org
-                
-                Informations sur les dons:
-                - Types de dons: financiers, matériels, ou en nature
-                - Les dons peuvent être ponctuels ou mensuels
-                - Possibilité d'associer un don à un événement spécifique
-                - Chaque don aide directement un enfant dans le besoin
-                
-                Si tu ne connais pas la réponse à une question spécifique sur OrphanCare,
-                suggère de contacter directement l'équipe à contact@orphancare.org.
-                
-                Garde tes réponses concises et personnalisées.
-                
-                N'hésite pas à suggérer à l'utilisateur de remplir le formulaire de don s'il montre un intérêt pour aider.`;
+            Si tu ne connais pas la réponse à une question spécifique sur OrphanCare,
+            suggère de contacter directement l'équipe à contact@orphancare.org.
             
-            // Toggle chatbot visibility
-            chatbotButton.addEventListener('click', function() {
-                chatbotContainer.style.display = 'flex';
-                chatbotButton.style.display = 'none';
-            });
+            Garde tes réponses concises et personnalisées.
             
-            // Close chatbot
-            closeChat.addEventListener('click', function() {
-                chatbotContainer.style.display = 'none';
-                chatbotButton.style.display = 'flex';
-            });
-            
-            // Send message when enter key is pressed
-            userInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    sendMessage();
-                }
-            });
-            
-            // Send message when button is clicked
-            sendButton.addEventListener('click', sendMessage);
-            
-            // Suggestions rapides après l'accueil
-            setTimeout(() => {
-                addSuggestions([
-                    "Comment faire un don?",
-                    "Qui est OrphanCare?",
-                    "Où va mon argent?"
-                ]);
-            }, 1000);
-            
-            function addSuggestions(suggestions) {
-                const suggestionsDiv = document.createElement('div');
-                suggestionsDiv.className = 'suggestions';
-                suggestionsDiv.innerHTML = '<p>Questions fréquentes :</p>';
-                
-                suggestions.forEach(suggestion => {
-                    const btn = document.createElement('button');
-                    btn.className = 'suggestion-btn';
-                    btn.textContent = suggestion;
-                    btn.addEventListener('click', () => {
-                        userInput.value = suggestion;
-                        sendMessage();
-                    });
-                    suggestionsDiv.appendChild(btn);
-                });
-                
-                messagesContainer.appendChild(suggestionsDiv);
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            N'hésite pas à suggérer à l'utilisateur de remplir le formulaire de don s'il montre un intérêt pour aider.`;
+        
+        // Toggle chatbot visibility
+        chatbotButton.addEventListener('click', function() {
+            chatbotContainer.style.display = 'flex';
+            chatbotButton.style.display = 'none';
+        });
+        
+        // Close chatbot
+        closeChat.addEventListener('click', function() {
+            chatbotContainer.style.display = 'none';
+            chatbotButton.style.display = 'flex';
+        });
+        
+        // Send message when enter key is pressed
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
             }
+        });
+        
+        // Send message when button is clicked
+        sendButton.addEventListener('click', sendMessage);
+        
+        // Suggestions rapides après l'accueil
+        setTimeout(() => {
+            addSuggestions([
+                "Comment faire un don?",
+                "Qui est OrphanCare?",
+                "Où va mon argent?"
+            ]);
+        }, 1000);
+        
+        function addSuggestions(suggestions) {
+            const suggestionsDiv = document.createElement('div');
+            suggestionsDiv.className = 'suggestions';
+            suggestionsDiv.innerHTML = '<p>Questions fréquentes :</p>';
             
-            async function sendMessage() {
-                const message = userInput.value.trim();
-                if (!message) return;
-                
-                // Add user message to chat
-                addMessage(message, 'user-message');
-                userInput.value = '';
-                
-                // Vérifier si la question est dans les réponses prédéfinies
-                const normalizedQuestion = message.toLowerCase().trim();
-                
-                if (predefinedQA[normalizedQuestion]) {
-                    // Ajouter un petit délai pour simuler la réflexion
-                    const typingIndicator = document.createElement('div');
-                    typingIndicator.className = 'message bot-message';
-                    typingIndicator.id = 'typing-indicator';
-                    typingIndicator.textContent = 'En train de réfléchir...';
-                    messagesContainer.appendChild(typingIndicator);
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                    
-                    // Répondre avec la réponse prédéfinie après un court délai
-                    setTimeout(() => {
-                        // Remove typing indicator
-                        const indicator = document.getElementById('typing-indicator');
-                        if (indicator) {
-                            indicator.remove();
-                        }
-                        
-                        addMessage(predefinedQA[normalizedQuestion], 'bot-message');
-                        
-                        // Ajouter des suggestions après certaines réponses
-                        if (normalizedQuestion === "bonjour" || normalizedQuestion === "salut") {
-                            setTimeout(() => {
-                                addSuggestions([
-                                    "Comment faire un don?",
-                                    "Quels types de dons acceptez-vous?",
-                                    "Est-ce que mon don est déductible d'impôts?"
-                                ]);
-                            }, 500);
-                        }
-                    }, 1000);
-                    
-                    return;
-                }
-                
-                // Add "typing" indicator
+            suggestions.forEach(suggestion => {
+                const btn = document.createElement('button');
+                btn.className = 'suggestion-btn';
+                btn.textContent = suggestion;
+                btn.addEventListener('click', () => {
+                    userInput.value = suggestion;
+                    sendMessage();
+                });
+                suggestionsDiv.appendChild(btn);
+            });
+            
+            messagesContainer.appendChild(suggestionsDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessage(message, 'user-message');
+            userInput.value = '';
+            
+            // Vérifier si la question est dans les réponses prédéfinies
+            const normalizedQuestion = message.toLowerCase().trim();
+            
+            if (predefinedQA[normalizedQuestion]) {
+                // Ajouter un petit délai pour simuler la réflexion
                 const typingIndicator = document.createElement('div');
                 typingIndicator.className = 'message bot-message';
                 typingIndicator.id = 'typing-indicator';
@@ -439,66 +406,97 @@
                 messagesContainer.appendChild(typingIndicator);
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
                 
-                // Call Gemini API with context instructions
-                try {
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${API_KEY}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            contents: [
-                                {
-                                    role: "system",
-                                    parts: [{ text: contextInstructions }]
-                                },
-                                {
-                                    role: "user",
-                                    parts: [{ text: message }]
-                                }
-                            ]
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    
+                // Répondre avec la réponse prédéfinie après un court délai
+                setTimeout(() => {
                     // Remove typing indicator
                     const indicator = document.getElementById('typing-indicator');
                     if (indicator) {
                         indicator.remove();
                     }
                     
-                    // Process and display response
-                    if (data && data.candidates && data.candidates.length > 0 && 
-                        data.candidates[0].content && data.candidates[0].content.parts && 
-                        data.candidates[0].content.parts.length > 0) {
-                        
-                        const botResponse = data.candidates[0].content.parts[0].text;
-                        addMessage(botResponse, 'bot-message');
-                    } else if (data && data.error) {
-                        addMessage(`Erreur: ${data.error.message || 'Une erreur est survenue'}`, 'bot-message');
-                    } else {
-                        addMessage("Désolé, je n'ai pas pu générer une réponse. Veuillez réessayer.", 'bot-message');
-                    }
+                    addMessage(predefinedQA[normalizedQuestion], 'bot-message');
                     
-                } catch (error) {
-                    // Remove typing indicator
-                    const indicator = document.getElementById('typing-indicator');
-                    if (indicator) {
-                        indicator.remove();
+                    // Ajouter des suggestions après certaines réponses
+                    if (normalizedQuestion === "bonjour" || normalizedQuestion === "salut") {
+                        setTimeout(() => {
+                            addSuggestions([
+                                "Comment faire un don?",
+                                "Quels types de dons acceptez-vous?",
+                                "Est-ce que mon don est déductible d'impôts?"
+                            ]);
+                        }, 500);
                     }
-                    
-                    addMessage(`Erreur: ${error.message || 'Une erreur est survenue lors de la communication avec l\'API'}`, 'bot-message');
-                }
+                }, 1000);
+                
+                return;
             }
             
-            function addMessage(text, className) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${className}`;
-                messageDiv.innerHTML = text.replace(/\n/g, '<br>');
-                messagesContainer.appendChild(messageDiv);
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            // Add "typing" indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'message bot-message';
+            typingIndicator.id = 'typing-indicator';
+            typingIndicator.textContent = 'En train de réfléchir...';
+            messagesContainer.appendChild(typingIndicator);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Call Gemini API avec la structure corrigée
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [
+                            {
+                                role: "user",
+                                parts: [
+                                    { text: contextInstructions + "\n\nQuestion de l'utilisateur: " + message }
+                                ]
+                            }
+                        ]
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Remove typing indicator
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+                
+                // Process and display response
+                if (data && data.candidates && data.candidates.length > 0 && 
+                    data.candidates[0].content && data.candidates[0].content.parts && 
+                    data.candidates[0].content.parts.length > 0) {
+                    
+                    const botResponse = data.candidates[0].content.parts[0].text;
+                    addMessage(botResponse, 'bot-message');
+                } else if (data && data.error) {
+                    addMessage(`Erreur: ${data.error.message || 'Une erreur est survenue'}`, 'bot-message');
+                } else {
+                    addMessage("Désolé, je n'ai pas pu générer une réponse. Veuillez réessayer.", 'bot-message');
+                }
+                
+            } catch (error) {
+                // Remove typing indicator
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) {
+                    indicator.remove();
+                }
+                
+                addMessage(`Erreur: ${error.message || 'Une erreur est survenue lors de la communication avec l\'API'}`, 'bot-message');
             }
-        });
-    </script>
+        }
+        
+        function addMessage(text, className) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${className}`;
+            messageDiv.innerHTML = text.replace(/\n/g, '<br>');
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    });
+</script>
 {% endblock %}
